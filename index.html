@@ -44,6 +44,7 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 .modal-backdrop{position:fixed;inset:0;background:#10182899;z-index:2000;display:grid;place-items:center;padding:18px}.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:25px;box-shadow:0 20px 60px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:24px}.close-btn{border:0;background:#edf1f6;border-radius:50%;width:34px;height:34px;font-size:20px}.naver-login-box{margin:4px 0 18px;text-align:center;font-family:"Malgun Gothic",Arial,sans-serif}.naver-login-caption{font-size:14px;color:#555;margin:0 0 14px}.naver-login-button{display:flex;width:100%;min-height:56px;align-items:center;justify-content:center;gap:7px;border:0;border-radius:5px;background:#03a857;color:#fff;font-size:20px;font-weight:800;letter-spacing:-.4px}.naver-login-button:hover{background:#029b4f}.naver-login-button .naver-word{font-weight:900}.login-links{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px;color:#777;font-size:14px}.login-links button{border:0;background:transparent;color:inherit;padding:2px 0;cursor:pointer}.login-links button:hover{text-decoration:underline;color:#333}.login-links .separator{color:#c5c5c5}.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#999;font-size:12px}.login-divider:before,.login-divider:after{content:"";height:1px;background:#e5eaf0;flex:1}.modal-menu{display:flex;gap:8px;margin-bottom:18px}.modal-menu button{flex:1;border:1px solid var(--line);background:#f7f9fc;padding:9px;border-radius:7px;font-weight:800}.modal-menu button.active{background:#eaf2ff;color:#1455b8;border-color:#b5cffb}
 .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:3000;background:#172235;color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 25px #0003;max-width:90%;text-align:center}
 .user-status{font-size:12px;color:var(--muted);margin-right:4px}
+.admin-table-wrap{overflow-x:auto}.admin-table{width:100%;border-collapse:collapse;font-size:14px}.admin-table th,.admin-table td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;white-space:nowrap}.admin-table th{background:#f5f8fc}.admin-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}.admin-notice{padding:14px;background:#f5f8fc;border-radius:8px;margin-bottom:14px}
 @media(max-width:1050px){.nav{flex-wrap:wrap;padding:10px 0}.nav nav{order:3;width:100%;justify-content:center;flex-wrap:wrap;padding-bottom:8px}.about,.director-grid{gap:30px}.class-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.topbar{display:none}.nav{min-height:65px}.logo{width:135px;height:45px}nav{gap:12px;font-size:13px}.nav-actions{margin-left:auto}.nav-btn,.btn{padding:9px 12px;font-size:13px}.hero{min-height:540px}.hero h1{font-size:39px;letter-spacing:-1.5px}.hero p{font-size:16px}.trust-grid{grid-template-columns:1fr 1fr}section{padding:62px 0}.about,.director-grid,.system-grid{grid-template-columns:1fr}.about-img,.director-img{height:300px}.about-text h2,.director-text h2{font-size:30px}.program-grid,.class-grid,.gallery-grid{grid-template-columns:1fr}.class-card{height:300px}.process{grid-template-columns:1fr 1fr}.gallery-item{height:220px}.footer-grid{grid-template-columns:1fr}.bank-shell{padding:15px}.post-row{padding:12px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.post-view{padding:16px}}
 </style>
@@ -102,23 +103,24 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 </div><p class="small-note">이 HTML 데모는 첨부파일을 현재 브라우저에 저장합니다. 파일은 1개당 1MB 이하로 권장합니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" type="button" id="cancelPost">취소</button></div></form></div>
 <div id="editorActions" class="form-actions hidden" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div>
 </div></div></section>
+<section id="admin-page" class="hidden"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p id="adminIntro" class="small-note" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
 <section id="contact" class="cta"><div class="container"><h2>NSTUDY와 취업 준비를 시작하세요.</h2><p>교육과정 및 상담 문의</p><a class="phone" href="tel:01093375509">010-9337-5509</a></div></section>
 </main>
-<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="images/logo001.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="#problem-bank">문제은행</a></p></div></div></footer>
+<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="images/logo001.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="#problem-bank">문제은행</a></p></div></div></footer>
 
 <div id="accountBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><div class="modal"><div class="modal-head"><h2 id="accountTitle">회원 메뉴</h2><button class="close-btn" id="closeAccount" aria-label="닫기">×</button></div><div class="modal-menu"><button class="active" data-account-tab="login">로그인</button><button data-account-tab="register">회원가입</button><button data-account-tab="logout">로그아웃</button></div>
 <div id="loginPanel">
-<div class="naver-login-box"><p class="naver-login-caption">네이버를 더 안전하고 편리하게 이용하세요</p><button type="button" class="naver-login-button" id="naverLoginButton"><span class="naver-word">NAVER</span><span>로그인</span></button><div class="login-links"><button type="button" id="findIdButton">아이디 찾기</button><span class="separator">|</span><button type="button" id="findPwButton">비밀번호 찾기</button><span class="separator">|</span><button type="button" id="goRegisterButton">회원가입</button></div></div>
+<div class="naver-login-box"><p class="naver-login-caption">NSTUDY 계정으로 편리하게 이용하세요</p><button type="button" class="naver-login-button" id="nstudyLoginButton"><span class="naver-word">NSTUDY</span><span>로그인</span></button><div class="login-links"><button type="button" id="findIdButton">아이디 찾기</button><span class="separator">|</span><button type="button" id="findPwButton">비밀번호 찾기</button><span class="separator">|</span><button type="button" id="goRegisterButton">회원가입</button></div></div>
 <div class="login-divider">또는 NSTUDY 계정으로 로그인</div>
 <form id="loginForm"><div class="field"><label for="loginId">ID</label><input id="loginId" autocomplete="username" required></div><div class="field"><label for="loginPw">PW</label><input id="loginPw" type="password" autocomplete="current-password" required></div><button class="btn btn-primary" type="submit">로그인</button></form></div>
 <form id="registerForm" class="hidden"><div class="form-grid">
 <div class="field"><label for="regId">ID</label><input id="regId" required minlength="4" autocomplete="username"></div><div class="field"><label for="regPw">PW</label><input id="regPw" type="password" required minlength="6" autocomplete="new-password"></div>
-<div class="field"><label for="regName">성명</label><input id="regName" required></div><div class="field"><label for="regSchool">학교</label><input id="regSchool" required></div>
+<div class="field"><label for="regType">회원 유형</label><select id="regType" required><option value="학생">학생</option><option value="학부모">학부모</option><option value="강사">강사</option></select></div><div class="field"><label for="regName">성명</label><input id="regName" required></div><div class="field"><label for="regSchool">학교</label><input id="regSchool" required></div>
 <div class="field"><label for="regGrade">학년</label><input id="regGrade" required placeholder="예: 고등학교 2학년"></div><div class="field"><label for="regPhone">전화번호</label><input id="regPhone" type="tel" required></div>
 <div class="field full"><label for="regAddress">주소</label><input id="regAddress" required autocomplete="street-address"></div><div class="field full"><label for="regEmail">이메일</label><input id="regEmail" type="email" required autocomplete="email"></div>
 </div><button class="btn btn-primary" type="submit">회원가입 완료</button></form>
 <div id="logoutPanel" class="hidden"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
-<p class="small-note" style="margin-top:15px">중요: 이 페이지는 단일 HTML 데모입니다. 회원 정보는 현재 브라우저에 저장되며 안전한 서버 인증이 아닙니다. 실제 서비스에 공개하기 전에는 서버·암호화·개인정보 보호 기능을 구축해야 합니다.</p>
+
 </div></div>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <script>
@@ -156,7 +158,16 @@ function load(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.
 function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast("저장 공간이 부족합니다. 첨부파일 크기를 줄여 주세요.");return false}}
 function showToast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add("hidden"),3000)}
 function loggedIn(){return !!currentUser && !!accounts[currentUser]}
-function updateAccountUI(){document.getElementById("userStatus").textContent=loggedIn()?currentUser+"님":"";document.getElementById("openAccount").textContent=loggedIn()?"회원 메뉴":"로그인";document.getElementById("accessNote").textContent=loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다.":"비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.";document.getElementById("editorActions").classList.toggle("hidden",!loggedIn());document.getElementById("editor").classList.add("hidden");renderPosts()}
+function isAdmin(){return loggedIn() && currentUser.toLowerCase()==="admin"}
+function canAccessAdmin(){return isAdmin() || (loggedIn() && accounts[currentUser].adminAccess===true)}
+function renderAdmin(){const root=document.getElementById("adminMembers");root.innerHTML="";const intro=document.getElementById("adminIntro");if(!canAccessAdmin()){intro.textContent="관리자 또는 관리 페이지 접근 권한이 승인된 회원만 이용할 수 있습니다.";root.innerHTML="<p>접근 권한이 없습니다.</p>";return}
+ intro.textContent=isAdmin()?"관리자 모드: 회원별 체크박스로 관리 페이지 접근 권한을 설정할 수 있습니다.":"회원 접근 모드: 회원 목록을 확인할 수 있습니다. 권한 변경은 관리자만 가능합니다.";
+ const entries=Object.entries(accounts);if(!entries.length){root.innerHTML="<p>등록된 회원이 없습니다.</p>";return}
+ const wrap=document.createElement("div");wrap.className="admin-table-wrap";const table=document.createElement("table");table.className="admin-table";table.innerHTML="<thead><tr><th>접근 허용</th><th>아이디</th><th>회원 유형</th><th>성명</th><th>학교</th><th>학년</th><th>전화번호</th><th>이메일</th></tr></thead>";const tbody=document.createElement("tbody");
+ entries.forEach(([id,a])=>{const tr=document.createElement("tr");const tdCheck=document.createElement("td");const cb=document.createElement("input");cb.type="checkbox";cb.checked=a.adminAccess===true;cb.setAttribute("aria-label",id+" 관리 페이지 접근 허용");cb.disabled=!isAdmin()||id.toLowerCase()==="admin";cb.addEventListener("change",()=>{accounts[id].adminAccess=cb.checked;if(save("nstudy_accounts",accounts)){showToast(cb.checked?"관리 페이지 접근을 허용했습니다.":"관리 페이지 접근 권한을 해제했습니다.")}else{cb.checked=!cb.checked}});tdCheck.appendChild(cb);tr.appendChild(tdCheck);[id,a.type||"학생",a.name||"",a.school||"",a.grade||"",a.phone||"",a.email||""].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
+ }
+function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
+function updateAccountUI(){document.getElementById("userStatus").textContent=loggedIn()?currentUser+"님":"";document.getElementById("openAccount").textContent=loggedIn()?"회원 메뉴":"로그인";document.getElementById("accessNote").textContent=loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다.":"비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.";document.getElementById("editorActions").classList.toggle("hidden",!loggedIn());document.getElementById("editor").classList.add("hidden");renderPosts();if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
 function renderPosts(){
  const list=document.getElementById("postList");list.innerHTML="";document.getElementById("categoryTitle").textContent=activeCategory+" 학습 자료";
  const items=posts[activeCategory]||[];
@@ -187,7 +198,7 @@ document.getElementById("postForm").addEventListener("submit",async e=>{e.preven
 const backdrop=document.getElementById("accountBackdrop");
 function openAccount(){backdrop.classList.remove("hidden");setAccountTab("login");document.getElementById("logoutMessage").textContent=loggedIn()?currentUser+"님으로 로그인되어 있습니다.":"현재 로그인 상태가 아닙니다."}
 function closeAccount(){backdrop.classList.add("hidden")}
-document.getElementById("naverLoginButton").addEventListener("click",()=>showToast("네이버 로그인은 네이버 개발자센터의 OAuth 설정과 서버 연동 후 사용할 수 있습니다."));
+document.getElementById("nstudyLoginButton").addEventListener("click",()=>{setAccountTab("login");document.getElementById("loginId").focus();showToast("아래 NSTUDY 계정 입력란에서 로그인해 주세요.");});
 document.getElementById("findIdButton").addEventListener("click",()=>showToast("아이디 찾기는 본인 확인 기능을 서버에 연결해야 사용할 수 있습니다."));
 document.getElementById("findPwButton").addEventListener("click",()=>showToast("비밀번호 찾기는 이메일 또는 휴대전화 본인 확인 기능을 서버에 연결해야 합니다."));
 document.getElementById("goRegisterButton").addEventListener("click",()=>setAccountTab("register"));
@@ -195,13 +206,26 @@ document.getElementById("openAccount").addEventListener("click",openAccount);doc
 function setAccountTab(tab){document.querySelectorAll("[data-account-tab]").forEach(b=>b.classList.toggle("active",b.dataset.accountTab===tab));document.getElementById("loginPanel").classList.toggle("hidden",tab!=="login");document.getElementById("registerForm").classList.toggle("hidden",tab!=="register");document.getElementById("logoutPanel").classList.toggle("hidden",tab!=="logout");document.getElementById("logoutMessage").textContent=loggedIn()?currentUser+"님으로 로그인되어 있습니다.":"현재 로그인 상태가 아닙니다."}
 document.querySelectorAll("[data-account-tab]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.accountTab==="logout"&&!loggedIn()){setAccountTab("login");showToast("먼저 로그인해 주세요.");return}setAccountTab(b.dataset.accountTab)}));
 document.getElementById("registerForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("regId").value.trim();const pw=document.getElementById("regPw").value;if(accounts[id]){showToast("이미 사용 중인 ID입니다.");return}if(id.length<4||pw.length<6){showToast("ID는 4자 이상, PW는 6자 이상 입력해 주세요.");return}
- accounts[id]={pw,name:document.getElementById("regName").value.trim(),school:document.getElementById("regSchool").value.trim(),grade:document.getElementById("regGrade").value.trim(),phone:document.getElementById("regPhone").value.trim(),address:document.getElementById("regAddress").value.trim(),email:document.getElementById("regEmail").value.trim()};
+ accounts[id]={pw,type:document.getElementById("regType").value,name:document.getElementById("regName").value.trim(),adminAccess:false,school:document.getElementById("regSchool").value.trim(),grade:document.getElementById("regGrade").value.trim(),phone:document.getElementById("regPhone").value.trim(),address:document.getElementById("regAddress").value.trim(),email:document.getElementById("regEmail").value.trim()};
  if(!save("nstudy_accounts",accounts))return;e.target.reset();setAccountTab("login");document.getElementById("loginId").value=id;showToast("회원가입이 완료되었습니다.");});
 document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;if(!accounts[id]||accounts[id].pw!==pw){showToast("ID 또는 PW를 확인해 주세요.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
 function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
 document.getElementById("logoutButton").addEventListener("click",logout);
+document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
 updateAccountUI();
 })();
 </script>
 </body>
 </html>
+
+
+
+----------------------------------------------------------------------------------------------------
+
+
+
+위의 HTML 코드는 우리의 홈페이지입니다.
+정말 잘했습니다.
+감사합니다. 그런데 로그인 시 네이버라는 말이 나오고 있습니다.
+로그인 시 [네이버]를 [NSTUDY] 로 바꿀 수 있는지요?
+바꿀 수 있다면 변경바랍니다.
