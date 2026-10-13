@@ -151,20 +151,34 @@ const seed = {
 };
 let posts = load("nstudy_posts", null) || seed;
 let accounts = load("nstudy_accounts", {});
+// ID가 ssjj인 계정은 항상 관리 페이지 접근 권한을 유지합니다.
+const ssjjAccountId = Object.keys(accounts).find(id => id.toLowerCase() === "ssjj");
+if (ssjjAccountId && accounts[ssjjAccountId]) {
+ // ssjj 계정은 항상 관리자이며 로그인 차단 대상이 되지 않습니다.
+ accounts[ssjjAccountId].adminAccess = true;
+ accounts[ssjjAccountId].blocked = false;
+ save("nstudy_accounts", accounts);
+}
 let currentUser = sessionStorage.getItem("nstudy_current_user") || "";
+if(currentUser && accounts[currentUser] && accounts[currentUser].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");}
 let activeCategory = "TOEIC";
 let toastTimer;
 function load(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
 function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast("저장 공간이 부족합니다. 첨부파일 크기를 줄여 주세요.");return false}}
 function showToast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add("hidden"),3000)}
 function loggedIn(){return !!currentUser && !!accounts[currentUser]}
-function isAdmin(){return loggedIn() && currentUser.toLowerCase()==="admin"}
+function isAdmin(){return loggedIn() && currentUser.toLowerCase()==="ssjj"}
 function canAccessAdmin(){return isAdmin() || (loggedIn() && accounts[currentUser].adminAccess===true)}
 function renderAdmin(){const root=document.getElementById("adminMembers");root.innerHTML="";const intro=document.getElementById("adminIntro");if(!canAccessAdmin()){intro.textContent="관리자 또는 관리 페이지 접근 권한이 승인된 회원만 이용할 수 있습니다.";root.innerHTML="<p>접근 권한이 없습니다.</p>";return}
- intro.textContent=isAdmin()?"관리자 모드: 회원별 체크박스로 관리 페이지 접근 권한을 설정할 수 있습니다.":"회원 접근 모드: 회원 목록을 확인할 수 있습니다. 권한 변경은 관리자만 가능합니다.";
+ intro.textContent=isAdmin()?"관리자 모드: 회원 접근 권한, 로그인 차단, 회원 삭제를 관리할 수 있습니다. 비밀번호는 현재 데모 구조상 브라우저에 저장된 값이 표시됩니다.":"회원 접근 모드: 회원 목록만 확인할 수 있습니다. 권한 변경은 관리자만 가능합니다.";
  const entries=Object.entries(accounts);if(!entries.length){root.innerHTML="<p>등록된 회원이 없습니다.</p>";return}
- const wrap=document.createElement("div");wrap.className="admin-table-wrap";const table=document.createElement("table");table.className="admin-table";table.innerHTML="<thead><tr><th>접근 허용</th><th>아이디</th><th>회원 유형</th><th>성명</th><th>학교</th><th>학년</th><th>전화번호</th><th>이메일</th></tr></thead>";const tbody=document.createElement("tbody");
- entries.forEach(([id,a])=>{const tr=document.createElement("tr");const tdCheck=document.createElement("td");const cb=document.createElement("input");cb.type="checkbox";cb.checked=a.adminAccess===true;cb.setAttribute("aria-label",id+" 관리 페이지 접근 허용");cb.disabled=!isAdmin()||id.toLowerCase()==="admin";cb.addEventListener("change",()=>{accounts[id].adminAccess=cb.checked;if(save("nstudy_accounts",accounts)){showToast(cb.checked?"관리 페이지 접근을 허용했습니다.":"관리 페이지 접근 권한을 해제했습니다.")}else{cb.checked=!cb.checked}});tdCheck.appendChild(cb);tr.appendChild(tdCheck);[id,a.type||"학생",a.name||"",a.school||"",a.grade||"",a.phone||"",a.email||""].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
+ const wrap=document.createElement("div");wrap.className="admin-table-wrap";const table=document.createElement("table");table.className="admin-table";const headers=["관리 페이지 접근","로그인 차단","아이디"];if(isAdmin())headers.push("비밀번호");headers.push("회원 유형","성명","학교","학년","전화번호","이메일");if(isAdmin())headers.push("회원 정보 삭제");const thead=document.createElement("thead"),hr=document.createElement("tr");headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;hr.appendChild(th)});thead.appendChild(hr);table.appendChild(thead);const tbody=document.createElement("tbody");
+ entries.forEach(([id,a])=>{const tr=document.createElement("tr");const isRoot=id.toLowerCase()==="ssjj";
+ const accessTd=document.createElement("td"),accessCb=document.createElement("input");accessCb.type="checkbox";accessCb.checked=isRoot||a.adminAccess===true;accessCb.setAttribute("aria-label",id+" 관리 페이지 접근 허용");accessCb.disabled=!isAdmin()||isRoot;accessCb.addEventListener("change",()=>{accounts[id].adminAccess=accessCb.checked;if(save("nstudy_accounts",accounts))showToast(accessCb.checked?"관리 페이지 접근을 허용했습니다.":"관리 페이지 접근 권한을 해제했습니다.");else accessCb.checked=!accessCb.checked});accessTd.appendChild(accessCb);tr.appendChild(accessTd);
+ const blockTd=document.createElement("td"),blockCb=document.createElement("input");blockCb.type="checkbox";blockCb.checked=isRoot?false:a.blocked===true;blockCb.setAttribute("aria-label",id+" 로그인 차단");blockCb.disabled=!isAdmin()||isRoot;blockCb.addEventListener("change",()=>{if(isRoot){blockCb.checked=false;return}accounts[id].blocked=blockCb.checked;if(save("nstudy_accounts",accounts)){showToast(blockCb.checked?"해당 회원의 로그인을 차단했습니다.":"해당 회원의 로그인 차단을 해제했습니다.")}else blockCb.checked=!blockCb.checked});blockTd.appendChild(blockCb);tr.appendChild(blockTd);
+ const values=[id];if(isAdmin())values.push(a.pw||"");values.push(a.type||"학생",a.name||"",a.school||"",a.grade||"",a.phone||"",a.email||"");values.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+ if(isAdmin()){const deleteTd=document.createElement("td"),del=document.createElement("button");del.type="button";del.className="btn btn-secondary";del.textContent="회원 삭제";del.disabled=isRoot;del.addEventListener("click",()=>{if(isRoot)return;if(!confirm("정말로 회원 '"+id+"'의 계정 정보와 해당 회원이 작성한 게시글을 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."))return;delete accounts[id];Object.keys(posts).forEach(cat=>{posts[cat]=(posts[cat]||[]).filter(post=>post.author!==id)});if(!save("nstudy_accounts",accounts)||!save("nstudy_posts",posts)){showToast("저장에 실패했습니다. 새로고침 전 저장 상태를 확인해 주세요.");return}if(currentUser===id){currentUser="";sessionStorage.removeItem("nstudy_current_user");updateAccountUI()}renderAdmin();showToast("회원 계정과 해당 회원 작성 게시글을 삭제했습니다.")});deleteTd.appendChild(del);tr.appendChild(deleteTd)}
+ tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
  }
 function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
 function updateAccountUI(){document.getElementById("userStatus").textContent=loggedIn()?currentUser+"님":"";document.getElementById("openAccount").textContent=loggedIn()?"회원 메뉴":"로그인";document.getElementById("accessNote").textContent=loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다.":"비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.";document.getElementById("editorActions").classList.toggle("hidden",!loggedIn());document.getElementById("editor").classList.add("hidden");renderPosts();if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
@@ -208,7 +222,7 @@ document.querySelectorAll("[data-account-tab]").forEach(b=>b.addEventListener("c
 document.getElementById("registerForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("regId").value.trim();const pw=document.getElementById("regPw").value;if(accounts[id]){showToast("이미 사용 중인 ID입니다.");return}if(id.length<4||pw.length<6){showToast("ID는 4자 이상, PW는 6자 이상 입력해 주세요.");return}
  accounts[id]={pw,type:document.getElementById("regType").value,name:document.getElementById("regName").value.trim(),adminAccess:false,school:document.getElementById("regSchool").value.trim(),grade:document.getElementById("regGrade").value.trim(),phone:document.getElementById("regPhone").value.trim(),address:document.getElementById("regAddress").value.trim(),email:document.getElementById("regEmail").value.trim()};
  if(!save("nstudy_accounts",accounts))return;e.target.reset();setAccountTab("login");document.getElementById("loginId").value=id;showToast("회원가입이 완료되었습니다.");});
-document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;if(!accounts[id]||accounts[id].pw!==pw){showToast("ID 또는 PW를 확인해 주세요.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
+document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;if(!accounts[id]||accounts[id].pw!==pw){showToast("ID 또는 PW를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
 function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
 document.getElementById("logoutButton").addEventListener("click",logout);
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
@@ -217,15 +231,3 @@ updateAccountUI();
 </script>
 </body>
 </html>
-
-
-
-----------------------------------------------------------------------------------------------------
-
-
-
-위의 HTML 코드는 우리의 홈페이지입니다.
-정말 잘했습니다.
-감사합니다. 그런데 로그인 시 네이버라는 말이 나오고 있습니다.
-로그인 시 [네이버]를 [NSTUDY] 로 바꿀 수 있는지요?
-바꿀 수 있다면 변경바랍니다.
