@@ -412,8 +412,10 @@ function findAccountKey(id){
 let currentUser = sessionStorage.getItem("nstudy_current_user") || localStorage.getItem("nstudy_current_user") || "";
 if(currentUser){
  const canonical=findAccountKey(currentUser);
- if(!canonical || accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");}
- else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
+ if(canonical){
+   if(accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");}
+   else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
+ }
 }
 let activeCategory = "TOEIC";
 let activeSubcategory = "";
@@ -448,7 +450,19 @@ function renderAdmin(){const root=document.getElementById("adminMembers");root.i
  tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
  }
 function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
-function updateAccountUI(){const accountButton=document.getElementById("openAccount");document.getElementById("userStatus").textContent=loggedIn()?currentUser+"님":"";accountButton.textContent=loggedIn()?"로그아웃":"로그인";accountButton.href=loggedIn()?"#logout":"./001-login.html?return=02-bank.html";accountButton.setAttribute("aria-label",loggedIn()?"로그아웃":"로그인");document.getElementById("accessNote").textContent=isAdmin()?"관리자: 모든 게시글 열람 및 게시글 작성이 가능합니다.":loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다. 게시글 작성은 관리자 전용입니다.":"비회원은 영역별 최신 게시글 3개까지 열람할 수 있습니다.";document.getElementById("editorActions").classList.toggle("hidden",!isAdmin());document.getElementById("editor").classList.add("hidden");renderPosts();if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
+function updateAccountUI(){
+ const accountButton=document.getElementById("openAccount");
+ const hasSession=!!currentUser;
+ document.getElementById("userStatus").textContent=hasSession?currentUser+"님":"";
+ accountButton.textContent=hasSession?"로그아웃":"로그인";
+ accountButton.href=hasSession?"#logout":"./001-login.html?return=02-bank.html";
+ accountButton.setAttribute("aria-label",hasSession?"로그아웃":"로그인");
+ document.getElementById("accessNote").textContent=isAdmin()?"관리자: 모든 게시글 열람 및 게시글 작성이 가능합니다.":loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다. 게시글 작성은 관리자 전용입니다.":"비회원은 영역별 최신 게시글 3개까지 열람할 수 있습니다.";
+ document.getElementById("editorActions").classList.toggle("hidden",!isAdmin());
+ document.getElementById("editor").classList.add("hidden");
+ renderPosts();
+ if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden");
+}
 function getPostSubcategory(post, category){
  if(post && post.subcategory) return post.subcategory;
  const title=String(post?.title||"");
@@ -531,8 +545,14 @@ document.querySelectorAll("[data-account-tab]").forEach(b=>b.addEventListener("c
 document.getElementById("registerForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("regId").value.trim().toLocaleLowerCase("en-US");const pw=document.getElementById("regPw").value;if(findAccountKey(id)){showToast("이미 사용 중인 ID입니다.");return}if(id.length<4||pw.length<6){showToast("ID는 4자 이상, PW는 6자 이상 입력해 주세요.");return}
  accounts[id]={pw,type:document.getElementById("regType").value,name:document.getElementById("regName").value.trim(),adminAccess:id==="jcm0011"||id==="ssjj",blocked:false,school:document.getElementById("regSchool").value.trim(),grade:document.getElementById("regGrade").value.trim(),phone:document.getElementById("regPhone").value.trim(),address:document.getElementById("regAddress").value.trim(),email:document.getElementById("regEmail").value.trim()};
  if(!save("nstudy_accounts",accounts))return;e.target.reset();setAccountTab("login");document.getElementById("loginId").value=id;showToast("회원가입이 완료되었습니다.");});
-document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const typedId=document.getElementById("loginId").value.trim();const id=findAccountKey(typedId);const pw=document.getElementById("loginPw").value;if(!id||!accounts[id]){showToast("이 기기에는 해당 ID의 회원 정보가 없습니다. PC에서 가입한 계정은 스마트폰과 자동 공유되지 않습니다.");return}if(String(accounts[id].pw)!==pw){showToast("비밀번호를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
-document.getElementById("openAccount").addEventListener("click",e=>{if(loggedIn()){e.preventDefault();logout();}});
+document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const typedId=document.getElementById("loginId").value.trim();const id=findAccountKey(typedId);const pw=document.getElementById("loginPw").value;if(!id||!accounts[id]){showToast("이 기기에는 해당 ID의 회원 정보가 없습니다. PC에서 가입한 계정은 스마트폰과 자동 공유되지 않습니다.");return}if(String(accounts[id].pw)!==pw){showToast("비밀번호를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);localStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
+document.getElementById("openAccount").addEventListener("click",e=>{if(currentUser){e.preventDefault();logout();}});
+window.addEventListener("storage",e=>{if(e.key==="nstudy_current_user"){
+ currentUser=e.newValue||"";
+ const canonical=findAccountKey(currentUser);
+ if(canonical)currentUser=canonical;
+ updateAccountUI();
+}});
 function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
 document.getElementById("logoutButton").addEventListener("click",logout);
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
