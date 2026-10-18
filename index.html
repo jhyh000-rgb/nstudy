@@ -527,7 +527,7 @@ document.getElementById("postForm").addEventListener("submit",async e=>{e.preven
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
 updateAccountUI();
 renderPosts();
-if(new URLSearchParams(location.search).get("openAdmin")==="1"){openAdminPage();}
+// 로그인 직후 자동으로 관리 페이지를 열거나 화면을 아래로 이동하지 않습니다. 관리 페이지는 하단 [관리] 링크를 눌러 열 수 있습니다.
 })();
 </script>
 </body>
