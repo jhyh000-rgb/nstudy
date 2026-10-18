@@ -409,11 +409,11 @@ function findAccountKey(id){
  const wanted=String(id||"").trim().toLocaleLowerCase("en-US");
  return Object.keys(accounts).find(key=>key.toLocaleLowerCase("en-US")===wanted) || "";
 }
-let currentUser = sessionStorage.getItem("nstudy_current_user") || "";
+let currentUser = sessionStorage.getItem("nstudy_current_user") || localStorage.getItem("nstudy_current_user") || "";
 if(currentUser){
  const canonical=findAccountKey(currentUser);
  if(!canonical || accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");}
- else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);}
+ else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
 }
 let activeCategory = "TOEIC";
 let activeSubcategory = "";
@@ -533,7 +533,7 @@ document.getElementById("registerForm").addEventListener("submit",e=>{e.preventD
  if(!save("nstudy_accounts",accounts))return;e.target.reset();setAccountTab("login");document.getElementById("loginId").value=id;showToast("회원가입이 완료되었습니다.");});
 document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const typedId=document.getElementById("loginId").value.trim();const id=findAccountKey(typedId);const pw=document.getElementById("loginPw").value;if(!id||!accounts[id]){showToast("이 기기에는 해당 ID의 회원 정보가 없습니다. PC에서 가입한 계정은 스마트폰과 자동 공유되지 않습니다.");return}if(String(accounts[id].pw)!==pw){showToast("비밀번호를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
 document.getElementById("openAccount").addEventListener("click",e=>{if(loggedIn()){e.preventDefault();logout();}});
-function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
+function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
 document.getElementById("logoutButton").addEventListener("click",logout);
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
 updateAccountUI();
