@@ -111,10 +111,11 @@ function findAccountKey(id){
  const wanted=String(id||"").trim().toLocaleLowerCase("en-US");
  return Object.keys(accounts).find(key=>key.toLocaleLowerCase("en-US")===wanted) || "";
 }
-let currentUser = sessionStorage.getItem("nstudy_current_user") || localStorage.getItem("nstudy_current_user") || "";
+// 문제은행 페이지와 로그인 상태를 공유하기 위해 localStorage를 기준으로 동기화합니다.
+let currentUser = localStorage.getItem("nstudy_current_user") || sessionStorage.getItem("nstudy_current_user") || "";
 if(currentUser){
  const canonical=findAccountKey(currentUser);
- if(!canonical || accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");}
+ if(!canonical || accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");}
  else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
 }
 let toastTimer;
@@ -136,9 +137,12 @@ function renderAdmin(){const root=document.getElementById("adminMembers");root.i
  tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
  }
 function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
-function updateAccountUI(){const status=document.getElementById("userStatus");const accountButton=document.getElementById("openAccount");status.textContent=loggedIn()?currentUser:"";if(loggedIn())localStorage.setItem("nstudy_current_user",currentUser);accountButton.textContent=loggedIn()?"로그아웃":"로그인";accountButton.href=loggedIn()?"#logout":"./001-login.html?return=index.html";accountButton.setAttribute("aria-label",loggedIn()?"로그아웃":"로그인");if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
+function updateAccountUI(){const status=document.getElementById("userStatus");const accountButton=document.getElementById("openAccount");status.textContent=loggedIn()?currentUser:"";if(loggedIn()){localStorage.setItem("nstudy_current_user",currentUser);sessionStorage.setItem("nstudy_current_user",currentUser)}accountButton.textContent=loggedIn()?"로그아웃":"로그인";accountButton.href=loggedIn()?"#logout":"./001-login.html?return=index.html";accountButton.setAttribute("aria-label",loggedIn()?"로그아웃":"로그인");if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
 document.getElementById("openAccount").addEventListener("click",function(e){if(!loggedIn())return;e.preventDefault();currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");updateAccountUI();showToast("로그아웃되었습니다.");window.scrollTo({top:0,behavior:"smooth"})});
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
+window.addEventListener("storage",e=>{if(e.key==="nstudy_current_user"){currentUser=e.newValue||"";const canonical=findAccountKey(currentUser);if(canonical && accounts[canonical] && accounts[canonical].blocked!==true)currentUser=canonical;else currentUser="";updateAccountUI()}});
+window.addEventListener("focus",updateAccountUI);
+window.addEventListener("pageshow",updateAccountUI);
 updateAccountUI();
 // 문제은행 기능과 자료는 별도 문서 02-bank.html에서 관리합니다.
 // 로그인 직후 자동으로 관리 페이지를 열거나 화면을 아래로 이동하지 않습니다.

@@ -409,14 +409,24 @@ function findAccountKey(id){
  const wanted=String(id||"").trim().toLocaleLowerCase("en-US");
  return Object.keys(accounts).find(key=>key.toLocaleLowerCase("en-US")===wanted) || "";
 }
-let currentUser = sessionStorage.getItem("nstudy_current_user") || localStorage.getItem("nstudy_current_user") || "";
-if(currentUser){
- const canonical=findAccountKey(currentUser);
- if(canonical){
-   if(accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");}
-   else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
+// 로그인 상태는 두 HTML 페이지가 공통으로 사용하는 localStorage를 기준으로 확인합니다.
+// sessionStorage는 같은 탭에서의 보조 저장소로만 사용합니다.
+function readSharedLogin(){
+ let stored="";
+ try { stored=localStorage.getItem("nstudy_current_user") || ""; } catch(e) {}
+ if(!stored){ try { stored=sessionStorage.getItem("nstudy_current_user") || ""; } catch(e) {} }
+ const canonical=findAccountKey(stored);
+ if(canonical && accounts[canonical] && accounts[canonical].blocked!==true){
+   currentUser=canonical;
+   try { localStorage.setItem("nstudy_current_user",canonical); sessionStorage.setItem("nstudy_current_user",canonical); } catch(e) {}
+ } else {
+   // 계정 목록과 아직 일치하지 않더라도 공유 저장소에 ID가 있으면 헤더에는 해당 ID를 표시합니다.
+   currentUser=stored;
  }
+ return currentUser;
 }
+let currentUser = "";
+readSharedLogin();
 let activeCategory = "TOEIC";
 let activeSubcategory = "";
 const subcategories = {
@@ -451,6 +461,7 @@ function renderAdmin(){const root=document.getElementById("adminMembers");root.i
  }
 function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
 function updateAccountUI(){
+ readSharedLogin();
  const accountButton=document.getElementById("openAccount");
  const hasSession=!!currentUser;
  document.getElementById("userStatus").textContent=hasSession?currentUser+"님":"";
@@ -548,11 +559,11 @@ document.getElementById("registerForm").addEventListener("submit",e=>{e.preventD
 document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const typedId=document.getElementById("loginId").value.trim();const id=findAccountKey(typedId);const pw=document.getElementById("loginPw").value;if(!id||!accounts[id]){showToast("이 기기에는 해당 ID의 회원 정보가 없습니다. PC에서 가입한 계정은 스마트폰과 자동 공유되지 않습니다.");return}if(String(accounts[id].pw)!==pw){showToast("비밀번호를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);localStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
 document.getElementById("openAccount").addEventListener("click",e=>{if(currentUser){e.preventDefault();logout();}});
 window.addEventListener("storage",e=>{if(e.key==="nstudy_current_user"){
- currentUser=e.newValue||"";
- const canonical=findAccountKey(currentUser);
- if(canonical)currentUser=canonical;
+ readSharedLogin();
  updateAccountUI();
 }});
+window.addEventListener("focus",()=>updateAccountUI());
+window.addEventListener("pageshow",()=>updateAccountUI());
 function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
 document.getElementById("logoutButton").addEventListener("click",logout);
 document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
