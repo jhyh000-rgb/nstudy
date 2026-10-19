@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. 각 사용자는 오직 자신의 user/{userId} 경로 하위 데이터만 읽고 쓸 수 있습니다.
+    match /user/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // 2. 그 외 모든 경로는 외부 접근을 차단합니다.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

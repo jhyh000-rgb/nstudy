@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NStudy BS - 내 데이터 관리</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- 네비게이션 바 -->
+  <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-fire text-xl"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg text-slate-900 tracking-tight">NStudy</span>
+          <span class="ml-1 text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-200">nstudy-bs</span>
+        </div>
+      </div>
+
+      <!-- 우측 사용자 정보 / 로그인 버튼 -->
+      <div id="authContainer" class="flex items-center">
+        <!-- 로그인 전 -->
+        <button id="loginBtn" class="flex items-center space-x-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg font-medium shadow-sm transition hover:shadow">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Google 계정으로 로그인</span>
+        </button>
+
+        <!-- 로그인 후 프로필 (기본 숨김) -->
+        <div id="userProfile" class="hidden flex items-center space-x-3">
+          <div class="flex items-center space-x-2">
+            <img id="userAvatar" class="w-9 h-9 rounded-full ring-2 ring-amber-500/30 object-cover" src="" alt="User Avatar" />
+            <div class="hidden sm:block text-left">
+              <div id="userName" class="text-sm font-semibold text-slate-800 leading-tight">사용자</div>
+              <div id="userEmail" class="text-xs text-slate-500 leading-tight">user@email.com</div>
+            </div>
+          </div>
+          <button id="logoutBtn" title="로그아웃" class="text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 p-2 rounded-lg transition">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 메인 컨텐츠 영역 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- 비로그인 상태 안내 화면 -->
+    <div id="loggedOutView" class="py-16 text-center">
+      <div class="max-w-md mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+        <div class="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mx-auto mb-5 text-2xl shadow-inner">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 mb-2">나만의 안전한 데이터 저장소</h1>
+        <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+          Google 계정으로 로그인하면 Firebase Firestore의 <code class="bg-slate-100 text-amber-700 px-1.5 py-0.5 rounded text-xs font-mono">user/{userId}</code> 경로에 데이터가 격리되어 오직 본인만 조회하고 관리할 수 있습니다.
+        </p>
+        <button id="heroLoginBtn" class="w-full flex items-center justify-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white font-medium py-3 px-4 rounded-xl shadow-md hover:shadow-lg transition">
+          <i class="fa-brands fa-google"></i>
+          <span>Google 계정으로 시작하기</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 로그인 상태 화면 -->
+    <div id="loggedInView" class="hidden space-y-6">
+      
+      <!-- 상단 컨트롤 바 -->
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span>내 저장 데이터</span>
+            <span id="dataCountBadge" class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-0.5 rounded-full">0건</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">
+            저장 경로: <span id="firestorePathDisplay" class="font-mono text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">user/{userId}/items</span>
+          </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+          <!-- 검색창 -->
+          <div class="relative flex-1 md:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" placeholder="제목/내용 검색..." class="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-slate-50" />
+          </div>
+          <!-- 새 데이터 추가 버튼 -->
+          <button id="openAddModalBtn" class="flex items-center space-x-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow hover:shadow-md transition shrink-0">
+            <i class="fa-solid fa-plus"></i>
+            <span>새 항목 추가</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 실시간 상태 알림 배너 (에러 또는 DB 미생성 시 안내) -->
+      <div id="statusAlert" class="hidden p-4 rounded-xl border text-sm"></div>
+
+      <!-- 데이터 목록 그리드 -->
+      <div id="dataListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- 로딩 스켈레톤 -->
+        <div id="loadingIndicator" class="col-span-full py-12 text-center text-slate-400">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-amber-500 mb-2"></i>
+          <p class="text-sm">Firestore에서 데이터를 불러오는 중...</p>
+        </div>
+      </div>
+
+      <!-- 데이터 없음 상태 -->
+      <div id="emptyState" class="hidden py-16 text-center bg-white rounded-2xl border border-dashed border-slate-300 p-8">
+        <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3">
+          <i class="fa-regular fa-folder-open text-xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-slate-700">저장된 데이터가 없습니다</h3>
+        <p class="text-xs text-slate-500 mt-1 mb-4">새로운 항목을 작성하여 나만의 데이터를 저장해 보세요.</p>
+        <button id="emptyAddBtn" class="inline-flex items-center space-x-1.5 text-sm font-medium text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-3.5 py-2 rounded-xl transition">
+          <i class="fa-solid fa-plus"></i>
+          <span>첫 항목 만들기</span>
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- 데이터 추가 / 수정 모달 -->
+  <div id="dataModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-100 transform transition-all">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 id="modalTitle" class="text-lg font-bold text-slate-900">새 항목 추가</h3>
+        <button id="closeModalBtn" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="dataForm" class="mt-4 space-y-4">
+        <input type="hidden" id="editItemId" value="" />
+        
+        <!-- 분류 태그 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">분류 / 카테고리</label>
+          <div class="flex gap-2">
+            <select id="itemCategory" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none bg-slate-50">
+              <option value="일반">📌 일반</option>
+              <option value="공부/학습">📚 공부 / 학습</option>
+              <option value="아이디어">💡 아이디어</option>
+              <option value="할 일">✅ 할 일</option>
+              <option value="비밀 메모">🔒 비밀 메모</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 제목 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">제목 <span class="text-red-500">*</span></label>
+          <input type="text" id="itemTitle" required placeholder="제목을 입력하세요" class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none" />
+        </div>
+
+        <!-- 상세 내용 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">내용</label>
+          <textarea id="itemContent" rows="4" placeholder="자유롭게 내용을 작성하세요" class="w-full px-3.5 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:outline-none resize-none"></textarea>
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button type="button" id="cancelModalBtn" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">취소</button>
+          <button type="submit" id="saveItemBtn" class="flex items-center space-x-1.5 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 text-sm font-semibold rounded-xl shadow transition">
+            <span id="saveBtnText">저장하기</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4 text-xl">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h4 class="text-base font-bold text-slate-900 mb-1">정말 삭제하시겠습니까?</h4>
+      <p class="text-xs text-slate-500 mb-5">삭제된 데이터는 복구할 수 없습니다.</p>
+      <input type="hidden" id="deleteTargetId" value="" />
+      <div class="flex items-center justify-center space-x-2">
+        <button id="cancelDeleteBtn" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl transition">취소</button>
+        <button id="confirmDeleteBtn" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 text-sm font-semibold rounded-xl shadow transition">삭제 확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 컨테이너 -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Firebase v10 모듈 스크립트 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { 
+      getAuth, 
+      signInWithPopup, 
+      GoogleAuthProvider, 
+      signOut, 
+      onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      doc, 
+      addDoc, 
+      updateDoc, 
+      deleteDoc, 
+      onSnapshot, 
+      query, 
+      orderBy, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Firebase 프로젝트 설정 (nstudy-bs)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAL94HqczDOHRm89j-YeGlgWiBI8JqyTAs",
+      authDomain: "nstudy-bs.firebaseapp.com",
+      projectId: "nstudy-bs",
+      storageBucket: "nstudy-bs.firebasestorage.app",
+      messagingSenderId: "780731143650",
+      appId: "1:780731143650:web:a7469a27f45b51aad955bb",
+      measurementId: "G-79KZXDVZQL"
+    };
+
+    // Firebase 초기화
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+
+    // 상태 관리 변수
+    let currentUser = null;
+    let unsubscribeFirestore = null;
+    let currentData = [];
+
+    // UI 요소
+    const loginBtn = document.getElementById("loginBtn");
+    const heroLoginBtn = document.getElementById("heroLoginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userProfile = document.getElementById("userProfile");
+    const userAvatar = document.getElementById("userAvatar");
+    const userName = document.getElementById("userName");
+    const userEmail = document.getElementById("userEmail");
+    const loggedOutView = document.getElementById("loggedOutView");
+    const loggedInView = document.getElementById("loggedInView");
+    const firestorePathDisplay = document.getElementById("firestorePathDisplay");
+    const dataCountBadge = document.getElementById("dataCountBadge");
+    const dataListContainer = document.getElementById("dataListContainer");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const emptyState = document.getElementById("emptyState");
+    const searchInput = document.getElementById("searchInput");
+    const statusAlert = document.getElementById("statusAlert");
+
+    // 모달 관련 요소
+    const dataModal = document.getElementById("dataModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const dataForm = document.getElementById("dataForm");
+    const editItemId = document.getElementById("editItemId");
+    const itemCategory = document.getElementById("itemCategory");
+    const itemTitle = document.getElementById("itemTitle");
+    const itemContent = document.getElementById("itemContent");
+    const openAddModalBtn = document.getElementById("openAddModalBtn");
+    const emptyAddBtn = document.getElementById("emptyAddBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const cancelModalBtn = document.getElementById("cancelModalBtn");
+
+    // 삭제 모달 요소
+    const deleteModal = document.getElementById("deleteModal");
+    const deleteTargetId = document.getElementById("deleteTargetId");
+    const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+    const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+    // 토스트 알림 함수
+    function showToast(message, type = "info") {
+      const toast = document.createElement("div");
+      const isError = type === "error";
+      toast.className = `px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center space-x-2 transition-all transform duration-300 pointer-events-auto ${
+        isError ? "bg-red-600 text-white" : "bg-slate-900 text-white"
+      }`;
+      toast.innerHTML = `<i class="fa-solid ${isError ? 'fa-circle-exclamation' : 'fa-circle-check'} text-amber-400"></i><span>${message}</span>`;
+      
+      const container = document.getElementById("toastContainer");
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Google 로그인 처리
+    async function handleLogin() {
+      try {
+        await signInWithPopup(auth, googleProvider);
+        showToast("성공적으로 로그인되었습니다!");
+      } catch (error) {
+        console.error("Login failed:", error);
+        if (error.code === "auth/popup-blocked") {
+          showToast("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.", "error");
+        } else if (error.code === "auth/configuration-not-found" || error.code === "auth/operation-not-allowed") {
+          showToast("Firebase 콘솔에서 Google 로그인 제공업체를 활성화해 주세요.", "error");
+          showAlert("⚠️ Firebase 콘솔 > Authentication > Sign-in method에서 'Google' 로그인을 사용 설정해야 합니다.", "warning");
+        } else {
+          showToast(`로그인 오류: ${error.message}`, "error");
+        }
+      }
+    }
+
+    // 로그아웃 처리
+    async function handleLogout() {
+      try {
+        if (unsubscribeFirestore) {
+          unsubscribeFirestore();
+          unsubscribeFirestore = null;
+        }
+        await signOut(auth);
+        showToast("로그아웃되었습니다.");
+      } catch (error) {
+        showToast(`로그아웃 실패: ${error.message}`, "error");
+      }
+    }
+
+    // 알림 배너 표시
+    function showAlert(msg, type = "info") {
+      statusAlert.classList.remove("hidden", "bg-amber-50", "border-amber-200", "text-amber-800", "bg-red-50", "border-red-200", "text-red-800");
+      if (type === "warning") {
+        statusAlert.classList.add("bg-amber-50", "border-amber-200", "text-amber-800");
+      } else {
+        statusAlert.classList.add("bg-red-50", "border-red-200", "text-red-800");
+      }
+      statusAlert.innerHTML = msg;
+    }
+
+    // 인증 상태 감시 (onAuthStateChanged)
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (user) {
+        // 로그인 상태 UI
+        loginBtn.classList.add("hidden");
+        userProfile.classList.remove("hidden");
+        userName.textContent = user.displayName || "익명 사용자";
+        userEmail.textContent = user.email || "";
+        userAvatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=f59e0b&color=fff`;
+        
+        loggedOutView.classList.add("hidden");
+        loggedInView.classList.remove("hidden");
+        firestorePathDisplay.textContent = `user/${user.uid}/items`;
+
+        // 사용자 고유 데이터 실시간 구독 시작
+        subscribeToUserData(user.uid);
+      } else {
+        // 비로그인 상태 UI
+        loginBtn.classList.remove("hidden");
+        userProfile.classList.add("hidden");
+        loggedOutView.classList.remove("hidden");
+        loggedInView.classList.add("hidden");
+        dataListContainer.innerHTML = "";
+      }
+    });
+
+    // Firestore: user/{userId}/items 실시간 데이터 구독
+    function subscribeToUserData(userId) {
+      loadingIndicator.classList.remove("hidden");
+      emptyState.classList.add("hidden");
+
+      // 경로: user/{userId}/items
+      const userItemsRef = collection(db, "user", userId, "items");
+      const q = query(userItemsRef, orderBy("createdAt", "desc"));
+
+      unsubscribeFirestore = onSnapshot(q, (snapshot) => {
+        loadingIndicator.classList.add("hidden");
+        currentData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderDataList();
+      }, (error) => {
+        loadingIndicator.classList.add("hidden");
+        console.error("Firestore read error:", error);
+        showAlert(`⚠️ Firestore 데이터를 불러오지 못했습니다: <strong>${error.message}</strong><br><span class="text-xs">Firebase 콘솔에서 Cloud Firestore 데이터베이스를 활성화하고 보안 규칙을 배포했는지 확인해 주세요.</span>`, "error");
+      });
+    }
+
+    // 데이터 목록 렌더링
+    function renderDataList() {
+      const term = searchInput.value.trim().toLowerCase();
+      const filtered = currentData.filter(item => {
+        if (!term) return true;
+        return (item.title && item.title.toLowerCase().includes(term)) || 
+               (item.content && item.content.toLowerCase().includes(term)) ||
+               (item.category && item.category.toLowerCase().includes(term));
+      });
+
+      dataCountBadge.textContent = `${filtered.length}건`;
+
+      if (filtered.length === 0) {
+        dataListContainer.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      dataListContainer.innerHTML = filtered.map(item => {
+        const dateStr = item.createdAt ? new Date(item.createdAt.toDate ? item.createdAt.toDate() : item.createdAt).toLocaleString('ko-KR', {
+          year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        }) : "방금 전";
+
+        return `
+          <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition flex flex-col justify-between group">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">
+                  ${escapeHtml(item.category || '일반')}
+                </span>
+                <span class="text-[11px] text-slate-400">${dateStr}</span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-base mb-2 group-hover:text-amber-600 transition">
+                ${escapeHtml(item.title || '(제목 없음)')}
+              </h4>
+              <p class="text-xs text-slate-600 leading-relaxed whitespace-pre-wrap line-clamp-4">
+                ${escapeHtml(item.content || '')}
+              </p>
+            </div>
+            
+            <div class="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-mono">ID: ${item.id.slice(0, 8)}...</span>
+              <div class="flex items-center space-x-1">
+                <button onclick="window.handleEdit('${item.id}')" class="px-2.5 py-1 text-xs text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition font-medium">
+                  <i class="fa-solid fa-pen-to-square mr-1"></i>수정
+                </button>
+                <button onclick="window.handleDeletePrompt('${item.id}')" class="px-2.5 py-1 text-xs text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition font-medium">
+                  <i class="fa-solid fa-trash-can mr-1"></i>삭제
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // HTML 특수문자 이스케이프
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // 모달 열기 (추가 모드)
+    function openAddModal() {
+      editItemId.value = "";
+      modalTitle.textContent = "새 항목 추가";
+      document.getElementById("saveBtnText").textContent = "저장하기";
+      dataForm.reset();
+      dataModal.classList.remove("hidden");
+      itemTitle.focus();
+    }
+
+    // 모달 열기 (수정 모드)
+    window.handleEdit = function(id) {
+      const item = currentData.find(d => d.id === id);
+      if (!item) return;
+
+      editItemId.value = item.id;
+      modalTitle.textContent = "항목 수정";
+      document.getElementById("saveBtnText").textContent = "수정 완료";
+      itemCategory.value = item.category || "일반";
+      itemTitle.value = item.title || "";
+      itemContent.value = item.content || "";
+      dataModal.classList.remove("hidden");
+      itemTitle.focus();
+    };
+
+    // 모달 닫기
+    function closeModal() {
+      dataModal.classList.add("hidden");
+    }
+
+    // 데이터 저장 / 수정 핸들러 (CRUD: Create & Update)
+    dataForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const title = itemTitle.value.trim();
+      const content = itemContent.value.trim();
+      const category = itemCategory.value;
+      const targetId = editItemId.value;
+
+      if (!title) {
+        showToast("제목을 입력해 주세요.", "error");
+        return;
+      }
+
+      try {
+        const userItemsRef = collection(db, "user", currentUser.uid, "items");
+
+        if (targetId) {
+          // 수정 (Update)
+          const docRef = doc(userItemsRef, targetId);
+          await updateDoc(docRef, {
+            title,
+            content,
+            category,
+            updatedAt: serverTimestamp()
+          });
+          showToast("항목이 수정되었습니다.");
+        } else {
+          // 추가 (Create)
+          await addDoc(userItemsRef, {
+            title,
+            content,
+            category,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          });
+          showToast("새 항목이 추가되었습니다.");
+        }
+        closeModal();
+      } catch (error) {
+        console.error("Save error:", error);
+        showToast(`저장 실패: ${error.message}`, "error");
+      }
+    });
+
+    // 삭제 모달 프롬프트 (CRUD: Delete)
+    window.handleDeletePrompt = function(id) {
+      deleteTargetId.value = id;
+      deleteModal.classList.remove("hidden");
+    };
+
+    // 삭제 실행
+    confirmDeleteBtn.addEventListener("click", async () => {
+      const id = deleteTargetId.value;
+      if (!id || !currentUser) return;
+
+      try {
+        const docRef = doc(db, "user", currentUser.uid, "items", id);
+        await deleteDoc(docRef);
+        deleteModal.classList.add("hidden");
+        showToast("항목이 삭제되었습니다.");
+      } catch (error) {
+        console.error("Delete error:", error);
+        showToast(`삭제 실패: ${error.message}`, "error");
+      }
+    });
+
+    cancelDeleteBtn.addEventListener("click", () => deleteModal.classList.add("hidden"));
+
+    // 이벤트 리스너 등록
+    loginBtn.addEventListener("click", handleLogin);
+    heroLoginBtn.addEventListener("click", handleLogin);
+    logoutBtn.addEventListener("click", handleLogout);
+    openAddModalBtn.addEventListener("click", openAddModal);
+    emptyAddBtn.addEventListener("click", openAddModal);
+    closeModalBtn.addEventListener("click", closeModal);
+    cancelModalBtn.addEventListener("click", closeModal);
+    searchInput.addEventListener("input", renderDataList);
+
+  </script>
+</body>
+</html>
