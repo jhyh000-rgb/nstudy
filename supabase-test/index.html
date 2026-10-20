@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSTUDY ACADEMY | NCS 취업교육 전문 아카데미</title>
+<meta name="description" content="NSTUDY - NCS 필기부터 공기업·대기업 취업까지 체계적으로 준비하는 취업교육 전문 아카데미">
+<style>
+:root{--blue:#1769e0;--navy:#101828;--ink:#18212f;--muted:#687487;--pale:#f5f8fc;--line:#e5eaf0}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:var(--ink);line-height:1.65;background:#fff}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.container{width:min(1200px,92%);margin:auto}
+.topbar{background:var(--navy);color:#fff;font-size:13px;padding:7px 0}.topbar .container{display:flex;justify-content:space-between}
+header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid var(--line)}
+.nav{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;width:185px;height:58px;flex-shrink:0}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+nav{display:flex;align-items:center;gap:20px;font-size:14px;font-weight:700}nav a:hover{color:var(--blue)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.nav-btn,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;padding:11px 17px;font-weight:800}
+.nav-btn{background:var(--blue);color:#fff}.login-btn{background:#eef4ff;color:#1455b8}
+.hero{min-height:590px;display:flex;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(5,18,40,.9),rgba(5,18,40,.53),rgba(5,18,40,.2)),url("https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg") center/cover no-repeat}
+.hero-content{max-width:720px;padding:70px 0}.hero-small{display:inline-block;border:1px solid #ffffff88;padding:6px 14px;border-radius:30px;margin-bottom:22px;font-size:13px}
+.hero h1{font-size:clamp(38px,5vw,66px);line-height:1.15;letter-spacing:-2px;margin-bottom:24px}.hero h1 span{color:#62b0ff}.hero p{font-size:19px;color:#e8eef7;margin-bottom:30px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap}.btn-primary{background:var(--blue);color:#fff}.btn-white{background:#fff;color:var(--ink)}
+.trust{background:var(--pale);padding:25px 0}.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:18px}.trust strong{display:block;font-size:22px}.trust span{font-size:13px;color:var(--muted)}
+section{padding:82px 0}.section-head{text-align:center;max-width:760px;margin:0 auto 42px}.section-label{color:var(--blue);font-size:13px;font-weight:900;letter-spacing:2px;margin-bottom:8px}.section-head h2{font-size:clamp(28px,4vw,40px);letter-spacing:-1.5px;margin-bottom:12px}.section-head p{color:var(--muted)}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}.about-img{height:430px;border-radius:14px;overflow:hidden}.about-img img{width:100%;height:100%;object-fit:cover}.about-text h2{font-size:36px;line-height:1.3;margin:10px 0 20px}.about-text p{color:var(--muted);margin-bottom:20px}.check{list-style:none}.check li{margin:10px 0;font-weight:700}.check li:before{content:"✓";color:var(--blue);font-weight:900;margin-right:10px}
+.programs,.gallery{background:#f6f8fb}.program-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #14285012}.card-img{height:210px}.card-img img{width:100%;height:100%;object-fit:cover}.card-body{padding:24px}.card-body h3{font-size:20px;margin-bottom:8px}.card-body p{color:var(--muted);font-size:14px}
+.class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.class-card{position:relative;height:330px;border-radius:12px;overflow:hidden}.class-card img{width:100%;height:100%;object-fit:cover;transition:.4s}.class-card:hover img{transform:scale(1.05)}.class-overlay{position:absolute;inset:auto 0 0;padding:65px 18px 18px;color:#fff;background:linear-gradient(transparent,#000d)}.class-overlay small{opacity:.8}.class-overlay h3{font-size:19px}
+.process{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.process-item{text-align:center;padding:25px 12px;border:1px solid var(--line);border-radius:10px}.process-number{width:44px;height:44px;margin:0 auto 14px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900}.process-item h3{font-size:16px;margin-bottom:6px}.process-item p{font-size:13px;color:var(--muted)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.gallery-item{height:245px;border-radius:10px;overflow:hidden}.gallery-item img{width:100%;height:100%;object-fit:cover;transition:.3s}.gallery-item:hover img{transform:scale(1.04)}
+.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.system-box{padding:28px;border:1px solid var(--line);border-radius:12px}.system-box h3{font-size:21px;margin-bottom:9px}.system-box p{color:var(--muted)}
+.director{background:var(--navy);color:#fff}.director-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:center}.director-img{height:430px;border-radius:12px;overflow:hidden}.director-img img{width:100%;height:100%;object-fit:cover}.director-text h2{font-size:38px;line-height:1.3;margin:12px 0 22px}.director-text p{color:#c3ccd9;margin-bottom:18px}
+.cta{background:var(--blue);color:#fff;text-align:center}.cta h2{font-size:clamp(28px,4vw,40px);margin-bottom:10px}.cta p{margin-bottom:20px}.phone{font-size:clamp(26px,4vw,36px);font-weight:900}
+footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:35px}.footer-logo-wrap{width:180px;margin-bottom:14px}.footer-logo{width:100%;height:auto}footer h3{color:#fff;margin-bottom:10px}footer p{font-size:13px;margin:4px 0}#adminPageLink{color:#101a2c;font-weight:700}#adminPageLink:hover{color:#243b5e;text-decoration:underline}
+.bank-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 10px 30px #14285008}
+
+
+
+.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:13px;font-weight:800}.field input,.field textarea,.field select{width:100%;border:1px solid #ccd5e2;border-radius:7px;padding:10px;background:#fff}.field textarea{min-height:130px;resize:vertical}.field.full{grid-column:1/-1}.form-actions{display:flex;gap:8px;flex-wrap:wrap}.btn-secondary{background:#edf1f6;color:#263548}.hidden{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:#10182899;z-index:2000;display:grid;place-items:center;padding:18px}.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:25px;box-shadow:0 20px 60px #0003}@media(max-width:600px){.modal-backdrop{padding:10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}.modal{padding:18px;max-height:94dvh;border-radius:12px}.modal-head h2{font-size:21px}.field input,.field select,.field textarea{font-size:16px}.modal form .btn{width:100%;min-height:44px}.login-links button{min-height:36px}.modal-menu button{min-height:42px}}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:24px}.close-btn{border:0;background:#edf1f6;border-radius:50%;width:34px;height:34px;font-size:20px}.naver-login-box{margin:4px 0 18px;text-align:center;font-family:"Malgun Gothic",Arial,sans-serif}.naver-login-caption{font-size:14px;color:#555;margin:0 0 14px}.naver-login-button{display:flex;width:100%;min-height:56px;align-items:center;justify-content:center;gap:7px;border:0;border-radius:5px;background:#03a857;color:#fff;font-size:20px;font-weight:800;letter-spacing:-.4px}.naver-login-button:hover{background:#029b4f}.naver-login-button .naver-word{font-weight:900}.login-links{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px;color:#777;font-size:14px}.login-links button{border:0;background:transparent;color:inherit;padding:2px 0;cursor:pointer}.login-links button:hover{text-decoration:underline;color:#333}.login-links .separator{color:#c5c5c5}.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#999;font-size:12px}.login-divider:before,.login-divider:after{content:"";height:1px;background:#e5eaf0;flex:1}.modal-menu{display:flex;gap:8px;margin-bottom:18px}.modal-menu button{flex:1;border:1px solid var(--line);background:#f7f9fc;padding:9px;border-radius:7px;font-weight:800}.modal-menu button.active{background:#eaf2ff;color:#1455b8;border-color:#b5cffb}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:3000;background:#172235;color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 25px #0003;max-width:90%;text-align:center}
+.user-status{font-size:12px;color:var(--muted);margin-right:4px}
+.admin-table-wrap{overflow-x:auto}.admin-table{width:100%;border-collapse:collapse;font-size:14px}.admin-table th,.admin-table td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;white-space:nowrap}.admin-table th{background:#f5f8fc}.admin-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}.admin-notice{padding:14px;background:#f5f8fc;border-radius:8px;margin-bottom:14px}
+@media(max-width:1050px){.nav{flex-wrap:wrap;padding:10px 0}.nav nav{order:3;width:100%;justify-content:center;flex-wrap:wrap;padding-bottom:8px}.about,.director-grid{gap:30px}.class-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.topbar{display:none}.nav{min-height:65px}.logo{width:135px;height:45px}nav{gap:12px;font-size:13px}.nav-actions{margin-left:auto}.nav-btn,.btn{padding:9px 12px;font-size:13px}.hero{min-height:540px}.hero h1{font-size:39px;letter-spacing:-1.5px}.hero p{font-size:16px}.trust-grid{grid-template-columns:1fr 1fr}section{padding:62px 0}.about,.director-grid,.system-grid{grid-template-columns:1fr}.about-img,.director-img{height:300px}.about-text h2,.director-text h2{font-size:30px}.program-grid,.class-grid,.gallery-grid{grid-template-columns:1fr}.class-card{height:300px}.process{grid-template-columns:1fr 1fr}.gallery-item{height:220px}.footer-grid{grid-template-columns:1fr}.bank-shell{padding:15px}.post-row{padding:12px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="container"><span>NSTUDY ACADEMY</span><span>취업교육 전문 아카데미</span></div></div>
+<header><div class="container nav">
+<a href="#home" class="logo" aria-label="NSTUDY 홈"><img src="./images/logo01.png" alt="NSTUDY 로고"></a>
+<nav aria-label="주 메뉴">
+<a href="#about">NSTUDY</a><a href="#program">교육과정</a><a href="#classroom">강의실</a><a href="#system">교육시스템</a><a href="#gallery">학생갤러리</a><a href="./02-bank.html">문제은행</a>
+</nav>
+<div class="nav-actions"><span id="userStatus" class="user-status"></span><a class="nav-btn login-btn" id="openAccount" href="./001-login.html?return=index.html">로그인</a><a href="#contact" class="nav-btn">상담문의</a></div>
+</div></header>
+<main>
+<section class="hero" id="home"><div class="container"><div class="hero-content">
+<div class="hero-small">BUSAN · NCS · CAREER ACADEMY</div>
+<h1>우리의 모든 노력이<br><span>취업의 결과</span>로 연결됩니다.</h1>
+<p>NCS 필기부터 면접, 공기업·대기업 취업까지<br>체계적인 학습 시스템으로 준비하세요.</p>
+<div class="hero-buttons"><a href="#program" class="btn btn-primary">교육과정 보기</a><a href="#contact" class="btn btn-white">상담 문의</a></div>
+</div></div></section>
+<div class="trust"><div class="container trust-grid"><div><strong>NCS</strong><span>필기시험 대비</span></div><div><strong>공기업</strong><span>취업 준비</span></div><div><strong>대기업</strong><span>취업 준비</span></div><div><strong>CAREER</strong><span>취업 전략</span></div></div></div>
+<section id="about"><div class="container about"><div class="about-img"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="학생 학습 모습" loading="lazy"></div><div class="about-text"><div class="section-label">NSTUDY ACADEMY</div><h2>단순한 자격증 공부가 아닌<br>취업을 위한 교육</h2><p>NSTUDY는 학생이 학교에서 쌓은 전공과 실무 역량을 취업 준비와 연결할 수 있도록 학습 방향과 준비 과정을 체계적으로 구성하는 교육 공간을 지향합니다.</p><ul class="check"><li>NCS 필기시험 준비</li><li>공기업 취업 준비</li><li>대기업 취업 준비</li><li>전공·실무 역량 기반 취업 전략</li></ul></div></div></section>
+<section id="program" class="programs"><div class="container"><div class="section-head"><div class="section-label">PROGRAM</div><h2>취업 준비를 단계별로</h2><p>학생의 목표에 맞춰 필요한 학습 영역을 체계적으로 구성합니다.</p></div><div class="program-grid">
+<article class="card"><div class="card-img"><img src="https://edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="학생 학습" loading="lazy"></div><div class="card-body"><h3>NCS 필기 집중반</h3><p>NCS 직업기초능력평가를 중심으로 문제 유형과 풀이 전략을 학습합니다.</p></div></article>
+<article class="card"><div class="card-img"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="교실 수업" loading="lazy"></div><div class="card-body"><h3>공기업 취업반</h3><p>필기부터 자기소개서와 면접까지 취업 준비 과정을 단계적으로 학습합니다.</p></div></article>
+<article class="card"><div class="card-img"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="시험 준비" loading="lazy"></div><div class="card-body"><h3>대기업 취업반</h3><p>기업 채용 과정에 맞춰 필기와 면접 등 취업 준비에 필요한 영역을 학습합니다.</p></div></article>
+</div></div></section>
+<section id="classroom"><div class="container"><div class="section-head"><div class="section-label">CLASSROOM</div><h2>집중할 수 있는 학습 공간</h2><p>깔끔하고 집중도 높은 교육 공간 콘셉트입니다.</p></div><div class="class-grid">
+<div class="class-card"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="집중 학습 강의실" loading="lazy"><div class="class-overlay"><small>CLASS 01</small><h3>집중 학습 강의실</h3></div></div>
+<div class="class-card"><img src="https://cdn.edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="자기주도 학습" loading="lazy"><div class="class-overlay"><small>CLASS 02</small><h3>자기주도 학습 공간</h3></div></div>
+<div class="class-card"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="실전 문제풀이" loading="lazy"><div class="class-overlay"><small>CLASS 03</small><h3>실전 문제풀이 강의실</h3></div></div>
+<div class="class-card"><img src="https://image.fnnews.com/resource/media/image/2025/11/09/202511091820348792_e.jpg" alt="취업시험 대비" loading="lazy"><div class="class-overlay"><small>CLASS 04</small><h3>취업시험 대비 공간</h3></div></div>
+</div></div></section>
+<section><div class="container"><div class="section-head"><div class="section-label">EDUCATION PROCESS</div><h2>취업 준비의 전체 흐름</h2></div><div class="process">
+<div class="process-item"><div class="process-number">01</div><h3>목표 설정</h3><p>희망 분야와 취업 방향을 정리합니다.</p></div><div class="process-item"><div class="process-number">02</div><h3>기초 학습</h3><p>NCS와 직무 기초를 학습합니다.</p></div><div class="process-item"><div class="process-number">03</div><h3>실전 문제</h3><p>다양한 유형의 문제를 풀어봅니다.</p></div><div class="process-item"><div class="process-number">04</div><h3>취업 준비</h3><p>지원서와 면접 준비를 진행합니다.</p></div><div class="process-item"><div class="process-number">05</div><h3>최종 준비</h3><p>실전 상황에 맞춰 준비합니다.</p></div>
+</div></div></section>
+<section id="gallery" class="gallery"><div class="container"><div class="section-head"><div class="section-label">STUDENT GALLERY</div><h2>공부하는 학생들의 모습</h2><p>NSTUDY가 지향하는 집중 학습 환경을 보여주는 이미지입니다.</p></div><div class="gallery-grid">
+<div class="gallery-item"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="학생 공부" loading="lazy"></div><div class="gallery-item"><img src="https://cdn.edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="학생 학원 수업" loading="lazy"></div><div class="gallery-item"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="학생 교실" loading="lazy"></div><div class="gallery-item"><img src="https://image.fnnews.com/resource/media/image/2025/11/09/202511091820348792_e.jpg" alt="학생 자습" loading="lazy"></div><div class="gallery-item"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="시험 공부" loading="lazy"></div><div class="gallery-item"><img src="https://cdn-web.ruangguru.com/landing-pages/assets/hs/yaja.jpg" alt="자기주도 학습" loading="lazy"></div>
+</div></div></section>
+<section id="system"><div class="container"><div class="section-head"><div class="section-label">NSTUDY SYSTEM</div><h2>체계적인 교육 시스템</h2><p>학습 방향과 실전 준비를 함께 구성합니다.</p></div><div class="system-grid">
+<div class="system-box"><h3>01. NCS 문제풀이</h3><p>NCS 유형별 문제를 단계적으로 학습하고 실전 문제풀이 능력을 키울 수 있도록 구성합니다.</p></div><div class="system-box"><h3>02. 취업 전략</h3><p>목표 기업과 직무를 정하고 필요한 준비 영역을 체계적으로 확인합니다.</p></div><div class="system-box"><h3>03. 자기소개서</h3><p>자신의 전공과 경험을 취업 준비 과정에서 효과적으로 표현할 수 있도록 준비합니다.</p></div><div class="system-box"><h3>04. 면접 준비</h3><p>예상 질문과 답변을 준비하고 실제 면접 상황을 고려한 연습을 진행합니다.</p></div>
+</div></div></section>
+<section class="director"><div class="container director-grid"><div class="director-img"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="학생 학습 모습" loading="lazy"></div><div class="director-text"><div class="section-label">NSTUDY EDUCATION</div><h2>학생의 현재 실력을<br>취업 준비와 연결합니다.</h2><p>학교에서 배운 전공과 실무 역량은 취업을 준비하는 중요한 기반이 될 수 있습니다.</p><p>NSTUDY는 학생들이 자신의 역량을 파악하고 NCS 필기와 취업 준비를 단계적으로 진행할 수 있도록 교육 과정을 구성합니다.</p><a href="#contact" class="btn btn-primary">상담 문의하기</a></div></div></section>
+
+<section id="admin-page" class="hidden"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p id="adminIntro" class="small-note" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
+<section id="contact" class="cta"><div class="container"><h2>NSTUDY와 취업 준비를 시작하세요.</h2><p>교육과정 및 상담 문의</p><a class="phone" href="tel:01093375509">010-9337-5509</a></div></section>
+</main>
+<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="./images/logo01.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="./02-bank.html">문제은행</a></p></div></div></footer>
+
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script type="module" src="./nstudy-app.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>문제은행 | NSTUDY ACADEMY</title>
+<meta content="NSTUDY ACADEMY 문제은행: NCS 직업기초능력, 자기소개서, 면접, TOEIC 학습자료와 게시글" name="description"/>
+<style>
+:root{--blue:#1769e0;--navy:#101828;--ink:#18212f;--muted:#687487;--pale:#f5f8fc;--line:#e5eaf0}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:var(--ink);line-height:1.65;background:#fff}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.container{width:min(1200px,92%);margin:auto}
+.topbar{background:var(--navy);color:#fff;font-size:13px;padding:7px 0}.topbar .container{display:flex;justify-content:space-between}
+header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid var(--line)}
+.nav{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;width:185px;height:58px;flex-shrink:0}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+nav{display:flex;align-items:center;gap:20px;font-size:14px;font-weight:700}nav a:hover{color:var(--blue)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.nav-btn,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;padding:11px 17px;font-weight:800}
+.nav-btn{background:var(--blue);color:#fff}.login-btn{background:#eef4ff;color:#1455b8}
+.hero{min-height:590px;display:flex;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(5,18,40,.9),rgba(5,18,40,.53),rgba(5,18,40,.2)),url("https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg") center/cover no-repeat}
+.hero-content{max-width:720px;padding:70px 0}.hero-small{display:inline-block;border:1px solid #ffffff88;padding:6px 14px;border-radius:30px;margin-bottom:22px;font-size:13px}
+.hero h1{font-size:clamp(38px,5vw,66px);line-height:1.15;letter-spacing:-2px;margin-bottom:24px}.hero h1 span{color:#62b0ff}.hero p{font-size:19px;color:#e8eef7;margin-bottom:30px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap}.btn-primary{background:var(--blue);color:#fff}.btn-white{background:#fff;color:var(--ink)}
+.trust{background:var(--pale);padding:25px 0}.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:18px}.trust strong{display:block;font-size:22px}.trust span{font-size:13px;color:var(--muted)}
+section{padding:82px 0}.section-head{text-align:center;max-width:760px;margin:0 auto 42px}.section-label{color:var(--blue);font-size:13px;font-weight:900;letter-spacing:2px;margin-bottom:8px}.section-head h2{font-size:clamp(28px,4vw,40px);letter-spacing:-1.5px;margin-bottom:12px}.section-head p{color:var(--muted)}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}.about-img{height:430px;border-radius:14px;overflow:hidden}.about-img img{width:100%;height:100%;object-fit:cover}.about-text h2{font-size:36px;line-height:1.3;margin:10px 0 20px}.about-text p{color:var(--muted);margin-bottom:20px}.check{list-style:none}.check li{margin:10px 0;font-weight:700}.check li:before{content:"✓";color:var(--blue);font-weight:900;margin-right:10px}
+.programs,.gallery{background:#f6f8fb}.program-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #14285012}.card-img{height:210px}.card-img img{width:100%;height:100%;object-fit:cover}.card-body{padding:24px}.card-body h3{font-size:20px;margin-bottom:8px}.card-body p{color:var(--muted);font-size:14px}
+.class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.class-card{position:relative;height:330px;border-radius:12px;overflow:hidden}.class-card img{width:100%;height:100%;object-fit:cover;transition:.4s}.class-card:hover img{transform:scale(1.05)}.class-overlay{position:absolute;inset:auto 0 0;padding:65px 18px 18px;color:#fff;background:linear-gradient(transparent,#000d)}.class-overlay small{opacity:.8}.class-overlay h3{font-size:19px}
+.process{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.process-item{text-align:center;padding:25px 12px;border:1px solid var(--line);border-radius:10px}.process-number{width:44px;height:44px;margin:0 auto 14px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900}.process-item h3{font-size:16px;margin-bottom:6px}.process-item p{font-size:13px;color:var(--muted)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.gallery-item{height:245px;border-radius:10px;overflow:hidden}.gallery-item img{width:100%;height:100%;object-fit:cover;transition:.3s}.gallery-item:hover img{transform:scale(1.04)}
+.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.system-box{padding:28px;border:1px solid var(--line);border-radius:12px}.system-box h3{font-size:21px;margin-bottom:9px}.system-box p{color:var(--muted)}
+.director{background:var(--navy);color:#fff}.director-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:center}.director-img{height:430px;border-radius:12px;overflow:hidden}.director-img img{width:100%;height:100%;object-fit:cover}.director-text h2{font-size:38px;line-height:1.3;margin:12px 0 22px}.director-text p{color:#c3ccd9;margin-bottom:18px}
+.cta{background:var(--blue);color:#fff;text-align:center}.cta h2{font-size:clamp(28px,4vw,40px);margin-bottom:10px}.cta p{margin-bottom:20px}.phone{font-size:clamp(26px,4vw,36px);font-weight:900}
+footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:35px}.footer-logo-wrap{width:180px;margin-bottom:14px}.footer-logo{width:100%;height:auto}footer h3{color:#fff;margin-bottom:10px}footer p{font-size:13px;margin:4px 0}#adminPageLink{color:#101a2c;font-weight:700}#adminPageLink:hover{color:#243b5e;text-decoration:underline}
+.problem-bank{background:#f7f9fc}.bank-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 10px 30px #14285008}
+.category-group{margin:4px 0 26px}.category-group h3{font-size:17px;margin:0 0 12px;color:#344054}.category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.category-card{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:92px;text-align:left;padding:15px;border:1px solid var(--card-border,#dce4ef);border-radius:11px;background:var(--card-bg,#fff);color:var(--card-ink,#263548);transition:border-color .15s,background .15s,transform .15s}.category-card:hover{border-color:#9bbdf7;transform:translateY(-2px)}.category-card.active{background:var(--card-bg,#edf4ff);border:2px solid var(--card-ink,var(--blue));padding:14px;color:var(--card-ink,#124fae);box-shadow:inset 0 0 0 1px #ffffffaa}.category-card strong{font-size:15px;line-height:1.4}.category-card small{font-size:12px;color:var(--muted);margin-top:5px}.category-count{display:inline-flex;align-items:center;justify-content:center;margin-top:8px;padding:2px 9px;min-width:42px;border-radius:999px;background:var(--card-ink,#1769e0);color:#fff;font-size:12px;font-weight:900;line-height:1.6;white-space:nowrap}.category-card.active .category-count{box-shadow:0 1px 3px #0001}.subcategory-panel{margin:0 0 24px;padding:18px;border:1px solid #dbe5f2;border-radius:12px;background:#f8fbff}.subcategory-panel h4{font-size:16px;margin-bottom:4px}.subcategory-panel p{font-size:13px;color:var(--muted);margin-bottom:12px}.subcategory-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.subcategory-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;padding:11px 12px;border:1px solid #d9e2ef;border-radius:8px;background:#fff;color:#24364b;font-size:13px;font-weight:700}.subcategory-btn.active{border-color:#1769e0;background:#eaf2ff;color:#1455b8}.subcategory-count{flex-shrink:0;display:inline-flex;justify-content:center;min-width:38px;padding:2px 7px;border-radius:20px;background:#edf1f6;color:#344054;font-size:12px;font-weight:900}.subcategory-btn.active .subcategory-count{background:#1769e0;color:#fff}.career-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.print-post-btn{margin-left:auto}.post-view .post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.post-view .post-actions button{min-height:42px}
+.bank-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.bank-toolbar h3{font-size:22px}.small-note{font-size:13px;color:var(--muted)}
+.post-list{display:grid;gap:10px}.post-row{width:100%;text-align:left;border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:15px}.post-row:hover{border-color:#9bbdf7;background:#fbfdff}.post-row strong{display:block}.post-row small{color:var(--muted)}.lock-label{font-size:12px;color:#a05b00;background:#fff4dc;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.post-view{margin-top:20px;border:1px solid var(--line);border-radius:10px;padding:24px;background:#fff}.post-view h3{font-size:25px;margin-bottom:8px}.post-body{white-space:pre-wrap;margin:20px 0;overflow-wrap:anywhere}.post-media{display:grid;gap:12px}.post-media img{max-width:100%;max-height:520px;object-fit:contain;border:1px solid var(--line);border-radius:8px}.post-media a{color:var(--blue);text-decoration:underline;overflow-wrap:anywhere}
+.editor{margin-top:25px;padding:22px;border:1px dashed #b7c7dd;border-radius:10px;background:#fbfcff}.editor h3{margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:13px;font-weight:800}.field input,.field textarea,.field select{width:100%;border:1px solid #ccd5e2;border-radius:7px;padding:10px;background:#fff}.field textarea{min-height:130px;resize:vertical}.field.full{grid-column:1/-1}.form-actions{display:flex;gap:8px;flex-wrap:wrap}.btn-secondary{background:#edf1f6;color:#263548}.hidden{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:#10182899;z-index:2000;display:grid;place-items:center;padding:18px}.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:25px;box-shadow:0 20px 60px #0003}@media(max-width:900px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.subcategory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.category-grid,.career-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.category-card{min-height:82px;padding:12px}.category-card.active{padding:11px}.subcategory-grid{grid-template-columns:1fr}.subcategory-panel{padding:13px}.category-card strong{font-size:14px}.modal-backdrop{padding:10px;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}.modal{padding:18px;max-height:94dvh;border-radius:12px}.modal-head h2{font-size:21px}.field input,.field select,.field textarea{font-size:16px}.modal form .btn{width:100%;min-height:44px}.login-links button{min-height:36px}.modal-menu button{min-height:42px}}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:24px}.close-btn{border:0;background:#edf1f6;border-radius:50%;width:34px;height:34px;font-size:20px}.naver-login-box{margin:4px 0 18px;text-align:center;font-family:"Malgun Gothic",Arial,sans-serif}.naver-login-caption{font-size:14px;color:#555;margin:0 0 14px}.naver-login-button{display:flex;width:100%;min-height:56px;align-items:center;justify-content:center;gap:7px;border:0;border-radius:5px;background:#03a857;color:#fff;font-size:20px;font-weight:800;letter-spacing:-.4px}.naver-login-button:hover{background:#029b4f}.naver-login-button .naver-word{font-weight:900}.login-links{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px;color:#777;font-size:14px}.login-links button{border:0;background:transparent;color:inherit;padding:2px 0;cursor:pointer}.login-links button:hover{text-decoration:underline;color:#333}.login-links .separator{color:#c5c5c5}.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#999;font-size:12px}.login-divider:before,.login-divider:after{content:"";height:1px;background:#e5eaf0;flex:1}.modal-menu{display:flex;gap:8px;margin-bottom:18px}.modal-menu button{flex:1;border:1px solid var(--line);background:#f7f9fc;padding:9px;border-radius:7px;font-weight:800}.modal-menu button.active{background:#eaf2ff;color:#1455b8;border-color:#b5cffb}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:3000;background:#172235;color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 25px #0003;max-width:90%;text-align:center}
+.user-status{font-size:12px;color:var(--muted);margin-right:4px}
+.admin-table-wrap{overflow-x:auto}.admin-table{width:100%;border-collapse:collapse;font-size:14px}.admin-table th,.admin-table td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;white-space:nowrap}.admin-table th{background:#f5f8fc}.admin-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}.admin-notice{padding:14px;background:#f5f8fc;border-radius:8px;margin-bottom:14px}
+@media(max-width:1050px){.nav{flex-wrap:wrap;padding:10px 0}.nav nav{order:3;width:100%;justify-content:center;flex-wrap:wrap;padding-bottom:8px}.about,.director-grid{gap:30px}.class-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.topbar{display:none}.nav{min-height:65px}.logo{width:135px;height:45px}nav{gap:12px;font-size:13px}.nav-actions{margin-left:auto}.nav-btn,.btn{padding:9px 12px;font-size:13px}.hero{min-height:540px}.hero h1{font-size:39px;letter-spacing:-1.5px}.hero p{font-size:16px}.trust-grid{grid-template-columns:1fr 1fr}section{padding:62px 0}.about,.director-grid,.system-grid{grid-template-columns:1fr}.about-img,.director-img{height:300px}.about-text h2,.director-text h2{font-size:30px}.program-grid,.class-grid,.gallery-grid{grid-template-columns:1fr}.class-card{height:300px}.process{grid-template-columns:1fr 1fr}.gallery-item{height:220px}.footer-grid{grid-template-columns:1fr}.bank-shell{padding:15px}.post-row{padding:12px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.post-view{padding:16px}}
+
+@page{size:A3 portrait;margin:14mm}
+@media print{
+ html,body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body.printing *{visibility:hidden!important}
+ body.printing #postView,body.printing #postView *{visibility:visible!important}
+ body.printing #postView{display:block!important;position:fixed!important;left:0!important;top:0!important;width:100%!important;max-height:none!important;overflow:visible!important;border:0!important;border-radius:0!important;padding:0!important;margin:0!important;box-shadow:none!important;background:#fff!important;font-size:14pt!important}
+ body.printing #postView h3{font-size:24pt!important;line-height:1.3!important;margin-bottom:8mm!important;color:#111!important}
+ body.printing #postView .post-body{font-size:13pt!important;line-height:1.8!important;white-space:pre-wrap!important;overflow-wrap:anywhere!important}
+ body.printing #postView .post-actions,body.printing #postView .no-print{display:none!important}
+ body.printing #postView .post-media img{max-width:100%!important;max-height:220mm!important;object-fit:contain!important;border:0!important;break-inside:avoid}
+ body.printing #postView a{color:#111!important;text-decoration:none!important}
+}
+
+
+/* 독립 문제은행 페이지에서는 홈페이지 본문을 숨기고 문제은행만 표시합니다. */
+body.bank-page main > section:not(#problem-bank):not(#admin-page){display:none!important}
+body.bank-page .topbar{display:block}
+body.bank-page .problem-bank{display:block!important;min-height:70vh;padding-top:48px}
+body.bank-page .nav{gap:12px}
+body.bank-page nav{flex-wrap:wrap}
+@media(max-width:900px){body.bank-page .nav{flex-wrap:wrap;padding:10px 0}body.bank-page nav{order:3;width:100%;justify-content:center;gap:12px;flex-wrap:wrap}}
+</style>
+</head>
+<body class="bank-page">
+
+<header><div class="container nav">
+<a aria-label="NSTUDY 홈" class="logo" href="./index.html#home"><img alt="NSTUDY 로고" src="./images/logo01.png"/></a>
+
+<div class="nav-actions"><span class="user-status" id="userStatus"></span><a class="nav-btn login-btn" href="./001-login.html?return=02-bank.html" id="openAccount">로그인</a></div>
+</div></header>
+<main>
+
+
+
+
+
+
+
+
+
+<section class="problem-bank" id="problem-bank"><div class="container"><div class="section-head"><div class="section-label">NSTUDY STUDY ARCHIVE</div><h2>NCS 문제은행</h2><p>과목별 학습 자료와 게시글을 확인하세요. 비회원은 각 과목의 최신 게시글 3개를 열람할 수 있습니다.</p></div>
+<div class="bank-shell">
+<div class="category-group"><h3>① NCS 직업기초능력 · 10개 영역</h3><div aria-label="NCS 직업기초능력 영역" class="category-grid" id="ncsCategoryGrid" role="group">
+<button class="category-card" data-category="의사소통능력"><strong>의사소통능력</strong><small>문서 이해 · 표현</small></button>
+<button class="category-card" data-category="수리능력"><strong>수리능력</strong><small>계산 · 통계 · 도표</small></button>
+<button class="category-card" data-category="문제해결능력"><strong>문제해결능력</strong><small>사고 · 대안 도출</small></button>
+<button class="category-card" data-category="자기개발능력"><strong>자기개발능력</strong><small>자기관리 · 경력개발</small></button>
+<button class="category-card" data-category="자원관리능력"><strong>자원관리능력</strong><small>시간 · 예산 · 자원</small></button>
+<button class="category-card" data-category="대인관계능력"><strong>대인관계능력</strong><small>협업 · 갈등관리</small></button>
+<button class="category-card" data-category="정보능력"><strong>정보능력</strong><small>컴퓨터 · 정보처리</small></button>
+<button class="category-card" data-category="기술능력"><strong>기술능력</strong><small>기술 이해 · 적용</small></button>
+<button class="category-card" data-category="조직이해능력"><strong>조직이해능력</strong><small>조직 · 업무 이해</small></button>
+<button class="category-card" data-category="직업윤리"><strong>직업윤리</strong><small>근로 · 공동체 윤리</small></button>
+</div></div>
+<div class="category-group"><h3>② 취업 실전 준비 · 3개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
+<button class="category-card" data-category="자기소개서"><strong>자기소개서</strong><small>경험 정리 · 문항별 작성</small></button>
+<button class="category-card" data-category="면접"><strong>면접</strong><small>예상 질문 · 답변 연습</small></button>
+<button class="category-card active" data-category="TOEIC"><strong>TOEIC</strong><small>LC · RC · 실전 연습</small></button>
+</div></div>
+<div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>각 세부 능력에 등록된 게시글 수입니다. 세부 능력을 누르면 해당 게시글만 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
+<div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
+<div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
+<div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>자기소개서</option><option>면접</option><option>TOEIC</option></select></div>
+<div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 선택</option></select></div>
+<div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
+<div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
+<div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
+<div class="field"><label for="postImage">이미지 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
+</div><p class="small-note">첨부파일은 Supabase 저장소에 저장됩니다. 파일당 최대 10MB입니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
+<div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div>
+</div></div></section>
+<section class="hidden" id="admin-page"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p class="small-note" id="adminIntro" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
+
+</main>
+
+<div aria-labelledby="accountTitle" aria-modal="true" class="modal-backdrop hidden" id="accountBackdrop" role="dialog"><div class="modal"><div class="modal-head"><h2 id="accountTitle">회원 메뉴</h2><button aria-label="닫기" class="close-btn" id="closeAccount">×</button></div><div class="modal-menu"><button class="active" data-account-tab="login">로그인</button><button data-account-tab="register">회원가입</button><button data-account-tab="logout">로그아웃</button></div>
+<div id="loginPanel">
+<div class="naver-login-box"><p class="naver-login-caption">NSTUDY 계정으로 편리하게 이용하세요</p><button class="naver-login-button" id="nstudyLoginButton" type="button"><span class="naver-word">NSTUDY</span><span>로그인</span></button><div class="login-links"><button id="findIdButton" type="button">아이디 찾기</button><span class="separator">|</span><button id="findPwButton" type="button">비밀번호 찾기</button><span class="separator">|</span><button id="goRegisterButton" type="button">회원가입</button></div></div>
+<div class="login-divider">또는 NSTUDY 계정으로 로그인</div>
+<form id="loginForm"><div class="field"><label for="loginId">ID</label><input autocapitalize="none" autocomplete="username" autocorrect="off" enterkeyhint="next" id="loginId" inputmode="text" name="username" required="" spellcheck="false" type="text"/></div><div class="field"><label for="loginPw">PW</label><input autocomplete="current-password" enterkeyhint="go" id="loginPw" name="password" required="" type="password"/></div><button class="btn btn-primary" type="submit">로그인</button></form></div>
+<form class="hidden" id="registerForm"><div class="form-grid">
+<div class="field"><label for="regId">ID</label><input autocapitalize="none" autocomplete="username" autocorrect="off" id="regId" minlength="4" required="" spellcheck="false"/></div><div class="field"><label for="regPw">PW</label><input autocomplete="new-password" id="regPw" minlength="6" required="" type="password"/></div>
+<div class="field"><label for="regType">회원 유형</label><select id="regType" required=""><option value="학생">학생</option><option value="학부모">학부모</option><option value="강사">강사</option></select></div><div class="field"><label for="regName">성명</label><input id="regName" required=""/></div><div class="field"><label for="regSchool">학교</label><input id="regSchool" required=""/></div>
+<div class="field"><label for="regGrade">학년</label><input id="regGrade" placeholder="예: 고등학교 2학년" required=""/></div><div class="field"><label for="regPhone">전화번호</label><input id="regPhone" required="" type="tel"/></div>
+<div class="field full"><label for="regAddress">주소</label><input autocomplete="street-address" id="regAddress" required=""/></div><div class="field full"><label for="regEmail">이메일</label><input autocomplete="email" id="regEmail" required="" type="email"/></div>
+</div><button class="btn btn-primary" type="submit">회원가입 완료</button></form>
+<div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
+</div></div>
+<div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
+<script type="module" src="./nstudy-app.js"></script>
+</body>
+</html>
