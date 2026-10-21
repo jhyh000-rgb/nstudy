@@ -7,8 +7,44 @@ const say=s=>{let t=$('toast');if(!t){alert(s);return}t.textContent=s;t.classLis
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=u;profile=null;if(user){const {data,error}=await db.from('nstudy_profiles').select('*').eq('id',user.id).maybeSingle();if(error)console.error(error);profile=data;if(profile?.blocked){await db.auth.signOut();user=null;profile=null;say('로그인이 제한된 계정입니다.')}}renderHeader();if($('postList'))await refreshPosts();if($('admin-page')&&!$('admin-page').classList.contains('hidden'))await renderMembers()}
 function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
-async function refreshPosts(){let query=user?db.from('nstudy_posts').select('*'):db.from('nstudy_public_post_previews').select('*');let {data,error}=await query.order('created_at',{ascending:false});if(error){say('게시글 조회 실패: '+error.message);return}posts=data||[];renderPosts()}
-function renderPosts(){const cards=document.querySelectorAll('.category-card');cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});if($('categoryTitle'))$('categoryTitle').textContent=category+' 학습 자료';const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');if(panel&&grid){grid.innerHTML='';const skills=[...new Set(posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean))];panel.classList.toggle('hidden',!skills.length);skills.forEach(skill=>{const b=document.createElement('button');b.className='subcategory-btn'+(skill===subcategory?' active':'');b.textContent=skill+' · '+String(posts.filter(p=>p.category===category&&p.subcategory===skill).length).padStart(2,'0')+'개';b.onclick=()=>{subcategory=subcategory===skill?'':skill;page=1;renderPosts()};grid.appendChild(b)})}const list=$('postList');if(!list)return;list.innerHTML='';const items=posts.filter(p=>p.category===category&&(!subcategory||p.subcategory===subcategory));items.slice((page-1)*10,page*10).forEach((p,i)=>{const b=document.createElement('button');b.className='post-row';b.innerHTML='<span><strong>'+esc(p.title)+'</strong><small>'+esc(p.post_date||'')+' · '+esc((p.body||'').slice(0,55))+'</small></span><span class="small-note">'+String(i+1).padStart(2,'0')+' · 게시글 보기</span>';b.onclick=()=>openPost(p);list.appendChild(b)});if(!items.length)list.innerHTML='<p class="small-note">등록된 게시글이 없습니다.</p>';if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}if($('postView'))$('postView').classList.add('hidden')}
+const noticeFirst=(a,b)=>Number(!!b.is_notice)-Number(!!a.is_notice)||new Date(b.created_at)-new Date(a.created_at)||String(a.id).localeCompare(String(b.id));
+async function refreshPosts(){let query=user?db.from('nstudy_posts').select('*'):db.from('nstudy_public_post_previews').select('*');let {data,error}=await query.order('created_at',{ascending:false});if(error){say('게시글 조회 실패: '+error.message);return}posts=(data||[]).sort(noticeFirst);renderPosts()}
+async function toggleNotice(p,checked,cb){
+ if(!admin())return;
+ const count=posts.filter(x=>x.category===p.category&&x.is_notice&&x.id!==p.id).length;
+ if(checked&&count>=2){cb.checked=false;return say('이 과목에는 공지글을 최대 2개까지 설정할 수 있습니다.')}
+ cb.disabled=true;
+ const {error}=await db.from('nstudy_posts').update({is_notice:checked}).eq('id',p.id);
+ if(error){cb.checked=!checked;say('공지 설정 실패: '+error.message)}else{await refreshPosts();say(checked?'공지로 설정되었습니다.':'공지 설정이 해제되었습니다.')}
+ cb.disabled=false;
+}
+function renderPosts(){
+ const cards=document.querySelectorAll('.category-card');
+ cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
+ if($('categoryTitle'))$('categoryTitle').textContent=category+' 학습 자료';
+ const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
+ if(panel&&grid){grid.innerHTML='';const skills=[...new Set(posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean))];panel.classList.toggle('hidden',!skills.length);skills.forEach(skill=>{const b=document.createElement('button');b.className='subcategory-btn'+(skill===subcategory?' active':'');b.textContent=skill+' · '+String(posts.filter(p=>p.category===category&&p.subcategory===skill).length).padStart(2,'0')+'개';b.onclick=()=>{subcategory=subcategory===skill?'':skill;page=1;renderPosts()};grid.appendChild(b)})}
+ const list=$('postList');if(!list)return;list.innerHTML='';
+ const items=posts.filter(p=>p.category===category&&(!subcategory||p.subcategory===subcategory)).sort(noticeFirst);
+ items.slice((page-1)*10,page*10).forEach((p,i)=>{
+  const row=document.createElement('div');row.className='post-row';row.style.cssText='display:flex;align-items:center;gap:10px';
+  const view=document.createElement('button');view.type='button';view.style.cssText='flex:1;min-width:0;text-align:left;background:transparent;border:0;color:inherit;cursor:pointer';
+  const title=document.createElement('span');title.style.cssText='display:block;font-weight:700';
+  if(p.is_notice){const tag=document.createElement('span');tag.textContent='[공지] ';tag.style.cssText='color:#b45309;font-weight:800';title.appendChild(tag)}
+  title.appendChild(document.createTextNode(p.title||''));
+  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=(p.post_date||'')+' · '+(p.body||'').slice(0,55);
+  view.append(title,desc);view.onclick=()=>openPost(p);row.appendChild(view);
+  if(admin()){
+   const label=document.createElement('label');label.style.cssText='display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;cursor:pointer';
+   const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!p.is_notice;cb.setAttribute('aria-label',p.title+' 공지 설정');cb.onchange=()=>toggleNotice(p,cb.checked,cb);
+   label.append(cb,document.createTextNode('공지'));row.appendChild(label);
+  }
+  list.appendChild(row);
+ });
+ if(!items.length)list.innerHTML='<p class="small-note">등록된 게시글이 없습니다.</p>';
+ if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}
+ if($('postView'))$('postView').classList.add('hidden');
+}
 async function openPost(p){
  const v=$('postView');if(!v)return;
  v.replaceChildren();
