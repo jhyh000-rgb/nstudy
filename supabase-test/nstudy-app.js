@@ -79,7 +79,7 @@ async function openPost(p){
   };actions.appendChild(dl);media.appendChild(actions);
  }
  const div=document.createElement('div');div.className='post-actions';
- const pr=document.createElement('button');pr.className='btn btn-primary';pr.textContent='A3 인쇄';pr.onclick=()=>window.print();
+ const pr=document.createElement('button');pr.className='btn btn-primary';pr.textContent='인쇄';pr.onclick=()=>window.print();
  const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
  if(admin()){
   const edit=document.createElement('button');edit.className='btn btn-secondary';edit.textContent='수정';edit.onclick=async()=>{const title=prompt('수정할 제목',p.title);if(title===null)return;const body=prompt('수정할 본문',p.body);if(body===null)return;const{error}=await db.from('nstudy_posts').update({title:title.trim(),body:body.trim()}).eq('id',p.id);if(error)return say('수정 실패: '+error.message);await refreshPosts();say('게시글이 수정되었습니다.')};
