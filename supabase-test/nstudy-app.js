@@ -102,7 +102,41 @@ async function openPost(p){
     return;
   }
 
-  pdfWindow.location.replace(data.signedUrl);
+  const pdfUrl = data.signedUrl;
+
+pdfWindow.document.open();
+pdfWindow.document.write(`
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 문서 보기</title>
+  <style>
+    body { margin: 0; background: #525659; }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: #142b4d;
+      color: white;
+      font-family: sans-serif;
+    }
+    #pdfViewer { width: 100%; height: calc(100dvh - 55px); border: 0; }
+    button { padding: 8px 14px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>NSTUDY PDF 보기</strong>
+    <button onclick="document.getElementById('pdfViewer').contentWindow.print()">인쇄</button>
+  </header>
+  <iframe id="pdfViewer" src="${pdfUrl}"></iframe>
+</body>
+</html>
+`);
+pdfWindow.document.close();
 };
  const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
  if(admin()){
