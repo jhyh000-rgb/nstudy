@@ -94,59 +94,6 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 <footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="./images/logo01.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="./02-bank.html">문제은행</a></p></div></div></footer>
 
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
-<script>
-(() => {
-"use strict";
-let accounts = load("nstudy_accounts", {});
-// ssjj는 관리자, jcm0011은 관리 페이지 접근 허용 회원으로 항상 설정합니다.
-["ssjj", "jcm0011"].forEach(fixedId => {
- const accountId = Object.keys(accounts).find(id => id.toLowerCase() === fixedId);
- if (accountId && accounts[accountId]) {
-   accounts[accountId].adminAccess = true;
-   if (fixedId === "ssjj") accounts[accountId].blocked = false;
- }
-});
-save("nstudy_accounts", accounts);
-function findAccountKey(id){
- const wanted=String(id||"").trim().toLocaleLowerCase("en-US");
- return Object.keys(accounts).find(key=>key.toLocaleLowerCase("en-US")===wanted) || "";
-}
-// 문제은행 페이지와 로그인 상태를 공유하기 위해 localStorage를 기준으로 동기화합니다.
-let currentUser = localStorage.getItem("nstudy_current_user") || sessionStorage.getItem("nstudy_current_user") || "";
-if(currentUser){
- const canonical=findAccountKey(currentUser);
- if(!canonical || accounts[canonical].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");}
- else {currentUser=canonical;sessionStorage.setItem("nstudy_current_user",currentUser);localStorage.setItem("nstudy_current_user",currentUser);}
-}
-let toastTimer;
-function load(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
-function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast("저장 공간이 부족합니다. 첨부파일 크기를 줄여 주세요.");return false}}
-function showToast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add("hidden"),3000)}
-function loggedIn(){return !!currentUser && !!accounts[currentUser]}
-function isAdmin(){return loggedIn() && currentUser.toLowerCase()==="ssjj"}
-function canAccessAdmin(){return isAdmin() || (loggedIn() && accounts[currentUser].adminAccess===true)}
-function renderAdmin(){const root=document.getElementById("adminMembers");root.innerHTML="";const intro=document.getElementById("adminIntro");if(!canAccessAdmin()){intro.textContent="관리자 또는 관리 페이지 접근 권한이 승인된 회원만 이용할 수 있습니다.";root.innerHTML="<p>접근 권한이 없습니다.</p>";return}
- intro.textContent=isAdmin()?"관리자 모드: 회원 접근 권한, 로그인 차단, 회원 삭제를 관리할 수 있습니다. 비밀번호는 현재 데모 구조상 브라우저에 저장된 값이 표시됩니다.":"회원 접근 모드: 회원 목록만 확인할 수 있습니다. 권한 변경은 관리자만 가능합니다.";
- const entries=Object.entries(accounts);if(!entries.length){root.innerHTML="<p>등록된 회원이 없습니다.</p>";return}
- const wrap=document.createElement("div");wrap.className="admin-table-wrap";const table=document.createElement("table");table.className="admin-table";const headers=["관리 페이지 접근","로그인 차단","아이디"];if(isAdmin())headers.push("비밀번호");headers.push("회원 유형","성명","학교","학년","전화번호","이메일");if(isAdmin())headers.push("회원 정보 삭제");const thead=document.createElement("thead"),hr=document.createElement("tr");headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;hr.appendChild(th)});thead.appendChild(hr);table.appendChild(thead);const tbody=document.createElement("tbody");
- entries.forEach(([id,a])=>{const tr=document.createElement("tr");const isRoot=id.toLowerCase()==="ssjj";const isFixedAccess=["ssjj","jcm0011"].includes(id.toLowerCase());
- const accessTd=document.createElement("td"),accessCb=document.createElement("input");accessCb.type="checkbox";accessCb.checked=isFixedAccess||a.adminAccess===true;accessCb.setAttribute("aria-label",id+" 관리 페이지 접근 허용");accessCb.disabled=!isAdmin()||isFixedAccess;accessCb.addEventListener("change",()=>{accounts[id].adminAccess=accessCb.checked;if(save("nstudy_accounts",accounts))showToast(accessCb.checked?"관리 페이지 접근을 허용했습니다.":"관리 페이지 접근 권한을 해제했습니다.");else accessCb.checked=!accessCb.checked});accessTd.appendChild(accessCb);tr.appendChild(accessTd);
- const blockTd=document.createElement("td"),blockCb=document.createElement("input");blockCb.type="checkbox";blockCb.checked=isRoot?false:a.blocked===true;blockCb.setAttribute("aria-label",id+" 로그인 차단");blockCb.disabled=!isAdmin()||isRoot;blockCb.addEventListener("change",()=>{if(isRoot){blockCb.checked=false;return}accounts[id].blocked=blockCb.checked;if(save("nstudy_accounts",accounts)){showToast(blockCb.checked?"해당 회원의 로그인을 차단했습니다.":"해당 회원의 로그인 차단을 해제했습니다.")}else blockCb.checked=!blockCb.checked});blockTd.appendChild(blockCb);tr.appendChild(blockTd);
- const values=[id];if(isAdmin())values.push(a.pw||"");values.push(a.type||"학생",a.name||"",a.school||"",a.grade||"",a.phone||"",a.email||"");values.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
- if(isAdmin()){const deleteTd=document.createElement("td"),del=document.createElement("button");del.type="button";del.className="btn btn-secondary";del.textContent="회원 삭제";del.addEventListener("click",()=>{const message=isRoot?"관리자 ID ssjj를 삭제하면 현재 관리자 권한과 관리 페이지 접근 권한을 잃게 됩니다. 계정 정보를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.":"정말로 회원 '"+id+"'의 계정 정보를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.";if(!confirm(message))return;delete accounts[id];if(!save("nstudy_accounts",accounts)){showToast("저장에 실패했습니다. 새로고침 전 저장 상태를 확인해 주세요.");return}if(currentUser===id){currentUser="";sessionStorage.removeItem("nstudy_current_user");updateAccountUI()}renderAdmin();showToast("회원 계정 정보를 삭제했습니다.")});deleteTd.appendChild(del);tr.appendChild(deleteTd)}
- tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
- }
-function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
-function updateAccountUI(){const status=document.getElementById("userStatus");const accountButton=document.getElementById("openAccount");status.textContent=loggedIn()?currentUser:"";if(loggedIn()){localStorage.setItem("nstudy_current_user",currentUser);sessionStorage.setItem("nstudy_current_user",currentUser)}accountButton.textContent=loggedIn()?"로그아웃":"로그인";accountButton.href=loggedIn()?"#logout":"./001-login.html?return=index.html";accountButton.setAttribute("aria-label",loggedIn()?"로그아웃":"로그인");if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
-document.getElementById("openAccount").addEventListener("click",function(e){if(!loggedIn())return;e.preventDefault();currentUser="";sessionStorage.removeItem("nstudy_current_user");localStorage.removeItem("nstudy_current_user");updateAccountUI();showToast("로그아웃되었습니다.");window.scrollTo({top:0,behavior:"smooth"})});
-document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
-window.addEventListener("storage",e=>{if(e.key==="nstudy_current_user"){currentUser=e.newValue||"";const canonical=findAccountKey(currentUser);if(canonical && accounts[canonical] && accounts[canonical].blocked!==true)currentUser=canonical;else currentUser="";updateAccountUI()}});
-window.addEventListener("focus",updateAccountUI);
-window.addEventListener("pageshow",updateAccountUI);
-updateAccountUI();
-// 문제은행 기능과 자료는 별도 문서 02-bank.html에서 관리합니다.
-// 로그인 직후 자동으로 관리 페이지를 열거나 화면을 아래로 이동하지 않습니다.
-})();
-</script>
+<script type="module" src="./nstudy-app.js?v=20261021-production"></script>
 </body>
 </html>

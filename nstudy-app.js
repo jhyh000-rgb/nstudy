@@ -4,6 +4,13 @@ const $=id=>document.getElementById(id);let user=null,profile=null,posts=[],cate
 const admin=()=>profile?.role==='admin'&&!profile.blocked;
 const access=()=>admin()||!!profile?.admin_access&&!profile?.blocked;
 const say=s=>{let t=$('toast');if(!t){alert(s);return}t.textContent=s;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),4000)};
+// 스마트폰·태블릿은 PDF.js 화면을 사용하고 PC는 기존 PDF 방식 유지
+const isMobilePdfDevice=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const pdfViewerUrl=signedUrl=>{
+ const viewer=new URL('./pdf-viewer.html',location.href);
+ viewer.hash=encodeURIComponent(signedUrl);
+ return viewer.href;
+};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=u;profile=null;if(user){const {data,error}=await db.from('nstudy_profiles').select('*').eq('id',user.id).maybeSingle();if(error)console.error(error);profile=data;if(profile?.blocked){await db.auth.signOut();user=null;profile=null;say('로그인이 제한된 계정입니다.')}}renderHeader();if($('postList'))await refreshPosts();if($('admin-page')&&!$('admin-page').classList.contains('hidden'))await renderMembers()}
 function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
@@ -67,11 +74,17 @@ async function openPost(p){
    img.onerror=()=>{const warning=document.createElement('p');warning.textContent='이미지를 표시할 수 없습니다. 아래 원본 보기 버튼을 이용해 주세요.';img.replaceWith(warning)};
    media.appendChild(img);
   }else{
-   const frame=document.createElement('iframe');frame.src=url+'#toolbar=1&view=FitH';frame.title='PDF 미리보기: '+name;frame.loading='lazy';frame.style.cssText='display:block;width:100%;height:70vh;min-height:380px;border:1px solid #dce4ef;border-radius:8px;background:#f8fafc';media.appendChild(frame);
-   const tip=document.createElement('p');tip.className='small-note';tip.textContent='스마트폰에서 미리보기가 표시되지 않으면 아래 PDF 전체 화면 보기 버튼을 누르세요.';media.appendChild(tip);
+   const frame=document.createElement('iframe');
+   frame.src=isMobilePdfDevice()?pdfViewerUrl(url):url+'#toolbar=1&view=FitH';
+   frame.title='PDF 미리보기: '+name;frame.loading='lazy';
+   frame.style.cssText='display:block;width:100%;height:70vh;min-height:380px;border:1px solid #dce4ef;border-radius:8px;background:#f8fafc';
+   media.appendChild(frame);
+   if(isMobilePdfDevice()){
+    const tip=document.createElement('p');tip.className='small-note';tip.textContent='화면이 작으면 아래 PDF 전체 화면 보기 버튼으로 크게 볼 수 있습니다.';media.appendChild(tip);
+   }
   }
   const actions=document.createElement('div');actions.className='form-actions';actions.style.margin='8px 0 16px';
-  const open=document.createElement('a');open.className='btn btn-secondary';open.href=url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
+  const open=document.createElement('a');open.className='btn btn-secondary';open.href=(kind==='pdf'&&isMobilePdfDevice())?pdfViewerUrl(url):url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
   const dl=document.createElement('button');dl.type='button';dl.className='btn btn-secondary';dl.textContent='다운로드';dl.onclick=async()=>{
    const {data:downloadData,error:downloadError}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600,{download:name});
    if(downloadError||!downloadData?.signedUrl){say('다운로드 주소 생성에 실패했습니다.');return}
@@ -80,29 +93,16 @@ async function openPost(p){
  }
  const div=document.createElement('div');div.className='post-actions';
  const pr=document.createElement('button');pr.className='btn btn-primary';pr.textContent='인쇄';pr.onclick=async()=>{
-  if(!p.pdf_path){
-    alert('인쇄할 PDF 문서가 없습니다.');
-    return;
-  }
-
+  if(!p.pdf_path){alert('첨부된 PDF 문서가 없습니다.');return;}
   const pdfWindow=window.open('','_blank');
-
-  if(!pdfWindow){
-    alert('팝업 차단을 해제해 주세요.');
-    return;
+  if(!pdfWindow){alert('팝업 차단을 해제해 주세요.');return;}
+  const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(p.pdf_path,3600);
+  if(error||!data?.signedUrl){pdfWindow.close();alert('PDF 문서를 열 수 없습니다.');return;}
+  if(isMobilePdfDevice()){
+    pdfWindow.location.replace(pdfViewerUrl(data.signedUrl));
+  }else{
+    pdfWindow.location.replace(data.signedUrl);
   }
-
-  const {data,error}=await db.storage
-    .from('nstudy-attachments')
-    .createSignedUrl(p.pdf_path,3600);
-
-  if(error||!data?.signedUrl){
-    pdfWindow.close();
-    alert('PDF 문서를 열 수 없습니다.');
-    return;
-  }
-
-  pdfWindow.location.href=data.signedUrl;
 };
  const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
  if(admin()){
@@ -114,6 +114,70 @@ async function openPost(p){
 async function upload(file){if(!file)return {path:'',name:''};if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(file.type))throw Error('PDF, JPG, PNG, WEBP 파일만 가능합니다.');if(file.size>10*1024*1024)throw Error('첨부파일은 10MB 이하만 가능합니다.');const path=user.id+'/'+crypto.randomUUID()+'/'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const {error}=await db.storage.from('nstudy-attachments').upload(path,file,{upsert:false});if(error)throw error;return {path,name:file.name}}
 function initBank(){document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=row.subcategory;page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;const skills=[...new Set(posts.filter(p=>p.category===c).map(p=>p.subcategory).filter(Boolean))];sel.innerHTML='<option value="">세부 능력 선택</option>'+skills.map(x=>'<option>'+esc(x)+'</option>').join('')}
-async function renderMembers(){const root=$('adminMembers');if(!root)return;if(!access()){root.textContent='관리 권한이 없습니다.';return}const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked').order('username');if(error){root.textContent=error.message;return}root.innerHTML='';const wrap=document.createElement('div');wrap.className='admin-table-wrap';const table=document.createElement('table');table.className='admin-table';table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>이메일</th><th>관리 접근</th><th>차단</th></tr></thead>';const body=document.createElement('tbody');for(const p of data||[]){const tr=document.createElement('tr');for(const k of ['username','full_name','member_type','school','contact_email']){const td=document.createElement('td');td.textContent=p[k]||'';tr.appendChild(td)}for(const k of ['admin_access','blocked']){const td=document.createElement('td'),cb=document.createElement('input');cb.type='checkbox';cb.checked=!!p[k];cb.disabled=!admin()||p.id===user.id;cb.onchange=async()=>{const {error}=await db.from('nstudy_profiles').update({[k]:cb.checked}).eq('id',p.id);if(error){cb.checked=!cb.checked;say(error.message)}else say('권한 정보가 저장되었습니다.')};td.appendChild(cb);tr.appendChild(td)}body.appendChild(tr)}table.appendChild(body);wrap.appendChild(table);root.appendChild(wrap);if($('adminIntro'))$('adminIntro').textContent='보안상 회원 비밀번호는 표시하지 않습니다. 계정 삭제는 별도 관리자 서버 기능이 필요합니다.'}
+async function renderMembers(){
+  const root=$('adminMembers');
+  if(!root)return;
+  if(!access()){root.textContent='관리 권한이 없습니다.';return;}
+  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked').order('username');
+  if(error){root.textContent=error.message;return;}
+  root.innerHTML='';
+  const wrap=document.createElement('div');wrap.className='admin-table-wrap';
+  const table=document.createElement('table');table.className='admin-table';
+  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>이메일</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
+  const body=document.createElement('tbody');
+  for(const p of data||[]){
+    const tr=document.createElement('tr');
+    for(const k of ['username','full_name','member_type','school','contact_email']){
+      const td=document.createElement('td');td.textContent=p[k]||'';tr.appendChild(td);
+    }
+    for(const k of ['admin_access','blocked']){
+      const td=document.createElement('td'),cb=document.createElement('input');
+      cb.type='checkbox';cb.checked=!!p[k];cb.disabled=!admin()||p.id===user.id;
+      cb.onchange=async()=>{
+        const {error}=await db.from('nstudy_profiles').update({[k]:cb.checked}).eq('id',p.id);
+        if(error){cb.checked=!cb.checked;say(error.message);}
+        else say('권한 정보가 저장되었습니다.');
+      };
+      td.appendChild(cb);tr.appendChild(td);
+    }
+    const protectedAccount=p.id===user.id||p.role==='admin';
+    const pwdTd=document.createElement('td'),pwd=document.createElement('button');
+    pwd.type='button';pwd.textContent='새 비밀번호 설정';pwd.disabled=!admin()||protectedAccount;
+    pwd.onclick=async()=>{
+      const newPassword=prompt(`${p.username} 회원의 새 비밀번호를 입력하세요. (8~72자)\n기존 비밀번호는 조회할 수 없습니다.`);
+      if(newPassword===null)return;
+      if(newPassword.length<8||newPassword.length>72){alert('비밀번호는 8~72자로 입력해 주세요.');return;}
+      if(!confirm(`${p.username} 회원의 비밀번호를 변경하시겠습니까?`))return;
+      pwd.disabled=true;
+      try{
+        const {data,error}=await db.functions.invoke('nstudy-admin-members',{body:{action:'set_password',userId:p.id,newPassword}});
+        if(error)throw error;
+        if(data?.error)throw new Error(data.error);
+        alert('새 비밀번호가 설정되었습니다.');
+      }catch(e){alert('비밀번호 변경 실패: '+(e.message||String(e)));}
+      finally{pwd.disabled=false;}
+    };
+    pwdTd.appendChild(pwd);tr.appendChild(pwdTd);
+    const deleteTd=document.createElement('td'),del=document.createElement('button');
+    del.type='button';del.textContent='삭제';del.disabled=!admin()||protectedAccount;
+    del.style.background='#b42318';del.style.color='#fff';
+    del.onclick=async()=>{
+      if(!confirm(`${p.username} 회원을 삭제하시겠습니까?\n삭제된 회원은 다시 로그인할 수 없습니다.\n기존 게시글은 유지됩니다.`))return;
+      const check=prompt(`삭제를 확정하려면 회원 아이디 "${p.username}"를 정확히 입력하세요.`);
+      if(check!==p.username){if(check!==null)alert('아이디가 일치하지 않아 삭제하지 않았습니다.');return;}
+      del.disabled=true;
+      try{
+        const {data,error}=await db.functions.invoke('nstudy-admin-members',{body:{action:'delete',userId:p.id}});
+        if(error)throw error;
+        if(data?.error)throw new Error(data.error);
+        alert('회원 계정이 삭제되었습니다.');
+        await renderMembers();
+      }catch(e){alert('회원 삭제 실패: '+(e.message||String(e)));del.disabled=false;}
+    };
+    deleteTd.appendChild(del);tr.appendChild(deleteTd);body.appendChild(tr);
+  }
+  table.appendChild(body);wrap.appendChild(table);root.appendChild(wrap);
+  if($('adminIntro'))$('adminIntro').textContent='기존 비밀번호는 확인할 수 없습니다. 일반 회원의 새 비밀번호 설정 및 삭제는 관리자만 사용할 수 있습니다. 관리자 계정은 보호됩니다.';
+}
 function initAdmin(){const a=$('adminPageLink');if(a)a.onclick=async e=>{e.preventDefault();if(!access())return say('관리 페이지 접근 권한이 없습니다.');$('admin-page').classList.remove('hidden');await renderMembers();$('admin-page').scrollIntoView({behavior:'smooth'})}}
 async function init(){initAdmin();if($('postList'))initBank();await refreshAuth();db.auth.onAuthStateChange(()=>{setTimeout(refreshAuth,0)})}init();

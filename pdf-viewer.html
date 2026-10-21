@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSTUDY PDF 보기</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#e5e7eb;font-family:Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;background:#142b4d;color:white;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header strong{font-size:15px}
+button{border:0;border-radius:6px;background:white;color:#142b4d;padding:9px 16px;font-weight:bold;cursor:pointer}
+#status{text-align:center;padding:20px;color:#374151}
+#pages{max-width:1000px;margin:auto;padding:12px}
+.page{display:block;width:100%;height:auto;margin:0 auto 16px;background:white;box-shadow:0 2px 8px #0002}
+@media print{
+@page{margin:0}
+header,#status{display:none!important}
+body{background:white}
+#pages{max-width:none;padding:0;margin:0}
+.page{width:100%;margin:0;box-shadow:none;break-after:page;page-break-after:always}
+.page:last-child{break-after:auto;page-break-after:auto}
+}
+</style>
+</head>
+<body>
+<header>
+<strong>NSTUDY PDF 문서</strong>
+<button onclick="window.print()">인쇄</button>
+</header>
+<div id="status">PDF 문서를 불러오는 중입니다...</div>
+<main id="pages"></main>
+
+<script type="module">
+import * as pdfjsLib from
+"https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+
+const status=document.getElementById("status");
+const pages=document.getElementById("pages");
+
+async function loadPDF(){
+ try{
+  const url=decodeURIComponent(location.hash.slice(1));
+  if(!url)throw new Error("PDF 주소가 없습니다.");
+
+  const pdf=await pdfjsLib.getDocument(url).promise;
+
+  for(let i=1;i<=pdf.numPages;i++){
+   status.textContent=`${i} / ${pdf.numPages} 페이지 불러오는 중...`;
+
+   const page=await pdf.getPage(i);
+   const viewport=page.getViewport({scale:1.5});
+
+   const canvas=document.createElement("canvas");
+   canvas.className="page";
+   canvas.width=Math.ceil(viewport.width);
+   canvas.height=Math.ceil(viewport.height);
+
+   pages.appendChild(canvas);
+
+   await page.render({
+    canvasContext:canvas.getContext("2d"),
+    viewport
+   }).promise;
+  }
+
+  status.style.display="none";
+ }catch(error){
+  console.error(error);
+  status.textContent="PDF를 표시할 수 없습니다. 파일 접근 권한이나 인터넷 연결을 확인해 주세요.";
+ }
+}
+
+loadPDF();
+</script>
+</body>
+</html>
