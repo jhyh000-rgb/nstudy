@@ -4,6 +4,13 @@ const $=id=>document.getElementById(id);let user=null,profile=null,posts=[],cate
 const admin=()=>profile?.role==='admin'&&!profile.blocked;
 const access=()=>admin()||!!profile?.admin_access&&!profile?.blocked;
 const say=s=>{let t=$('toast');if(!t){alert(s);return}t.textContent=s;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),4000)};
+// 스마트폰·태블릿은 PDF.js 화면을 사용하고 PC는 기존 PDF 방식 유지
+const isMobilePdfDevice=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const pdfViewerUrl=signedUrl=>{
+ const viewer=new URL('./pdf-viewer.html',location.href);
+ viewer.hash=encodeURIComponent(signedUrl);
+ return viewer.href;
+};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=u;profile=null;if(user){const {data,error}=await db.from('nstudy_profiles').select('*').eq('id',user.id).maybeSingle();if(error)console.error(error);profile=data;if(profile?.blocked){await db.auth.signOut();user=null;profile=null;say('로그인이 제한된 계정입니다.')}}renderHeader();if($('postList'))await refreshPosts();if($('admin-page')&&!$('admin-page').classList.contains('hidden'))await renderMembers()}
 function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
@@ -67,11 +74,17 @@ async function openPost(p){
    img.onerror=()=>{const warning=document.createElement('p');warning.textContent='이미지를 표시할 수 없습니다. 아래 원본 보기 버튼을 이용해 주세요.';img.replaceWith(warning)};
    media.appendChild(img);
   }else{
-   const frame=document.createElement('iframe');frame.src=url+'#toolbar=1&view=FitH';frame.title='PDF 미리보기: '+name;frame.loading='lazy';frame.style.cssText='display:block;width:100%;height:70vh;min-height:380px;border:1px solid #dce4ef;border-radius:8px;background:#f8fafc';media.appendChild(frame);
-   const tip=document.createElement('p');tip.className='small-note';tip.textContent='스마트폰에서 미리보기가 표시되지 않으면 아래 PDF 전체 화면 보기 버튼을 누르세요.';media.appendChild(tip);
+   const frame=document.createElement('iframe');
+   frame.src=isMobilePdfDevice()?pdfViewerUrl(url):url+'#toolbar=1&view=FitH';
+   frame.title='PDF 미리보기: '+name;frame.loading='lazy';
+   frame.style.cssText='display:block;width:100%;height:70vh;min-height:380px;border:1px solid #dce4ef;border-radius:8px;background:#f8fafc';
+   media.appendChild(frame);
+   if(isMobilePdfDevice()){
+    const tip=document.createElement('p');tip.className='small-note';tip.textContent='화면이 작으면 아래 PDF 전체 화면 보기 버튼으로 크게 볼 수 있습니다.';media.appendChild(tip);
+   }
   }
   const actions=document.createElement('div');actions.className='form-actions';actions.style.margin='8px 0 16px';
-  const open=document.createElement('a');open.className='btn btn-secondary';open.href=url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
+  const open=document.createElement('a');open.className='btn btn-secondary';open.href=(kind==='pdf'&&isMobilePdfDevice())?pdfViewerUrl(url):url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
   const dl=document.createElement('button');dl.type='button';dl.className='btn btn-secondary';dl.textContent='다운로드';dl.onclick=async()=>{
    const {data:downloadData,error:downloadError}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600,{download:name});
    if(downloadError||!downloadData?.signedUrl){say('다운로드 주소 생성에 실패했습니다.');return}
@@ -85,11 +98,8 @@ async function openPost(p){
   if(!pdfWindow){alert('팝업 차단을 해제해 주세요.');return;}
   const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(p.pdf_path,3600);
   if(error||!data?.signedUrl){pdfWindow.close();alert('PDF 문서를 열 수 없습니다.');return;}
-  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-  if(mobile){
-    const viewerUrl=new URL('./pdf-viewer.html',location.href);
-    viewerUrl.hash=encodeURIComponent(data.signedUrl);
-    pdfWindow.location.replace(viewerUrl.href);
+  if(isMobilePdfDevice()){
+    pdfWindow.location.replace(pdfViewerUrl(data.signedUrl));
   }else{
     pdfWindow.location.replace(data.signedUrl);
   }
