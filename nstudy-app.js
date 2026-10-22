@@ -63,12 +63,9 @@ async function openPost(p){
   const path=p[kind+'_path'];if(!path)continue;
   const name=p[kind+'_name']||(kind==='pdf'?'학습자료.pdf':'첨부 이미지');
   const label=document.createElement('strong');label.textContent=(kind==='pdf'?'PDF: ':'이미지: ')+name;media.appendChild(label);
-  const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600);
-  if(error||!data?.signedUrl){
-   const warning=document.createElement('p');warning.className='small-note';warning.textContent='첨부파일을 열 수 없습니다. Supabase Storage의 열람 권한을 확인해 주세요.';media.appendChild(warning);
-   console.error('첨부파일 주소 생성 실패',kind,error);continue;
+  let url;try{url=await attachmentUrl(path)}catch(error){
+   const warning=document.createElement('p');warning.className='small-note';warning.textContent='첨부파일을 열 수 없습니다: '+error.message;media.appendChild(warning);console.error(error);continue;
   }
-  const url=data.signedUrl;
   if(kind==='image'){
    const img=document.createElement('img');img.src=url;img.alt=name;img.loading='lazy';img.style.cssText='max-width:100%;height:auto;object-fit:contain';
    img.onerror=()=>{const warning=document.createElement('p');warning.textContent='이미지를 표시할 수 없습니다. 아래 원본 보기 버튼을 이용해 주세요.';img.replaceWith(warning)};
@@ -86,9 +83,8 @@ async function openPost(p){
   const actions=document.createElement('div');actions.className='form-actions';actions.style.margin='8px 0 16px';
   const open=document.createElement('a');open.className='btn btn-secondary';open.href=(kind==='pdf'&&isMobilePdfDevice())?pdfViewerUrl(url):url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
   const dl=document.createElement('button');dl.type='button';dl.className='btn btn-secondary';dl.textContent='다운로드';dl.onclick=async()=>{
-   const {data:downloadData,error:downloadError}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600,{download:name});
-   if(downloadError||!downloadData?.signedUrl){say('다운로드 주소 생성에 실패했습니다.');return}
-   const link=document.createElement('a');link.href=downloadData.signedUrl;link.download=name;document.body.appendChild(link);link.click();link.remove();
+   let downloadUrl;try{downloadUrl=await attachmentUrl(path,name)}catch(error){say('다운로드 실패: '+error.message);return}
+   const link=document.createElement('a');link.href=downloadUrl;link.download=name;document.body.appendChild(link);link.click();link.remove();
   };actions.appendChild(dl);media.appendChild(actions);
  }
  const div=document.createElement('div');div.className='post-actions';
@@ -96,12 +92,11 @@ async function openPost(p){
   if(!p.pdf_path){alert('첨부된 PDF 문서가 없습니다.');return;}
   const pdfWindow=window.open('','_blank');
   if(!pdfWindow){alert('팝업 차단을 해제해 주세요.');return;}
-  const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(p.pdf_path,3600);
-  if(error||!data?.signedUrl){pdfWindow.close();alert('PDF 문서를 열 수 없습니다.');return;}
+  let pdfUrl;try{pdfUrl=await attachmentUrl(p.pdf_path)}catch(error){pdfWindow.close();alert('PDF 문서를 열 수 없습니다: '+error.message);return;}
   if(isMobilePdfDevice()){
-    pdfWindow.location.replace(pdfViewerUrl(data.signedUrl));
+    pdfWindow.location.replace(pdfViewerUrl(pdfUrl));
   }else{
-    pdfWindow.location.replace(data.signedUrl);
+    pdfWindow.location.replace(pdfUrl);
   }
 };
  const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
@@ -111,7 +106,32 @@ async function openPost(p){
  }
  v.appendChild(div);v.classList.remove('hidden');v.scrollIntoView({block:'start',behavior:'smooth'});
 }
-async function upload(file){if(!file)return {path:'',name:''};if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(file.type))throw Error('PDF, JPG, PNG, WEBP 파일만 가능합니다.');if(file.size>10*1024*1024)throw Error('첨부파일은 10MB 이하만 가능합니다.');const path=user.id+'/'+crypto.randomUUID()+'/'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const {error}=await db.storage.from('nstudy-attachments').upload(path,file,{upsert:false});if(error)throw error;return {path,name:file.name}}
+const R2_WORKER='https://nstudy-r2.jhyh000.workers.dev';
+async function attachmentUrl(path,downloadName=''){
+ if(!path)return '';
+ if(!path.startsWith('r2:')){
+  const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600,downloadName?{download:downloadName}:undefined);
+  if(error||!data?.signedUrl)throw Error(error?.message||'Supabase 첨부파일 주소 생성 실패');
+  return data.signedUrl;
+ }
+ const {data:{session}}=await db.auth.getSession();
+ if(!session?.access_token)throw Error('R2 첨부파일을 열려면 로그인이 필요합니다.');
+ const response=await fetch(R2_WORKER+'/sign',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({path:path.slice(3),download:!!downloadName})});
+ const result=await response.json();
+ if(!response.ok||!result.url)throw Error(result.error||'R2 첨부파일 주소 생성 실패');
+ return result.url;
+}
+async function upload(file){
+ if(!file)return {path:'',name:''};
+ if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(file.type))throw Error('PDF, JPG, PNG, WEBP 파일만 가능합니다.');
+ if(file.size>10*1024*1024)throw Error('첨부파일은 10MB 이하만 가능합니다.');
+ const {data:{session}}=await db.auth.getSession();
+ if(!session?.access_token)throw Error('로그인이 필요합니다.');
+ const response=await fetch(R2_WORKER+'/upload',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':file.type,'X-File-Name':encodeURIComponent(file.name)},body:file});
+ let result;try{result=await response.json()}catch{throw Error('R2 서버 응답을 확인할 수 없습니다.');}
+ if(!response.ok||!result.path)throw Error(result.error||'R2 업로드 실패');
+ return {path:'r2:'+result.path,name:file.name};
+}
 function initBank(){document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=row.subcategory;page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;const skills=[...new Set(posts.filter(p=>p.category===c).map(p=>p.subcategory).filter(Boolean))];sel.innerHTML='<option value="">세부 능력 선택</option>'+skills.map(x=>'<option>'+esc(x)+'</option>').join('')}
 async function renderMembers(){
