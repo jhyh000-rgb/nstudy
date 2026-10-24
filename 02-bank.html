@@ -5,7 +5,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>문제은행 | NSTUDY ACADEMY</title>
-<meta content="NSTUDY ACADEMY 문제은행: NCS 직업기초능력, 자기소개서, 면접, TOEIC 학습자료와 게시글" name="description"/>
+<meta content="NSTUDY ACADEMY 문제은행: NCS 직업기초능력, 취업 실전 준비, 기능사 자격시험 학습자료와 게시글" name="description"/>
 <style>
 :root{--blue:#1769e0;--navy:#101828;--ink:#18212f;--muted:#687487;--pale:#f5f8fc;--line:#e5eaf0}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -79,6 +79,12 @@ body.bank-page nav{flex-wrap:wrap}
 .post-view .post-media > .youtube-embed iframe{width:100%!important;height:100%!important}
 .post-view .post-media > .form-actions{justify-content:center;width:100%}
 .post-view .post-media > strong,.post-view .post-media > a,.post-view .post-media > .small-note{text-align:center}
+
+/* 기능사 분야별 분류: 기존 NCS 문제은행 스타일을 그대로 활용 */
+#certificate-bank{scroll-margin-top:110px}
+.certificate-intro{color:var(--muted);font-size:14px;margin-bottom:14px}
+.certificate-grid .category-card{border-color:#c7dcf6;background:#f6faff}
+.certificate-grid .category-card.active{background:#eaf2ff;border-color:#1769e0}
 </style>
 </head>
 <body class="bank-page">
@@ -98,7 +104,7 @@ body.bank-page nav{flex-wrap:wrap}
 
 
 
-<section class="problem-bank" id="problem-bank"><div class="container"><div class="section-head"><div class="section-label">NSTUDY STUDY ARCHIVE</div><h2>NCS 문제은행</h2><p>과목별 학습 자료와 게시글을 확인하세요. 비회원은 각 과목의 최신 게시글 3개를 열람할 수 있습니다.</p></div>
+<section class="problem-bank" id="problem-bank"><div class="container"><div class="section-head"><div class="section-label">NSTUDY STUDY ARCHIVE</div><h2>NSTUDY 문제은행</h2><p>과목별 학습 자료와 게시글을 확인하세요. 비회원은 각 과목의 최신 게시글 3개를 열람할 수 있습니다.</p></div>
 <div class="bank-shell">
 <div class="category-group"><h3>① NCS 직업기초능력 · 10개 영역</h3><div aria-label="NCS 직업기초능력 영역" class="category-grid" id="ncsCategoryGrid" role="group">
 <button class="category-card" data-category="의사소통능력"><strong>의사소통능력</strong><small>문서 이해 · 표현</small></button>
@@ -117,12 +123,20 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="면접"><strong>면접</strong><small>예상 질문 · 답변 연습</small></button>
 <button class="category-card active" data-category="TOEIC"><strong>TOEIC</strong><small>LC · RC · 실전 연습</small></button>
 </div></div>
-<div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>각 세부 능력에 등록된 게시글 수입니다. 세부 능력을 누르면 해당 게시글만 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
+
+<div class="category-group" id="certificate-bank"><h3>③ 기능사 자격시험 · 5개 분야 / 25개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
+<button type="button" class="category-card certificate-category" data-category="기능사 · 전기·전자" data-certificate-group="전기·전자"><strong>전기·전자</strong><small>기능사 5개 과목</small></button>
+<button type="button" class="category-card certificate-category" data-category="기능사 · 기계·자동차" data-certificate-group="기계·자동차"><strong>기계·자동차</strong><small>기능사 5개 과목</small></button>
+<button type="button" class="category-card certificate-category" data-category="기능사 · IT·정보통신" data-certificate-group="IT·정보통신"><strong>IT·정보통신</strong><small>기능사 5개 과목</small></button>
+<button type="button" class="category-card certificate-category" data-category="기능사 · 화학·환경" data-certificate-group="화학·환경"><strong>화학·환경</strong><small>기능사 5개 과목</small></button>
+<button type="button" class="category-card certificate-category" data-category="기능사 · 조리·제과" data-certificate-group="조리·제과"><strong>조리·제과</strong><small>기능사 5개 과목</small></button>
+</div></div>
+<div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
-<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>자기소개서</option><option>면접</option><option>TOEIC</option></select></div>
-<div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 선택</option></select></div>
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option></select></div>
+<div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
 <div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
@@ -150,5 +164,61 @@ body.bank-page nav{flex-wrap:wrap}
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
 <script type="module" src="./nstudy-app.js?v=20261025-youtube"></script>
+
+<script>
+/* 기능사 분야의 과목 목록은 게시글이 없어도 표시합니다. 기존 앱의 게시글 로직은 유지합니다. */
+window.NSTUDY_CERTIFICATE_SUBJECTS = {"기능사 · 전기·전자": ["전기기능사", "전자기기기능사", "승강기기능사", "공조냉동기계기능사", "전자캐드기능사"], "기능사 · 기계·자동차": ["컴퓨터응용선반기능사", "컴퓨터응용밀링기능사", "설비보전기능사", "자동차정비기능사", "전산응용기계제도기능사"], "기능사 · IT·정보통신": ["정보처리기능사", "정보기기운용기능사", "통신선로기능사", "컴퓨터그래픽기능사", "전자출판기능사"], "기능사 · 화학·환경": ["위험물기능사", "가스기능사", "환경기능사", "화학분석기능사", "에너지관리기능사"], "기능사 · 조리·제과": ["한식조리기능사", "양식조리기능사", "제빵기능사", "제과기능사", "중식조리기능사"]};
+(function(){
+ const subjects=window.NSTUDY_CERTIFICATE_SUBJECTS;
+ const categorySelect=document.getElementById('postCategory');
+ const subSelect=document.getElementById('postSubcategory');
+ function addSubjectOptions(){
+   if(!categorySelect||!subSelect)return;
+   const items=subjects[categorySelect.value];
+   if(!items)return;
+   const previous=subSelect.value;
+   subSelect.replaceChildren(new Option('기능사 과목 선택',''));
+   items.forEach(name=>subSelect.add(new Option(name,name)));
+   if(items.includes(previous))subSelect.value=previous;
+ }
+ categorySelect?.addEventListener('change',()=>setTimeout(addSubjectOptions,0));
+ // 기존 앱이 과목 선택 메뉴를 다시 만드는 경우에도 기능사 과목을 복원합니다.
+ if(subSelect){const observer=new MutationObserver(()=>{
+   if(!subjects[categorySelect?.value])return;
+   const names=subjects[categorySelect.value];
+   if(names.every(name=>Array.from(subSelect.options).some(o=>o.value===name)))return;
+   const selected=subSelect.value;
+   observer.disconnect();
+   names.forEach(name=>{if(!Array.from(subSelect.options).some(o=>o.value===name))subSelect.add(new Option(name,name));});
+   if(names.includes(selected))subSelect.value=selected;
+   observer.observe(subSelect,{childList:true});
+ });observer.observe(subSelect,{childList:true});}
+ // 0개 게시글 과목도 기존 하위 과목 패널에 노출
+ const grid=document.getElementById('subcategoryGrid');
+ const heading=document.getElementById('subcategoryHeading');
+ const panel=document.getElementById('subcategoryPanel');
+ function syncSubjects(){
+   const active=document.querySelector('.certificate-category.active');
+   if(!active||!grid)return;
+   const items=subjects[active.dataset.category]||[];
+   if(heading)heading.textContent=active.dataset.certificateGroup+' · 기능사 과목별 게시글';
+   if(panel)panel.classList.remove('hidden');
+   for(const name of items){
+     if(Array.from(grid.querySelectorAll('.subcategory-btn')).some(b=>b.dataset.certificateSubject===name||b.textContent.includes(name)))continue;
+     const b=document.createElement('button');b.type='button';b.className='subcategory-btn';b.dataset.certificateSubject=name;
+     const label=document.createElement('span');label.textContent=name;
+     const count=document.createElement('span');count.className='subcategory-count';count.textContent='00개';
+     b.append(label,count);b.addEventListener('click',()=>{
+       // 앱의 기본 필터 동작과 연결하려면 nstudy-app.js의 renderPosts 수정이 필요합니다.
+       const existing=Array.from(grid.querySelectorAll('.subcategory-btn')).find(x=>x!==b&&x.textContent.includes(name));
+       if(existing)existing.click();else { b.title='과목별 게시글 연결은 nstudy-app.js 수정 후 활성화됩니다.'; }
+     });grid.append(b);
+   }
+ }
+ document.querySelectorAll('.category-card').forEach(b=>b.addEventListener('click',()=>setTimeout(syncSubjects,80)));
+ if(grid){new MutationObserver(()=>{if(document.querySelector('.certificate-category.active'))setTimeout(syncSubjects,0)}).observe(grid,{childList:true});}
+ if(location.hash==='#certificate-bank')setTimeout(()=>document.getElementById('certificate-bank')?.scrollIntoView(),200);
+})();
+</script>
 </body>
 </html>
