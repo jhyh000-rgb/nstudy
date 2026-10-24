@@ -71,6 +71,14 @@ body.bank-page .nav{gap:12px}
 body.bank-page nav{flex-wrap:wrap}
 @media(max-width:900px){body.bank-page .nav{flex-wrap:wrap;padding:10px 0}body.bank-page nav{order:3;width:100%;justify-content:center;gap:12px;flex-wrap:wrap}}
 .youtube-embed{width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#101828}.youtube-embed iframe{width:100%;height:100%;border:0;display:block}@media print{.youtube-embed{display:none!important}}
+/* 게시글 첨부 이미지·PDF·유튜브 플레이어 중앙 정렬 */
+.post-view .post-media{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.post-view .post-media > img{display:block;width:auto;max-width:100%;height:auto;margin-inline:auto}
+.post-view .post-media > iframe{display:block;width:min(100%,900px)!important;max-width:100%;margin-inline:auto}
+.post-view .post-media > .youtube-embed{width:min(100%,900px);max-width:100%;margin-inline:auto;align-self:center}
+.post-view .post-media > .youtube-embed iframe{width:100%!important;height:100%!important}
+.post-view .post-media > .form-actions{justify-content:center;width:100%}
+.post-view .post-media > strong,.post-view .post-media > a,.post-view .post-media > .small-note{text-align:center}
 </style>
 </head>
 <body class="bank-page">
