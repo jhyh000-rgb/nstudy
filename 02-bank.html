@@ -98,11 +98,13 @@ body.bank-page nav{flex-wrap:wrap}
 .bank-results-ncs{--result-color:#1769e0;--result-light:#edf5ff;--result-line:#b9d6ff}
 .bank-results-career{--result-color:#15803d;--result-light:#effaf2;--result-line:#b4e4c1}
 .bank-results-certificate{--result-color:#b45309;--result-light:#fff6e8;--result-line:#f3d5a9}
-.bank-results-heading{background:var(--result-light);color:var(--result-color);padding:12px 16px;border-radius:8px;font-size:17px;font-weight:900;margin-bottom:18px}
+.bank-results-heading{border-left:7px solid var(--result-color);background:var(--result-light);color:var(--result-color);padding:12px 16px;border-radius:8px;font-size:17px;font-weight:900;margin-bottom:18px}
 .bank-results .subcategory-panel{background:var(--result-light);border-color:var(--result-line)}
 .bank-results .subcategory-btn.active{background:var(--result-light);color:var(--result-color);border-color:var(--result-color)}
 .bank-results .subcategory-btn.active .subcategory-count{background:var(--result-color)}
 .bank-results .bank-toolbar h3{color:var(--result-color)}
+.bank-results .subcategory-btn:hover{border-color:var(--result-color)}
+.bank-results .btn-primary{background:var(--result-color);color:#fff}
 .bank-results .post-row:hover{border-color:var(--result-color)}
 @media(max-width:600px){.category-group.bank-group-ncs,.category-group.bank-group-career,.category-group.bank-group-certificate{padding:13px}.bank-results{padding:12px}.bank-results-heading{font-size:15px;padding:10px 12px}}
 
@@ -169,7 +171,7 @@ body.bank-page nav{flex-wrap:wrap}
 <button type="button" class="category-card certificate-category" data-category="기능사 · 화학·환경" data-certificate-group="화학·환경"><strong>화학·환경</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 조리·제과" data-certificate-group="조리·제과"><strong>조리·제과</strong><small>기능사 8개 과목</small></button>
 </div></div>
-<div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">② 취업 실전 준비 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
+<div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
