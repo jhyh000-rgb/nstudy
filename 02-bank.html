@@ -70,6 +70,7 @@ body.bank-page .problem-bank{display:block!important;min-height:70vh;padding-top
 body.bank-page .nav{gap:12px}
 body.bank-page nav{flex-wrap:wrap}
 @media(max-width:900px){body.bank-page .nav{flex-wrap:wrap;padding:10px 0}body.bank-page nav{order:3;width:100%;justify-content:center;gap:12px;flex-wrap:wrap}}
+.youtube-embed{width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#101828}.youtube-embed iframe{width:100%;height:100%;border:0;display:block}@media print{.youtube-embed{display:none!important}}
 </style>
 </head>
 <body class="bank-page">
@@ -118,7 +119,8 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
 <div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
 <div class="field"><label for="postImage">이미지 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
-</div><p class="small-note">첨부파일은 Supabase 저장소에 저장됩니다. 파일당 최대 10MB입니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
+<div class="field full"><label for="postYoutube">유튜브 동영상 주소 (선택)</label><input id="postYoutube" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/><small class="small-note">유튜브 일반 영상, Shorts, 단축 주소를 지원합니다.</small></div>
+</div><p class="small-note">첨부파일은 연결된 파일 저장소에 저장됩니다. 파일당 최대 10MB입니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
 <div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div>
 </div></div></section>
 <section class="hidden" id="admin-page"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p class="small-note" id="adminIntro" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
@@ -139,6 +141,6 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261021-production"></script>
+<script type="module" src="./nstudy-app.js?v=20261025-youtube"></script>
 </body>
 </html>
