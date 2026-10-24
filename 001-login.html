@@ -1,1 +1,91 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NSTUDY 로그인</title><style>body{font-family:'Malgun Gothic',sans-serif;background:#f3f6fb;margin:0;color:#19283b}.wrap{max-width:480px;margin:7vh auto;background:white;border-radius:16px;box-shadow:0 8px 40px #152d4818;overflow:hidden}header{background:#101d39;color:white;padding:24px;text-align:center;font-size:25px;font-weight:800}main{padding:28px}label{display:block;margin:14px 0 6px;font-weight:700}input,select,button{box-sizing:border-box;width:100%;padding:13px;border-radius:7px;border:1px solid #cdd6e4;font-size:16px}button{background:#1769e0;color:white;border:0;font-weight:800;margin-top:20px;cursor:pointer}.tabs{display:flex;gap:8px}.tabs button{margin:0;background:#e8eef8;color:#234}.tabs button.active{background:#1769e0;color:#fff}.hidden{display:none}#msg{color:#a32929;margin-top:15px;white-space:pre-wrap}.foot{text-align:center;margin-top:20px}a{color:#1769e0}</style></head><body><div class="wrap"><header>NSTUDY 로그인</header><main><div class="tabs"><button id="loginTab" class="active">로그인</button><button id="signupTab">회원가입</button></div><form id="login"><label>이메일</label><input id="email" type="email" required autocomplete="email"><label>비밀번호</label><input id="password" type="password" required autocomplete="current-password"><button>로그인</button></form><form id="signup" class="hidden"><label>아이디</label><input id="username" minlength="4" required><label>이메일</label><input id="newEmail" type="email" required><label>비밀번호</label><input id="newPassword" type="password" minlength="6" required><label>회원 유형</label><select id="memberType"><option>학생</option><option>학부모</option><option>강사</option></select><label>성명</label><input id="fullName" required><label>학교</label><input id="school"><label>학년</label><input id="grade"><label>전화번호</label><input id="phone" type="tel"><label>주소</label><input id="address"><button>회원가입</button></form><p id="msg" role="status"></p><div class="foot"><a href="./index.html">홈페이지로 돌아가기</a></div></main></div><script type="module">import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';const db=createClient('https://ljjurwyhhbokrkcbfqwh.supabase.co','sb_publishable_wG_7bLxeoVA1DY35GPK0yA_GsXYGODM'),$=x=>document.getElementById(x),msg=s=>$('msg').textContent=s;const dest=new URLSearchParams(location.search).get('return');const target=['index.html','02-bank.html'].includes(dest)?dest:'index.html';function tab(signup){$('signup').classList.toggle('hidden',!signup);$('login').classList.toggle('hidden',signup);$('signupTab').classList.toggle('active',signup);$('loginTab').classList.toggle('active',!signup);msg('')}$('loginTab').onclick=()=>tab(false);$('signupTab').onclick=()=>tab(true);$('login').onsubmit=async e=>{e.preventDefault();msg('로그인 확인 중...');const{data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)return msg('로그인 실패: '+error.message);const{data:p}=await db.from('nstudy_profiles').select('blocked').eq('id',data.user.id).maybeSingle();if(!p){await db.auth.signOut();return msg('회원 프로필이 없습니다. 3단계 SQL을 실행한 뒤 다시 가입하거나 관리자에게 문의해 주세요.');}if(p.blocked){await db.auth.signOut();return msg('로그인이 제한된 계정입니다.')}location.href='./'+target};$('signup').onsubmit=async e=>{e.preventDefault();msg('회원가입 처리 중...');const email=$('newEmail').value.trim(),password=$('newPassword').value,username=$('username').value.trim().toLowerCase();const metadata={username,member_type:$('memberType').value,full_name:$('fullName').value.trim(),school:$('school').value.trim(),grade:$('grade').value.trim(),phone:$('phone').value.trim(),address:$('address').value.trim()};const{data,error}=await db.auth.signUp({email,password,options:{data:metadata,emailRedirectTo:new URL('./001-login.html',location.href).href}});if(error)return msg('회원가입 실패: '+error.message);if(!data.session)return msg('인증 메일을 확인해 주세요. 이메일 인증 후 이 화면에서 로그인하시면 됩니다.');const{data:existing}=await db.from('nstudy_profiles').select('id').eq('id',data.user.id).maybeSingle();if(!existing)return msg('계정이 생성되었지만 프로필 생성이 확인되지 않았습니다. 3단계 SQL을 먼저 실행해 주세요.');msg('회원가입이 완료되었습니다.');location.href='./'+target};</script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NSTUDY 로그인</title>
+<style>
+body{font-family:'Malgun Gothic',sans-serif;background:#f3f6fb;margin:0;color:#19283b}
+.wrap{max-width:480px;margin:7vh auto;background:white;border-radius:16px;box-shadow:0 8px 40px #152d4818;overflow:visible}
+header{background:#101d39;color:white;padding:24px;text-align:center;font-size:25px;font-weight:800;border-radius:16px 16px 0 0}
+main{padding:28px}label{display:block;margin:14px 0 6px;font-weight:700}
+input,select,button{box-sizing:border-box;width:100%;padding:13px;border-radius:7px;border:1px solid #cdd6e4;font-size:16px}
+button{background:#1769e0;color:white;border:0;font-weight:800;margin-top:20px;cursor:pointer}
+.tabs{display:flex;gap:8px}.tabs button{margin:0;background:#e8eef8;color:#234}.tabs button.active{background:#1769e0;color:#fff}
+.hidden{display:none!important}#msg{color:#a32929;margin-top:15px;white-space:pre-wrap}.foot{text-align:center;margin-top:20px}a{color:#1769e0}
+.school-search{position:relative}.school-hint{font-size:12px;color:#687487;margin-top:5px;line-height:1.5}
+.school-results{position:absolute;top:100%;left:0;right:0;z-index:20;max-height:260px;overflow-y:auto;background:#fff;border:1px solid #b8c8e0;border-radius:8px;box-shadow:0 12px 28px #152d4826;margin-top:3px;list-style:none;padding:4px}
+.school-results li{margin:0}.school-results button{display:block;text-align:left;background:#fff;color:#19283b;margin:0;border:0;border-radius:5px;font-weight:400;padding:10px 12px}
+.school-results button:hover,.school-results button:focus{background:#edf4ff;outline:2px solid #a9c7f8;outline-offset:-2px}
+.school-name{display:block;font-size:14px;font-weight:700}.school-meta{display:block;color:#62718a;font-size:12px;margin-top:2px}
+.school-empty{padding:12px;color:#687487;font-size:13px}
+@media(max-width:520px){.wrap{margin:0;min-height:100vh;border-radius:0}header{border-radius:0}main{padding:22px}}
+</style>
+</head>
+<body><div class="wrap"><header>NSTUDY 로그인</header><main>
+<div class="tabs"><button type="button" id="loginTab" class="active">로그인</button><button type="button" id="signupTab">회원가입</button></div>
+<form id="login"><label for="email">이메일</label><input id="email" type="email" required autocomplete="email"><label for="password">비밀번호</label><input id="password" type="password" required autocomplete="current-password"><button>로그인</button></form>
+<form id="signup" class="hidden">
+<label for="username">아이디</label><input id="username" minlength="4" required>
+<label for="newEmail">이메일</label><input id="newEmail" type="email" required>
+<label for="newPassword">비밀번호</label><input id="newPassword" type="password" minlength="6" required>
+<label for="memberType">회원 유형</label><select id="memberType"><option>학생</option><option>학부모</option><option>강사</option></select>
+<label for="fullName">성명</label><input id="fullName" required>
+<label for="school">학교</label>
+<div class="school-search" id="schoolSearch">
+<input id="school" type="text" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="schoolResults" placeholder="지역 또는 학교명 입력 (예: 부산)">
+<ul id="schoolResults" class="school-results hidden" role="listbox" aria-label="학교 자동추천"></ul>
+</div>
+<p class="school-hint">지역명 또는 학교명을 입력하면 학교 유형과 함께 추천됩니다. 목록에 없는 학교는 직접 입력할 수 있습니다.</p>
+<label for="grade">학년</label><input id="grade">
+<label for="phone">전화번호</label><input id="phone" type="tel">
+<label for="address">주소</label><input id="address">
+<button>회원가입</button></form>
+<p id="msg" role="status"></p><div class="foot"><a href="./index.html">홈페이지로 돌아가기</a></div>
+</main></div>
+<script type="module">
+import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const db=createClient('https://ljjurwyhhbokrkcbfqwh.supabase.co','sb_publishable_wG_7bLxeoVA1DY35GPK0yA_GsXYGODM'),$=x=>document.getElementById(x),msg=s=>$('msg').textContent=s;
+const dest=new URLSearchParams(location.search).get('return');
+const target=['index.html','02-bank.html'].includes(dest)?dest:'index.html';
+function tab(signup){$('signup').classList.toggle('hidden',!signup);$('login').classList.toggle('hidden',signup);$('signupTab').classList.toggle('active',signup);$('loginTab').classList.toggle('active',!signup);closeSuggestions();msg('')}
+$('loginTab').onclick=()=>tab(false);$('signupTab').onclick=()=>tab(true);
+// 예시로 제공하는 일부 실제 학교입니다. 전체 학교 목록이 아니며, 사용자가 직접 입력할 수도 있습니다.
+const SCHOOLS=[
+ {name:'부산기계공업고등학교',region:'부산',type:'마이스터고'},
+ {name:'부산자동차고등학교',region:'부산',type:'마이스터고'},
+ {name:'부산소프트웨어마이스터고등학교',region:'부산',type:'마이스터고'},
+ {name:'부산전자공업고등학교',region:'부산',type:'특성화고'},
+ {name:'부산대학교',region:'부산',type:'대학교'},
+ {name:'국립부경대학교',region:'부산',type:'대학교'},
+ {name:'동아대학교',region:'부산',type:'대학교'},
+ {name:'동의대학교',region:'부산',type:'대학교'},
+ {name:'경성대학교',region:'부산',type:'대학교'},
+ {name:'신라대학교',region:'부산',type:'대학교'}
+];
+const schoolInput=$('school'),results=$('schoolResults');
+function closeSuggestions(){results.classList.add('hidden');results.replaceChildren();schoolInput.setAttribute('aria-expanded','false')}
+function chooseSchool(name){schoolInput.value=name;closeSuggestions();schoolInput.focus()}
+function showSuggestions(){
+ const q=schoolInput.value.trim().toLocaleLowerCase('ko');
+ results.replaceChildren();
+ if(!q){closeSuggestions();return}
+ const matches=SCHOOLS.filter(s=>[s.name,s.region,s.type].some(v=>v.toLocaleLowerCase('ko').includes(q))).slice(0,12);
+ if(!matches.length){const li=document.createElement('li');li.className='school-empty';li.textContent='추천 학교가 없습니다. 학교명을 직접 입력해 주세요.';results.appendChild(li)}
+ else matches.forEach(s=>{
+  const li=document.createElement('li');li.setAttribute('role','option');
+  const btn=document.createElement('button');btn.type='button';
+  const name=document.createElement('span');name.className='school-name';name.textContent=s.name;
+  const meta=document.createElement('span');meta.className='school-meta';meta.textContent=s.region+' · '+s.type;
+  btn.append(name,meta);btn.addEventListener('mousedown',e=>e.preventDefault());btn.addEventListener('click',()=>chooseSchool(s.name));li.appendChild(btn);results.appendChild(li);
+ });
+ results.classList.remove('hidden');schoolInput.setAttribute('aria-expanded','true');
+}
+schoolInput.addEventListener('input',showSuggestions);
+schoolInput.addEventListener('focus',showSuggestions);
+schoolInput.addEventListener('keydown',e=>{if(e.key==='Escape')closeSuggestions();if(e.key==='ArrowDown'&&!results.classList.contains('hidden')){const first=results.querySelector('button');if(first){e.preventDefault();first.focus()}}});
+results.addEventListener('keydown',e=>{const buttons=[...results.querySelectorAll('button')];const idx=buttons.indexOf(document.activeElement);if(e.key==='ArrowDown'&&idx<buttons.length-1){e.preventDefault();buttons[idx+1].focus()}else if(e.key==='ArrowUp'){e.preventDefault();if(idx>0)buttons[idx-1].focus();else schoolInput.focus()}else if(e.key==='Escape'){closeSuggestions();schoolInput.focus()}});
+document.addEventListener('click',e=>{if(!$('schoolSearch').contains(e.target))closeSuggestions()});
+$('login').onsubmit=async e=>{e.preventDefault();msg('로그인 확인 중...');const{data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)return msg('로그인 실패: '+error.message);const{data:p}=await db.from('nstudy_profiles').select('blocked').eq('id',data.user.id).maybeSingle();if(!p){await db.auth.signOut();return msg('회원 프로필이 없습니다. 3단계 SQL을 실행한 뒤 다시 가입하거나 관리자에게 문의해 주세요.');}if(p.blocked){await db.auth.signOut();return msg('로그인이 제한된 계정입니다.')}location.href='./'+target};
+$('signup').onsubmit=async e=>{e.preventDefault();msg('회원가입 처리 중...');const email=$('newEmail').value.trim(),password=$('newPassword').value,username=$('username').value.trim().toLowerCase();const metadata={username,member_type:$('memberType').value,full_name:$('fullName').value.trim(),school:$('school').value.trim(),grade:$('grade').value.trim(),phone:$('phone').value.trim(),address:$('address').value.trim()};const{data,error}=await db.auth.signUp({email,password,options:{data:metadata,emailRedirectTo:new URL('./001-login.html',location.href).href}});if(error)return msg('회원가입 실패: '+error.message);if(!data.session)return msg('인증 메일을 확인해 주세요. 이메일 인증 후 이 화면에서 로그인하시면 됩니다.');const{data:existing}=await db.from('nstudy_profiles').select('id').eq('id',data.user.id).maybeSingle();if(!existing)return msg('계정이 생성되었지만 프로필 생성이 확인되지 않았습니다. 3단계 SQL을 먼저 실행해 주세요.');msg('회원가입이 완료되었습니다.');location.href='./'+target};
+</script></body></html>
