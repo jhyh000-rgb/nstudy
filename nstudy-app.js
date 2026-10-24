@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const db=createClient('https://ljjurwyhhbokrkcbfqwh.supabase.co','sb_publishable_wG_7bLxeoVA1DY35GPK0yA_GsXYGODM');
-const CERTIFICATE_SUBJECTS={"기능사 · 전기·전자": ["전기기능사", "전자기기기능사", "승강기기능사", "공조냉동기계기능사", "전자캐드기능사"], "기능사 · 기계·자동차": ["컴퓨터응용선반기능사", "컴퓨터응용밀링기능사", "설비보전기능사", "자동차정비기능사", "전산응용기계제도기능사"], "기능사 · IT·정보통신": ["정보처리기능사", "정보기기운용기능사", "통신선로기능사", "컴퓨터그래픽기능사", "전자출판기능사"], "기능사 · 화학·환경": ["위험물기능사", "가스기능사", "환경기능사", "화학분석기능사", "에너지관리기능사"], "기능사 · 조리·제과": ["한식조리기능사", "양식조리기능사", "제빵기능사", "제과기능사", "중식조리기능사"]};
+const CERTIFICATE_SUBJECTS={"기능사 · 전기·전자": ["전기기능사", "전자기기기능사", "승강기기능사", "공조냉동기계기능사", "전자캐드기능사", "전자계산기기능사", "전자부품장착기능사", "전기철도기능사"], "기능사 · 기계·자동차": ["컴퓨터응용선반기능사", "컴퓨터응용밀링기능사", "설비보전기능사", "자동차정비기능사", "전산응용기계제도기능사", "기계가공조립기능사", "자동차차체수리기능사", "자동차보수도장기능사"], "기능사 · IT·정보통신": ["정보처리기능사", "정보기기운용기능사", "통신선로기능사", "컴퓨터그래픽스운용기능사", "전자출판기능사", "웹디자인개발기능사", "통신기기기능사", "무선설비기능사"], "기능사 · 화학·환경": ["위험물기능사", "가스기능사", "환경기능사", "화학분석기능사", "에너지관리기능사", "신재생에너지발전설비기능사(태양광)", "종자기능사", "유기농업기능사"], "기능사 · 조리·제과": ["한식조리기능사", "양식조리기능사", "제빵기능사", "제과기능사", "중식조리기능사", "일식조리기능사", "복어조리기능사", "떡제조기능사"]};
 const certificateCategory=c=>Object.prototype.hasOwnProperty.call(CERTIFICATE_SUBJECTS,c);
 const $=id=>document.getElementById(id);let user=null,profile=null,posts=[],category='TOEIC',subcategory='',page=1;
 const admin=()=>profile?.role==='admin'&&!profile.blocked;
@@ -190,6 +190,18 @@ function initBank(){if(location.hash==='#certificate-bank'){category='기능사 
       return;
     }
     category=c.dataset.category;
+    const section=c.closest('[data-bank-section]')?.dataset.bankSection || 'career';
+    const resultsTitle={
+      ncs:'NCS 직업기초능력 문제은행',
+      career:'취업 실전 준비 문제은행',
+      certificate:'기능사 자격시험 문제은행'
+    };
+    if(results){
+      results.classList.remove('bank-results-ncs','bank-results-career','bank-results-certificate');
+      results.classList.add('bank-results-'+section);
+      const heading=$('bankResultsHeading');
+      if(heading)heading.textContent=resultsTitle[section]||'문제은행';
+    }
     subcategory='';
     page=1;
     document.querySelectorAll('.category-card').forEach(card=>card.setAttribute('aria-expanded','false'));
