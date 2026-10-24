@@ -52,6 +52,23 @@ function renderPosts(){
  if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}
  if($('postView'))$('postView').classList.add('hidden');
 }
+// YouTube 주소는 영상 ID만 추출하여 안전한 embed 주소로 변환합니다.
+function youtubeVideoId(value){
+ if(!value)return '';
+ try{
+  const u=new URL(value.trim());
+  if(u.protocol!=='https:'&&u.protocol!=='http:')return '';
+  const host=u.hostname.toLowerCase().replace(/^(www\.|m\.)/,'');
+  const parts=u.pathname.split('/').filter(Boolean);
+  let id='';
+  if(host==='youtu.be')id=parts[0]||'';
+  else if(host==='youtube.com'||host==='youtube-nocookie.com'){
+   if(parts[0]==='watch')id=u.searchParams.get('v')||'';
+   else if(['shorts','embed','live'].includes(parts[0]))id=parts[1]||'';
+  }
+  return /^[A-Za-z0-9_-]{11}$/.test(id)?id:'';
+ }catch{return ''}
+}
 async function openPost(p){
  const v=$('postView');if(!v)return;
  v.replaceChildren();
@@ -87,6 +104,20 @@ async function openPost(p){
    const link=document.createElement('a');link.href=downloadUrl;link.download=name;document.body.appendChild(link);link.click();link.remove();
   };actions.appendChild(dl);media.appendChild(actions);
  }
+ // PDF·이미지와 함께 YouTube 영상을 게시글 안에 표시합니다.
+ if(p.youtube_url){
+  const id=youtubeVideoId(p.youtube_url);
+  if(id){
+   const label=document.createElement('strong');label.textContent='유튜브 동영상';media.appendChild(label);
+   const wrap=document.createElement('div');wrap.className='youtube-embed';
+   const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+id;
+   iframe.title='유튜브 동영상';iframe.loading='lazy';iframe.referrerPolicy='strict-origin-when-cross-origin';
+   iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+   iframe.allowFullscreen=true;wrap.appendChild(iframe);media.appendChild(wrap);
+   const link=document.createElement('a');link.href='https://www.youtube.com/watch?v='+id;
+   link.target='_blank';link.rel='noopener noreferrer';link.textContent='유튜브에서 직접 보기';media.appendChild(link);
+  }
+ }
  const div=document.createElement('div');div.className='post-actions';
  const pr=document.createElement('button');pr.className='btn btn-primary';pr.textContent='인쇄';pr.onclick=async()=>{
   if(!p.pdf_path){alert('첨부된 PDF 문서가 없습니다.');return;}
@@ -101,7 +132,7 @@ async function openPost(p){
 };
  const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
  if(admin()){
-  const edit=document.createElement('button');edit.className='btn btn-secondary';edit.textContent='수정';edit.onclick=async()=>{const title=prompt('수정할 제목',p.title);if(title===null)return;const body=prompt('수정할 본문',p.body);if(body===null)return;const{error}=await db.from('nstudy_posts').update({title:title.trim(),body:body.trim()}).eq('id',p.id);if(error)return say('수정 실패: '+error.message);await refreshPosts();say('게시글이 수정되었습니다.')};
+  const edit=document.createElement('button');edit.className='btn btn-secondary';edit.textContent='수정';edit.onclick=async()=>{const title=prompt('수정할 제목',p.title);if(title===null)return;const body=prompt('수정할 본문',p.body);if(body===null)return;const yt=prompt('유튜브 주소 (없으면 빈칸)',p.youtube_url||'');if(yt===null)return;if(yt.trim()&&!youtubeVideoId(yt))return say('올바른 유튜브 주소를 입력해 주세요.');const{error}=await db.from('nstudy_posts').update({title:title.trim(),body:body.trim(),youtube_url:yt.trim()||null}).eq('id',p.id);if(error)return say('수정 실패: '+error.message);await refreshPosts();say('게시글이 수정되었습니다.')};
   const del=document.createElement('button');del.className='btn btn-secondary';del.textContent='삭제';del.onclick=async()=>{if(!confirm('이 게시글을 삭제하시겠습니까? 첨부파일은 별도로 남을 수 있습니다.'))return;const{error}=await db.from('nstudy_posts').delete().eq('id',p.id);if(error)return say('삭제 실패: '+error.message);await refreshPosts();say('게시글이 삭제되었습니다.')};div.append(edit,del);
  }
  v.appendChild(div);v.classList.remove('hidden');v.scrollIntoView({block:'start',behavior:'smooth'});
@@ -132,7 +163,7 @@ async function upload(file){
  if(!response.ok||!result.path)throw Error(result.error||'R2 업로드 실패');
  return {path:'r2:'+result.path,name:file.name};
 }
-function initBank(){document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=row.subcategory;page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
+function initBank(){document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=row.subcategory;page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;const skills=[...new Set(posts.filter(p=>p.category===c).map(p=>p.subcategory).filter(Boolean))];sel.innerHTML='<option value="">세부 능력 선택</option>'+skills.map(x=>'<option>'+esc(x)+'</option>').join('')}
 async function renderMembers(){
   const root=$('adminMembers');
