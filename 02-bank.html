@@ -105,6 +105,22 @@ body.bank-page nav{flex-wrap:wrap}
 .bank-results .bank-toolbar h3{color:var(--result-color)}
 .bank-results .post-row:hover{border-color:var(--result-color)}
 @media(max-width:600px){.category-group.bank-group-ncs,.category-group.bank-group-career,.category-group.bank-group-certificate{padding:13px}.bank-results{padding:12px}.bank-results-heading{font-size:15px;padding:10px 12px}}
+
+/* 선택한 대분류 안에서 바로 펼쳐지는 문제은행 아코디언 */
+.category-group[data-bank-section]{overflow:visible}
+.category-group[data-bank-section]>.bank-results{
+  margin:18px 0 4px;padding:20px;border-radius:12px;
+  animation:bankExpand .18s ease-out;
+}
+.category-group[data-bank-section]>.category-grid .category-card[aria-expanded="true"]{
+  outline:2px solid currentColor;outline-offset:2px;
+}
+.bank-group-ncs>.bank-results{border:2px solid #1769e0;background:#f0f6ff}
+.bank-group-career>.bank-results{border:2px solid #15803d;background:#f0fdf4}
+.bank-group-certificate>.bank-results{border:2px solid #b45309;background:#fffbeb}
+@keyframes bankExpand{from{opacity:.6;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.category-group[data-bank-section]>.bank-results{padding:12px;margin-top:14px}}
+
 </style>
 </head>
 <body class="bank-page">
@@ -126,7 +142,7 @@ body.bank-page nav{flex-wrap:wrap}
 
 <section class="problem-bank" id="problem-bank"><div class="container"><div class="section-head"><div class="section-label">NSTUDY STUDY ARCHIVE</div><h2>NSTUDY 문제은행</h2><p>과목별 학습 자료와 게시글을 확인하세요. 비회원은 각 과목의 최신 게시글 3개를 열람할 수 있습니다.</p></div>
 <div class="bank-shell">
-<div class="category-group bank-group-ncs"><h3>① NCS 직업기초능력 · 10개 영역</h3><div aria-label="NCS 직업기초능력 영역" class="category-grid" id="ncsCategoryGrid" role="group">
+<div class="category-group bank-group-ncs" data-bank-section="ncs"><h3>① NCS 직업기초능력 · 10개 영역</h3><div aria-label="NCS 직업기초능력 영역" class="category-grid" id="ncsCategoryGrid" role="group">
 <button class="category-card" data-category="의사소통능력"><strong>의사소통능력</strong><small>문서 이해 · 표현</small></button>
 <button class="category-card" data-category="수리능력"><strong>수리능력</strong><small>계산 · 통계 · 도표</small></button>
 <button class="category-card" data-category="문제해결능력"><strong>문제해결능력</strong><small>사고 · 대안 도출</small></button>
@@ -138,7 +154,7 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="조직이해능력"><strong>조직이해능력</strong><small>조직 · 업무 이해</small></button>
 <button class="category-card" data-category="직업윤리"><strong>직업윤리</strong><small>근로 · 공동체 윤리</small></button>
 </div></div>
-<div class="category-group bank-group-career"><h3>② 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
+<div class="category-group bank-group-career" data-bank-section="career"><h3>② 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
 <button class="category-card" data-category="한국사"><strong>한국사</strong><small>한국사능력검정시험 대비</small></button>
 <button class="category-card" data-category="컴활"><strong>컴활</strong><small>컴퓨터활용능력 시험 대비</small></button>
 <button class="category-card active" data-category="TOEIC"><strong>TOEIC</strong><small>LC · RC · 실전 연습</small></button>
@@ -146,14 +162,14 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="면접"><strong>면접</strong><small>예상 질문 · 답변 연습</small></button>
 </div></div>
 
-<div class="category-group bank-group-certificate" id="certificate-bank"><h3>③ 기능사 자격시험 · 5개 분야 / 40개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
+<div class="category-group bank-group-certificate" id="certificate-bank" data-bank-section="certificate"><h3>③ 기능사 자격시험 · 5개 분야 / 40개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
 <button type="button" class="category-card certificate-category" data-category="기능사 · 전기·전자" data-certificate-group="전기·전자"><strong>전기·전자</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 기계·자동차" data-certificate-group="기계·자동차"><strong>기계·자동차</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · IT·정보통신" data-certificate-group="IT·정보통신"><strong>IT·정보통신</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 화학·환경" data-certificate-group="화학·환경"><strong>화학·환경</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 조리·제과" data-certificate-group="조리·제과"><strong>조리·제과</strong><small>기능사 8개 과목</small></button>
 </div></div>
-<div class="bank-results bank-results-career" id="bankResults"><div class="bank-results-heading" id="bankResultsHeading">② 취업 실전 준비 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
+<div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">② 취업 실전 준비 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
