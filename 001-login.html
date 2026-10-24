@@ -37,7 +37,7 @@ button{background:#1769e0;color:white;border:0;font-weight:800;margin-top:20px;c
 <ul id="schoolResults" class="school-results hidden" role="listbox" aria-label="학교 자동추천"></ul>
 </div>
 <p class="school-hint">지역명 또는 학교명을 입력하면 학교 유형과 함께 추천됩니다. 목록에 없는 학교는 직접 입력할 수 있습니다.</p>
-<label for="grade">학년</label><input id="grade">
+<label for="grade">학년</label><input id="grade" list="gradeSuggestions" placeholder="학년을 선택하거나 입력하세요" autocomplete="off"><datalist id="gradeSuggestions"><option value="1학년"></option><option value="2학년"></option><option value="3학년"></option><option value="4학년"></option><option value="일반"></option></datalist>
 <label for="phone">전화번호</label><input id="phone" type="tel">
 <label for="address">주소</label><input id="address">
 <button>회원가입</button></form>
