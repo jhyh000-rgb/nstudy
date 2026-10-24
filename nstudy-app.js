@@ -28,6 +28,10 @@ async function toggleNotice(p,checked,cb){
  cb.disabled=false;
 }
 function renderPosts(){
+ const results=$('bankResults'),resultsHeading=$('bankResultsHeading');
+ const group=certificateCategory(category)?'certificate':(['한국사','컴활','TOEIC','자기소개서','면접'].includes(category)?'career':'ncs');
+ if(results){results.classList.remove('bank-results-ncs','bank-results-career','bank-results-certificate');results.classList.add('bank-results-'+group)}
+ if(resultsHeading)resultsHeading.textContent=group==='ncs'?'① NCS 직업기초능력 문제은행':group==='career'?'② 취업 실전 준비 문제은행':'③ 기능사 자격시험 문제은행';
  const cards=document.querySelectorAll('.category-card');
  cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
  if($('categoryTitle'))$('categoryTitle').textContent=category+' 학습 자료';
