@@ -123,6 +123,15 @@ body.bank-page nav{flex-wrap:wrap}
 @keyframes bankExpand{from{opacity:.6;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.category-group[data-bank-section]>.bank-results{padding:12px;margin-top:14px}}
 
+/* ④ 수행평가: 기존 문제은행 카드 디자인 유지 */
+.bank-group-assessment{--group-color:#7c3aed;--group-light:#f7f2ff;--group-line:#dcc9ff}
+.category-group.bank-group-assessment{padding:20px;border:1px solid var(--group-line);border-left:6px solid var(--group-color);border-radius:14px;background:var(--group-light);margin:0 0 20px}
+.category-group.bank-group-assessment h3{color:var(--group-color);font-size:19px;font-weight:900}
+.category-group.bank-group-assessment .category-card{--card-bg:#fff;--card-border:var(--group-line);--card-ink:var(--group-color)}
+.category-group.bank-group-assessment .category-card.active{background:var(--group-light)}
+.bank-results-assessment{--result-color:#7c3aed;--result-light:#f7f2ff;--result-line:#dcc9ff}
+.bank-group-assessment>.bank-results{border:2px solid #7c3aed;background:#faf7ff}
+@media(max-width:600px){.category-group.bank-group-assessment{padding:13px}}
 </style>
 </head>
 <body class="bank-page">
@@ -171,11 +180,18 @@ body.bank-page nav{flex-wrap:wrap}
 <button type="button" class="category-card certificate-category" data-category="기능사 · 화학·환경" data-certificate-group="화학·환경"><strong>화학·환경</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 조리·제과" data-certificate-group="조리·제과"><strong>조리·제과</strong><small>기능사 8개 과목</small></button>
 </div></div>
+<div class="category-group bank-group-assessment" id="assessment-bank" data-bank-section="assessment">
+<h3>④ 수행평가 · 2개 영역</h3>
+<p class="certificate-intro">고등부와 중등부의 과목별 수행평가 학습자료를 확인하세요.</p>
+<div class="category-grid" aria-label="수행평가 영역" role="group">
+<button type="button" class="category-card" data-category="수행평가(고등부)"><strong>수행평가(고등부)</strong><small>고등학교 과목별 수행평가</small></button>
+<button type="button" class="category-card" data-category="수행평가(중등부)"><strong>수행평가(중등부)</strong><small>중학교 과목별 수행평가</small></button>
+</div></div>
 <div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>세부 능력 또는 기능사 자격증을 선택하면 해당 과목의 게시글을 볼 수 있습니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
-<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option></select></div>
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
@@ -205,5 +221,19 @@ body.bank-page nav{flex-wrap:wrap}
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
 <script type="module" src="./nstudy-app.js?v=20261025-certificate2"></script>
 
+<script>
+/* 수행평가 카드 선택 시 해당 영역 바로 아래에 기존 게시글 화면 표시 */
+document.querySelectorAll('#assessment-bank .category-card').forEach(button=>{
+  button.addEventListener('click',()=>{
+    const results=document.getElementById('bankResults');
+    const section=document.getElementById('assessment-bank');
+    if(!results||!section)return;
+    section.appendChild(results);
+    results.classList.remove('bank-results-ncs','bank-results-career','bank-results-certificate','hidden');
+    results.classList.add('bank-results-assessment');
+    document.querySelectorAll('.category-card').forEach(card=>card.setAttribute('aria-expanded',String(card===button)));
+  });
+});
+</script>
 </body>
 </html>
