@@ -78,6 +78,56 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 #home.hero .hero-copy.is-active .hero-buttons{animation:hero-copy-rise .7s .35s both;}
 @keyframes hero-copy-rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){#home.hero .hero-copy.is-active,#home.hero .hero-copy.is-active *{animation:none!important;}}
+
+/* 메인 이미지와 함께 바뀌는 서로 다른 크기의 플로팅 카드 */
+#home.hero .hero-float-zone{position:absolute;right:clamp(25px,5vw,90px);top:50%;transform:translateY(-50%);width:350px;height:405px;z-index:4;pointer-events:none}
+#home.hero .float-scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s,visibility .5s}
+#home.hero .float-scene.is-active{opacity:1;visibility:visible}
+#home.hero .float-card{box-sizing:border-box;position:absolute;display:flex;align-items:center;gap:10px;padding:13px;border-radius:17px;background:rgba(255,255,255,.95);color:#163052;box-shadow:0 12px 30px #061d3d55;backdrop-filter:blur(8px);animation:card-rise .75s both}
+#home.hero .float-scene:not(.is-active) .float-card{animation:none}
+#home.hero .float-symbol{display:grid;place-items:center;flex-shrink:0;width:40px;height:40px;background:#ffffff33;border-radius:12px;font-size:24px}
+#home.hero .float-info{display:flex;flex-direction:column;gap:5px}#home.hero .float-info strong{font-size:16px;line-height:1.25}#home.hero .float-info small{font-size:12px;line-height:1.4;opacity:.85}
+#home.hero .tone-blue{background:linear-gradient(125deg,#117ce7,#4bb5ff);color:white}#home.hero .tone-orange{background:linear-gradient(125deg,#ff9c76,#ffd0a7);color:#503026}#home.hero .tone-mint{background:linear-gradient(125deg,#61dcb6,#b7f6dc);color:#154d42}
+#home.hero .pos-1{width:245px;min-height:125px;left:0;top:90px;animation-delay:.08s}#home.hero .pos-2{width:215px;min-height:85px;right:0;top:0;animation-delay:.18s}#home.hero .pos-3{width:170px;min-height:78px;right:0;top:233px;animation-delay:.28s}#home.hero .pos-4{width:245px;min-height:78px;left:0;bottom:0;animation-delay:.38s}
+@keyframes card-rise{from{opacity:0;transform:translateY(25px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(min-width:1101px){#home.hero>.container{padding-right:425px!important}#home.hero .hero-content{max-width:740px!important}}
+@media(min-width:701px) and (max-width:1100px){#home.hero .hero-float-zone{right:10px;transform:translateY(-50%) scale(.72);transform-origin:right center}#home.hero>.container{padding-right:240px!important}#home.hero h1{font-size:clamp(31px,4vw,48px)}}
+@media(max-width:700px){#home.hero{min-height:690px;padding-bottom:255px}#home.hero .hero-float-zone{top:auto;bottom:30px;right:50%;transform:translateX(50%) scale(.60);transform-origin:bottom center}#home.hero>.container{padding-left:70px!important;padding-right:16px!important}#home.hero .hero-nav{bottom:10px}#home.hero .hero-arrow{top:34%}}
+@media(max-width:380px){#home.hero .hero-float-zone{transform:translateX(50%) scale(.52)}#home.hero>.container{padding-left:58px!important}}
+@media(prefers-reduced-motion:reduce){#home.hero .float-card{animation:none!important}#home.hero .float-scene{transition:none!important}}
+
+/* 플로팅 카드 크기 50% 축소: 카드 크기 비율과 슬라이드 기능 유지 */
+@media (min-width:1101px){
+ #home.hero .hero-float-zone{transform:translateY(-50%) scale(.5);transform-origin:right center;right:clamp(25px,5vw,90px)}
+ #home.hero>.container{padding-right:245px!important}
+}
+@media (min-width:701px) and (max-width:1100px){
+ #home.hero .hero-float-zone{transform:translateY(-50%) scale(.36);transform-origin:right center}
+ #home.hero>.container{padding-right:145px!important}
+}
+@media (max-width:700px){
+ #home.hero{min-height:590px;padding-bottom:135px}
+ #home.hero .hero-float-zone{transform:translateX(50%) scale(.30);transform-origin:bottom center;bottom:15px}
+}
+@media (max-width:380px){#home.hero .hero-float-zone{transform:translateX(50%) scale(.26)}}
+
+/* 사진마다 서로 다른 비대칭 카드 배치: 기존 50% 축소 크기는 그대로 유지 */
+#home.hero .float-scene:nth-child(1) .pos-1{left:0;top:95px;right:auto;bottom:auto}
+#home.hero .float-scene:nth-child(1) .pos-2{right:0;top:0;left:auto;bottom:auto}
+#home.hero .float-scene:nth-child(1) .pos-3{right:0;top:235px;left:auto;bottom:auto}
+#home.hero .float-scene:nth-child(1) .pos-4{left:0;bottom:0;right:auto;top:auto}
+/* 두 번째 장: 왼쪽 위 작은 카드, 오른쪽 가운데 큰 카드, 아래 두 카드 분산 */
+#home.hero .float-scene:nth-child(2) .pos-1{right:0;top:115px;left:auto;bottom:auto}
+#home.hero .float-scene:nth-child(2) .pos-2{left:0;top:0;right:auto;bottom:auto}
+#home.hero .float-scene:nth-child(2) .pos-3{left:0;top:245px;right:auto;bottom:auto}
+#home.hero .float-scene:nth-child(2) .pos-4{right:0;bottom:0;left:auto;top:auto}
+/* 세 번째 장: 위 중앙 큰 카드, 오른쪽 위 작은 카드, 아래 좌우 흩어진 카드 */
+#home.hero .float-scene:nth-child(3) .pos-1{left:0;top:0;right:auto;bottom:auto}
+#home.hero .float-scene:nth-child(3) .pos-2{right:0;top:155px;left:auto;bottom:auto}
+#home.hero .float-scene:nth-child(3) .pos-3{left:0;top:235px;right:auto;bottom:auto}
+#home.hero .float-scene:nth-child(3) .pos-4{right:0;bottom:0;left:auto;top:auto}
+.assessment-link{font-weight:800;color:#1769e0;text-decoration:underline;text-underline-offset:3px}
+.assessment-link:hover{color:#0c459b}
 </style>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/nstudy-icon-192.png">
@@ -100,7 +150,7 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 <div class="hero-slide" style="background-image:url('./images/hero-03.jpg')" aria-hidden="true"></div>
 <button type="button" class="hero-arrow prev" aria-label="이전 사진">‹</button>
 <button type="button" class="hero-arrow next" aria-label="다음 사진">›</button>
-<div class="hero-nav" aria-label="메인 사진 선택"><button type="button" class="hero-dot" aria-label="첫 번째 사진" aria-current="true"></button><button type="button" class="hero-dot" aria-label="두 번째 사진" aria-current="false"></button><button type="button" class="hero-dot" aria-label="세 번째 사진" aria-current="false"></button></div>
+<div class="hero-float-zone" aria-label="교육 프로그램 소개 카드"><div class="float-scene is-active" aria-hidden="false"><div class="float-card pos-1 tone-blue"><span class="float-symbol">📘</span><span class="float-info"><strong>NCS 문제은행</strong><small>실전 문제로 합격 준비</small></span></div><div class="float-card pos-2 tone-white"><span class="float-symbol">✓</span><span class="float-info"><strong>학습 진도</strong><small>오늘의 학습 목표</small></span></div><div class="float-card pos-3 tone-orange"><span class="float-symbol">🎓</span><span class="float-info"><strong>취업 역량</strong><small>한 걸음 더 성장</small></span></div><div class="float-card pos-4 tone-mint"><span class="float-symbol">✦</span><span class="float-info"><strong>맞춤 학습</strong><small>나에게 맞는 교육</small></span></div></div><div class="float-scene" aria-hidden="true"><div class="float-card pos-1 tone-blue"><span class="float-symbol">📊</span><span class="float-info"><strong>NCS 학습</strong><small>핵심 역량을 체계적으로</small></span></div><div class="float-card pos-2 tone-white"><span class="float-symbol">📝</span><span class="float-info"><strong>문제 풀이</strong><small>영역별 실전 연습</small></span></div><div class="float-card pos-3 tone-orange"><span class="float-symbol">✓</span><span class="float-info"><strong>학습 관리</strong><small>꾸준한 성장 기록</small></span></div><div class="float-card pos-4 tone-mint"><span class="float-symbol">📚</span><span class="float-info"><strong>자료 해석</strong><small>기초부터 응용까지</small></span></div></div><div class="float-scene" aria-hidden="true"><div class="float-card pos-1 tone-blue"><span class="float-symbol">🎯</span><span class="float-info"><strong>취업 준비</strong><small>실전 중심 커리어 교육</small></span></div><div class="float-card pos-2 tone-white"><span class="float-symbol">🛠</span><span class="float-info"><strong>자격증 준비</strong><small>기능사 시험 대비</small></span></div><div class="float-card pos-3 tone-orange"><span class="float-symbol">💬</span><span class="float-info"><strong>면접 연습</strong><small>자신 있게 답하기</small></span></div><div class="float-card pos-4 tone-mint"><span class="float-symbol">✦</span><span class="float-info"><strong>자기소개서</strong><small>나만의 강점 발견</small></span></div></div></div><div class="hero-nav" aria-label="메인 사진 선택"><button type="button" class="hero-dot" aria-label="첫 번째 사진" aria-current="true"></button><button type="button" class="hero-dot" aria-label="두 번째 사진" aria-current="false"></button><button type="button" class="hero-dot" aria-label="세 번째 사진" aria-current="false"></button></div>
 <div class="container"><div class="hero-content"><div class="hero-copy is-active" data-slide="0" aria-hidden="false"><div class="hero-small">NCS · 국가기술자격 · CAREER ACADEMY</div><h1>우리의 모든 노력이<br><span>취업의 결과</span>로 연결됩니다.</h1><p>기능사 자격증 취득부터 NCS, 자기소개서·면접까지<br>전공 역량과 취업 준비를 함께하세요.</p><div class="hero-buttons"><a href="#program" class="btn btn-primary">교육과정 보기</a><a href="#certificate" class="btn btn-white">기능사 시험 준비</a><a href="#contact" class="btn btn-white">상담 문의</a></div></div><div class="hero-copy" data-slide="1" aria-hidden="true"><div class="hero-small">NSTUDY · NCS 문제은행</div><h1>실전 문제를 풀수록<br><span>합격에 가까워집니다.</span></h1><p>NCS 직업기초능력과 취업 준비 문제은행으로<br>나에게 필요한 영역을 체계적으로 학습하세요.</p><div class="hero-buttons"><a href="./02-bank.html" class="btn btn-primary">NCS 문제은행 바로가기</a><a href="#program" class="btn btn-white">교육과정 알아보기</a></div></div><div class="hero-copy" data-slide="2" aria-hidden="true"><div class="hero-small">NSTUDY · 취업 교육</div><h1>함께 배우는 오늘이<br><span>내일의 경쟁력</span>이 됩니다.</h1><p>실전 중심의 교육과 자격시험 준비로<br>자신만의 취업 역량을 키워가세요.</p><div class="hero-buttons"><a href="#certificate" class="btn btn-primary">자격시험 준비하기</a><a href="#contact" class="btn btn-white">교육 상담하기</a></div></div></div></div></section>
 <div class="trust"><div class="container trust-grid"><div><strong>NCS</strong><span>필기시험 대비</span></div><div><strong>공기업</strong><span>취업 준비</span></div><div><strong>대기업</strong><span>취업 준비</span></div><div><strong>기능사</strong><span>국가기술자격 대비</span></div></div></div>
 <section id="about"><div class="container about"><div class="about-img"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="학생 학습 모습" loading="lazy"></div><div class="about-text"><div class="section-label">NSTUDY ACADEMY</div><h2>단순한 자격증 공부가 아닌<br>취업을 위한 교육</h2><p>NSTUDY는 학생이 학교에서 쌓은 전공과 실무 역량을 취업 준비와 연결할 수 있도록 학습 방향과 준비 과정을 체계적으로 구성하는 교육 공간을 지향합니다.</p><ul class="check"><li>기능사 국가기술자격시험 대비</li><li>NCS 필기시험 준비</li><li>공기업 취업 준비</li><li>대기업 취업 준비</li><li>전공·실무 역량 기반 취업 전략</li></ul></div></div></section>
@@ -109,7 +159,7 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 <article class="card"><div class="card-img"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="교실 수업" loading="lazy"></div><div class="card-body"><h3>공기업 취업반</h3><p>필기부터 자기소개서와 면접까지 취업 준비 과정을 단계적으로 학습합니다.</p></div></article>
 <article class="card"><div class="card-img"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="시험 준비" loading="lazy"></div><div class="card-body"><h3>대기업 취업반</h3><p>기업 채용 과정에 맞춰 필기와 면접 등 취업 준비에 필요한 영역을 학습합니다.</p></div></article>
 </div></div></section>
-<section id="certificate" class="certificate-focus" aria-labelledby="certificateTitle"><div class="container"><div class="section-head"><div class="section-label">SKILLED TECHNICIAN CERTIFICATE</div><h2 id="certificateTitle">기능사 자격증, 취업 경쟁력의 시작입니다!</h2><p>마이스터고·특성화고 학생과 국가기술자격 취득을 준비하는 학습자를 위해 전공별 기능사 자격시험 학습을 지원합니다. 필기 기출문제와 핵심 이론, 실기 학습자료를 함께 준비하세요.</p></div><div class="program-grid"><article class="card"><div class="card-body"><h3>① NCS 직업기초능력</h3><p>10개 직업기초능력 영역별 문제풀이와 체계적인 학습</p></div></article><article class="card"><div class="card-body"><h3>② 취업 실전 준비</h3><p>자기소개서·면접·TOEIC 등 취업 준비 역량 강화</p></div></article><article class="card"><div class="card-body"><h3>③ 기능사 자격시험</h3><p>전공별 국가기술자격 취득을 위한 필기·실기 시험 대비</p></div></article></div></div></section>
+<section id="certificate" class="certificate-focus" aria-labelledby="certificateTitle"><div class="container"><div class="section-head"><div class="section-label">SKILLED TECHNICIAN CERTIFICATE</div><h2 id="certificateTitle">기능사 자격증, 취업 경쟁력의 시작입니다!</h2><p>마이스터고·특성화고 학생과 국가기술자격 취득을 준비하는 학습자를 위해 전공별 기능사 자격시험 학습을 지원합니다. 필기 기출문제와 핵심 이론, 실기 학습자료를 함께 준비하세요.</p></div><div class="program-grid"><article class="card"><div class="card-body"><h3>① NCS 직업기초능력</h3><p>10개 직업기초능력 영역별 문제풀이와 체계적인 학습</p></div></article><article class="card"><div class="card-body"><h3>② 취업 실전 준비</h3><p>자기소개서·면접·TOEIC 등 취업 준비 역량 강화</p></div></article><article class="card"><div class="card-body"><h3>③ 기능사 자격시험</h3><p>전공별 국가기술자격 취득을 위한 필기·실기 시험 대비</p></div></article><article class="card"><div class="card-body"><h3>④ 수행평가</h3><p><a href="./02-bank.html#assessment-bank" class="assessment-link">수행평가(고등부)</a> · <a href="./02-bank.html#assessment-bank" class="assessment-link">수행평가(중등부)</a><br>과목별 수행평가 문제, 보고서 작성 및 발표 준비 자료</p></div></article></div></div></section>
 <section id="classroom"><div class="container"><div class="section-head"><div class="section-label">CLASSROOM</div><h2>집중할 수 있는 학습 공간</h2><p>깔끔하고 집중도 높은 교육 공간 콘셉트입니다.</p></div><div class="class-grid">
 <div class="class-card"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="집중 학습 강의실" loading="lazy"><div class="class-overlay"><small>CLASS 01</small><h3>집중 학습 강의실</h3></div></div>
 <div class="class-card"><img src="https://cdn.edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="자기주도 학습" loading="lazy"><div class="class-overlay"><small>CLASS 02</small><h3>자기주도 학습 공간</h3></div></div>
@@ -136,13 +186,14 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 <script type="module" src="./nstudy-app.js?v=20261021-production"></script>
 <script>
 (()=>{const root=document.querySelector('.hero');if(!root)return;
-const slides=[...root.querySelectorAll('.hero-slide')],dots=[...root.querySelectorAll('.hero-dot')],copies=[...root.querySelectorAll('.hero-copy')];
+const slides=[...root.querySelectorAll('.hero-slide')],dots=[...root.querySelectorAll('.hero-dot')],copies=[...root.querySelectorAll('.hero-copy')],scenes=[...root.querySelectorAll('.float-scene')];
 let current=0,timer;
-function show(i){current=(i+slides.length)%slides.length;slides.forEach((s,n)=>{s.classList.toggle('is-active',n===current);s.setAttribute('aria-hidden',String(n!==current));});copies.forEach((c,n)=>{const selected=n===current;c.classList.toggle('is-active',selected);c.setAttribute('aria-hidden',String(!selected));c.querySelectorAll('a').forEach(a=>a.tabIndex=selected?0:-1);});dots.forEach((d,n)=>d.setAttribute('aria-current',String(n===current)));}
+function show(i){current=(i+slides.length)%slides.length;slides.forEach((s,n)=>{s.classList.toggle('is-active',n===current);s.setAttribute('aria-hidden',String(n!==current));});copies.forEach((c,n)=>{const selected=n===current;c.classList.toggle('is-active',selected);c.setAttribute('aria-hidden',String(!selected));c.querySelectorAll('a').forEach(a=>a.tabIndex=selected?0:-1);});dots.forEach((d,n)=>d.setAttribute('aria-current',String(n===current)));scenes.forEach((t,n)=>{t.classList.toggle('is-active',n===current);t.setAttribute('aria-hidden',String(n!==current));});}
 function play(){clearInterval(timer);if(!matchMedia('(prefers-reduced-motion: reduce)').matches)timer=setInterval(()=>show(current+1),5000);}
 root.querySelector('.hero-arrow.prev').addEventListener('click',()=>{show(current-1);play()});
 root.querySelector('.hero-arrow.next').addEventListener('click',()=>{show(current+1);play()});
 dots.forEach((d,i)=>d.addEventListener('click',()=>{show(i);play()}));
+
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInterval(timer);else play()});
 play();
 })();
