@@ -53,7 +53,7 @@ function renderPosts(){
   const title=document.createElement('span');title.style.cssText='display:block;font-weight:700';
   if(p.is_notice){const tag=document.createElement('span');tag.textContent='[공지] ';tag.style.cssText='color:#b45309;font-weight:800';title.appendChild(tag)}
   title.appendChild(document.createTextNode(p.title||''));
-  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=(p.body||'').slice(0,55);
+  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=(p.post_date||'')+' · '+(p.body||'').slice(0,55);
   view.append(title,desc);view.onclick=()=>openPost(p);row.appendChild(view);
   if(admin()){
    const label=document.createElement('label');label.style.cssText='display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;cursor:pointer';
@@ -87,7 +87,7 @@ async function openPost(p){
  const v=$('postView');if(!v)return;
  v.replaceChildren();
  const heading=document.createElement('h3');heading.textContent=p.title||'';v.appendChild(heading);
- const info=document.createElement('p');info.className='small-note';info.textContent=p.category||'';v.appendChild(info);
+ const info=document.createElement('p');info.className='small-note';info.textContent=[p.category,p.post_date].filter(Boolean).join(' · ');v.appendChild(info);
  const body=document.createElement('div');body.className='post-body';body.textContent=p.body||'';v.appendChild(body);
  const media=document.createElement('div');media.className='post-media';v.appendChild(media);
  for(const kind of ['image','pdf']){
