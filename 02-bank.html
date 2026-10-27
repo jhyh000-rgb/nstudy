@@ -219,21 +219,29 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261025-certificate2"></script>
+<script type="module" src="./nstudy-app.js?v=20261028-bank-expand-fix"></script>
 
 <script>
-/* 수행평가 카드 선택 시 해당 영역 바로 아래에 기존 게시글 화면 표시 */
-document.querySelectorAll('#assessment-bank .category-card').forEach(button=>{
-  button.addEventListener('click',()=>{
-    const results=document.getElementById('bankResults');
-    const section=document.getElementById('assessment-bank');
-    if(!results||!section)return;
-    section.appendChild(results);
-    results.classList.remove('bank-results-ncs','bank-results-career','bank-results-certificate','hidden');
-    results.classList.add('bank-results-assessment');
-    document.querySelectorAll('.category-card').forEach(card=>card.setAttribute('aria-expanded',String(card===button)));
+/* 모든 문제은행 영역에서 해당 게시글 패널을 카드 바로 아래 펼칩니다. */
+(function(){
+  const results=document.getElementById('bankResults');
+  if(!results)return;
+  const sectionClasses=['bank-results-ncs','bank-results-career','bank-results-certificate','bank-results-assessment'];
+  document.querySelectorAll('.category-group[data-bank-section] .category-card[data-category]').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const section=button.closest('.category-group[data-bank-section]');
+      if(!section)return;
+      section.appendChild(results);
+      results.classList.remove('hidden',...sectionClasses);
+      results.classList.add('bank-results-'+section.dataset.bankSection);
+      const heading=document.getElementById('bankResultsHeading');
+      if(heading)heading.textContent=button.dataset.category+' 문제은행';
+      document.querySelectorAll('.category-group[data-bank-section] .category-card[data-category]').forEach(card=>{
+        card.setAttribute('aria-expanded',String(card===button));
+      });
+    });
   });
-});
+})();
 </script>
 </body>
 </html>
