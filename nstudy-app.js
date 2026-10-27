@@ -87,7 +87,7 @@ async function openPost(p){
  const v=$('postView');if(!v)return;
  v.replaceChildren();
  const heading=document.createElement('h3');heading.textContent=p.title||'';v.appendChild(heading);
- const info=document.createElement('p');info.className='small-note';info.textContent=[p.category,p.post_date].filter(Boolean).join(' · ');v.appendChild(info);
+ const info=document.createElement('p');info.className='small-note';info.textContent=p.category||'';v.appendChild(info);
  const body=document.createElement('div');body.className='post-body';body.textContent=p.body||'';v.appendChild(body);
  const media=document.createElement('div');media.className='post-media';v.appendChild(media);
  for(const kind of ['image','pdf']){
