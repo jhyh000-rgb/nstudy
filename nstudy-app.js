@@ -311,6 +311,7 @@ async function renderMembers(){
     deleteTd.appendChild(del);tr.appendChild(deleteTd);body.appendChild(tr);
   }
   table.appendChild(body);
+  wrap.appendChild(table);
   const tools=document.createElement('div');tools.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0';
   const filter=document.createElement('select');filter.setAttribute('aria-label','수강 상태 필터');filter.style.maxWidth='220px';
   [['members','전체 회원'],['active','현재 수강 중인 학생'],['all','전체 학생'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,t])=>filter.add(new Option(t,v)));
