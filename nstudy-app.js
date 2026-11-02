@@ -214,7 +214,7 @@ async function renderMembers(){
   table.style.setProperty('width','max-content','important');
   table.style.setProperty('min-width','0','important');
   table.style.setProperty('table-layout','auto');
-  const compactWidths={username:67,full_name:243,member_type:95,school:110,grade:57,phone:98,parent_phone:130,address:170,contact_email:190};
+  const compactWidths={username:67,full_name:122,member_type:95,school:110,grade:57,phone:98,parent_phone:130,address:170,contact_email:190};
   const compactControl=(el,width)=>{el.style.setProperty('width',width+'px','important');el.style.setProperty('min-width','0','important');el.style.setProperty('max-width',width+'px','important');el.style.setProperty('box-sizing','border-box');el.style.setProperty('padding','6px 5px','important');el.style.setProperty('font-size','13px','important');};
   table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>학년</th><th>본인 전화번호</th><th>학부모 전화번호</th><th>주소</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
   const body=document.createElement('tbody');
