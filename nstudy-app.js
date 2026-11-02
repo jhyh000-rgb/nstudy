@@ -201,17 +201,36 @@ async function renderMembers(){
   const root=$('adminMembers');
   if(!root)return;
   if(!access()){root.textContent='관리 권한이 없습니다.';return;}
-  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked,enrollment_start,enrollment_end,enrollment_override').order('username');
+  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked,enrollment_start,enrollment_end,enrollment_override,parent_phone,address').order('username');
   if(error){root.textContent=error.message;return;}
   root.innerHTML='';
   const wrap=document.createElement('div');wrap.className='admin-table-wrap';
   const table=document.createElement('table');table.className='admin-table';
-  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
+  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>학년</th><th>본인 전화번호</th><th>학부모 전화번호</th><th>주소</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
   const body=document.createElement('tbody');
   for(const p of data||[]){
     const tr=document.createElement('tr');
-    for(const k of ['username','full_name','member_type','school','contact_email']){
-      const td=document.createElement('td');td.textContent=p[k]||'';tr.appendChild(td);
+    // 회원정보는 관리자가 편집하고 저장합니다. 인증 이메일과 로그인 비밀번호는 별도 인증 절차가 필요합니다.
+    const fields=[['username','아이디'],['full_name','성명'],['member_type','회원 유형'],['school','학교'],['grade','학년'],['phone','본인 전화번호'],['parent_phone','학부모 전화번호'],['address','주소'],['contact_email','연락 이메일']];
+    for(const [k,label] of fields){
+      const td=document.createElement('td');
+      const input=k==='member_type'?document.createElement('select'):document.createElement('input');
+      if(k==='member_type') ['학생','학부모','강사'].forEach(v=>input.add(new Option(v,v)));
+      else {input.type=k==='contact_email'?'email':k.includes('phone')?'tel':'text';input.style.minWidth='110px';}
+      input.value=p[k]||'';input.setAttribute('aria-label',p.username+' '+label);input.disabled=!admin();
+      input.onchange=async()=>{
+        const old=p[k]||'',next=input.value.trim();
+        if(k==='username'&&!/^[a-zA-Z0-9_]{4,30}$/.test(next)){alert('아이디는 영문, 숫자, 밑줄(_) 4~30자로 입력하세요.');input.value=old;return;}
+        if(k==='contact_email'&&next&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)){alert('이메일 형식을 확인하세요.');input.value=old;return;}
+        if(k==='member_type'&&p.role==='admin'){alert('관리자 계정의 회원 유형은 변경하지 않습니다.');input.value=old;return;}
+        input.disabled=true;
+        const {error}=await db.from('nstudy_profiles').update({[k]:next||null}).eq('id',p.id);
+        input.disabled=!admin();
+        if(error){input.value=old;say(label+' 저장 실패: '+error.message);return;}
+        p[k]=next; say(label+' 저장 완료');
+        if(k==='member_type')await renderMembers();
+      };
+      td.appendChild(input);tr.appendChild(td);
     }
     // 수강 상태는 학생 계정에만 적용합니다. 기본값은 날짜 기준 자동 판정입니다.
     if(p.member_type==='학생'){
@@ -294,15 +313,15 @@ async function renderMembers(){
   table.appendChild(body);
   const tools=document.createElement('div');tools.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0';
   const filter=document.createElement('select');filter.setAttribute('aria-label','수강 상태 필터');filter.style.maxWidth='220px';
-  [['active','현재 수강 중인 학생'],['all','전체 학생'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,t])=>filter.add(new Option(t,v)));
+  [['members','전체 회원'],['active','현재 수강 중인 학생'],['all','전체 학생'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,t])=>filter.add(new Option(t,v)));
   const count=document.createElement('strong');
   const rows=[...body.children];
   const studentData=(data||[]).filter(p=>p.member_type==='학생');
-  const selected=()=>studentData.filter(p=>filter.value==='all'||enrollmentState(p)===filter.value);
-  const apply=()=>{let visible=0;rows.forEach((tr,i)=>{const p=(data||[])[i];const show=p.member_type==='학생'&&(filter.value==='all'||enrollmentState(p)===filter.value);tr.hidden=!show;if(show)visible++});count.textContent=visible+'명'};
-  filter.onchange=apply;
-  const printable=()=>selected().map(p=>({아이디:p.username||'',성명:p.full_name||'',학교:p.school||'',학년:p.grade||'',연락처:p.phone||'',이메일:p.contact_email||'',시작일:p.enrollment_start||'',종료일:p.enrollment_end||'',수강상태:enrollmentLabels[enrollmentState(p)]||''}));
-  const print=document.createElement('button');print.type='button';print.textContent='선택 명단 인쇄';print.style.width='auto';print.onclick=()=>{
+  const selected=()=>filter.value==='members'?(data||[]):studentData.filter(p=>filter.value==='all'||enrollmentState(p)===filter.value);
+  const apply=()=>{let visible=0;rows.forEach((tr,i)=>{const p=(data||[])[i];const show=filter.value==='members'||(p.member_type==='학생'&&(filter.value==='all'||enrollmentState(p)===filter.value));tr.hidden=!show;if(show)visible++});count.textContent=visible+'명'};
+  filter.onchange=()=>{apply();print.hidden=false;csv.hidden=false;};
+  const printable=()=>selected().map(p=>({아이디:p.username||'',성명:p.full_name||'',회원유형:p.member_type||'',학교:p.school||'',학년:p.grade||'',본인전화:p.phone||'',학부모전화:p.parent_phone||'',주소:p.address||'',이메일:p.contact_email||'',시작일:p.enrollment_start||'',종료일:p.enrollment_end||'',수강상태:p.member_type==='학생'?(enrollmentLabels[enrollmentState(p)]||''):''}));
+  const print=document.createElement('button');print.type='button';print.textContent='선택 명단 인쇄';print.style.width='auto';print.hidden=true;print.onclick=()=>{
     const records=printable();if(!records.length)return alert('인쇄할 학생이 없습니다.');
     const w=window.open('','_blank');if(!w)return alert('팝업 차단을 해제해 주세요.');
     const d=w.document;d.title='NSTUDY 수강생 명단';
@@ -314,7 +333,7 @@ async function renderMembers(){
     const tb=d.createElement('tbody');records.forEach(r=>{const row=d.createElement('tr');keys.forEach(k=>{const td=d.createElement('td');td.textContent=r[k];row.appendChild(td)});tb.appendChild(row)});t.appendChild(tb);d.body.appendChild(t);
     w.focus();setTimeout(()=>w.print(),250);
   };
-  const csv=document.createElement('button');csv.type='button';csv.textContent='선택 명단 CSV 저장';csv.style.width='auto';csv.onclick=()=>{
+  const csv=document.createElement('button');csv.type='button';csv.textContent='선택 명단 CSV 저장';csv.style.width='auto';csv.hidden=true;csv.onclick=()=>{
     const records=printable();if(!records.length)return alert('저장할 학생이 없습니다.');
     const keys=Object.keys(records[0]);const quote=v=>'"'+String(v??'').replace(/"/g,'""').replace(/^[=+@\-\t\r]/,x=>"'"+x)+'"';
     const contents='\ufeff'+[keys.map(quote).join(','),...records.map(r=>keys.map(k=>quote(r[k])).join(','))].join('\r\n');
