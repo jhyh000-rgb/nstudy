@@ -208,6 +208,14 @@ async function renderMembers(){
   root.innerHTML='';
   const wrap=document.createElement('div');wrap.className='admin-table-wrap';
   const table=document.createElement('table');table.className='admin-table';
+  // 회원관리 입력칸만 축소: 홈페이지의 공통 input {width:100%} 규칙보다 우선 적용
+  wrap.style.setProperty('overflow-x','auto');
+  wrap.style.setProperty('max-width','100%');
+  table.style.setProperty('width','max-content','important');
+  table.style.setProperty('min-width','0','important');
+  table.style.setProperty('table-layout','auto');
+  const compactWidths={username:100,full_name:80,member_type:95,school:130,grade:75,phone:130,parent_phone:130,address:170,contact_email:190};
+  const compactControl=(el,width)=>{el.style.setProperty('width',width+'px','important');el.style.setProperty('min-width','0','important');el.style.setProperty('max-width',width+'px','important');el.style.setProperty('box-sizing','border-box');el.style.setProperty('padding','6px 5px','important');el.style.setProperty('font-size','13px','important');};
   table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>학년</th><th>본인 전화번호</th><th>학부모 전화번호</th><th>주소</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
   const body=document.createElement('tbody');
   for(const p of data||[]){
@@ -218,7 +226,8 @@ async function renderMembers(){
       const td=document.createElement('td');
       const input=k==='member_type'?document.createElement('select'):document.createElement('input');
       if(k==='member_type') ['학생','학부모','강사'].forEach(v=>input.add(new Option(v,v)));
-      else {input.type=k==='contact_email'?'email':k.includes('phone')?'tel':'text';input.style.minWidth='110px';}
+      else {input.type=k==='contact_email'?'email':k.includes('phone')?'tel':'text';}
+      compactControl(input,compactWidths[k]||110);
       input.value=p[k]||'';input.setAttribute('aria-label',p.username+' '+label);input.disabled=!admin();
       input.onchange=async()=>{
         const old=p[k]||'',next=input.value.trim();
@@ -238,7 +247,7 @@ async function renderMembers(){
     if(p.member_type==='학생'){
       for(const k of ['enrollment_start','enrollment_end']){
         const td=document.createElement('td'),input=document.createElement('input');
-        input.type='date';input.value=p[k]||'';input.style.minWidth='135px';input.disabled=!admin();
+        input.type='date';input.value=p[k]||'';compactControl(input,135);input.disabled=!admin();
         input.onchange=async()=>{
           const next=input.value||null;
           const start=k==='enrollment_start'?next:p.enrollment_start;
@@ -254,7 +263,7 @@ async function renderMembers(){
       }
       const td=document.createElement('td'),sel=document.createElement('select');
       [['auto','자동 판정'],['active','수강 중'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,label])=>sel.add(new Option(label,v)));
-      sel.value=p.enrollment_override||'auto';sel.disabled=!admin();
+      sel.value=p.enrollment_override||'auto';compactControl(sel,105);sel.disabled=!admin();
       sel.onchange=async()=>{
         const previous=p.enrollment_override||'auto';sel.disabled=true;
         const {error}=await db.from('nstudy_profiles').update({enrollment_override:sel.value}).eq('id',p.id);
