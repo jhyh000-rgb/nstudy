@@ -197,7 +197,9 @@ const enrollmentState=p=>{
  return 'active';
 };
 const enrollmentLabels={active:'수강 중',pending:'수강 대기',paused:'휴원',completed:'수강 종료'};
+let memberRenderSequence=0;
 async function renderMembers(){
+  const renderSequence=++memberRenderSequence;
   const root=$('adminMembers');
   if(!root)return;
   if(!access()){root.textContent='관리 권한이 없습니다.';return;}
