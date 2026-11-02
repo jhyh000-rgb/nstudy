@@ -188,21 +188,62 @@ function updateSkills(){
  if(skills.includes(previous))sel.value=previous;
  sel.required=certificateCategory(c);
 }
+const enrollmentState=p=>{
+ if(p.enrollment_override&&p.enrollment_override!=='auto')return p.enrollment_override;
+ const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Seoul'});
+ if(!p.enrollment_start)return 'pending';
+ if(p.enrollment_start>today)return 'pending';
+ if(p.enrollment_end&&p.enrollment_end<today)return 'completed';
+ return 'active';
+};
+const enrollmentLabels={active:'수강 중',pending:'수강 대기',paused:'휴원',completed:'수강 종료'};
 async function renderMembers(){
   const root=$('adminMembers');
   if(!root)return;
   if(!access()){root.textContent='관리 권한이 없습니다.';return;}
-  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked').order('username');
+  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked,enrollment_start,enrollment_end,enrollment_override').order('username');
   if(error){root.textContent=error.message;return;}
   root.innerHTML='';
   const wrap=document.createElement('div');wrap.className='admin-table-wrap';
   const table=document.createElement('table');table.className='admin-table';
-  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>이메일</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
+  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
   const body=document.createElement('tbody');
   for(const p of data||[]){
     const tr=document.createElement('tr');
     for(const k of ['username','full_name','member_type','school','contact_email']){
       const td=document.createElement('td');td.textContent=p[k]||'';tr.appendChild(td);
+    }
+    // 수강 상태는 학생 계정에만 적용합니다. 기본값은 날짜 기준 자동 판정입니다.
+    if(p.member_type==='학생'){
+      for(const k of ['enrollment_start','enrollment_end']){
+        const td=document.createElement('td'),input=document.createElement('input');
+        input.type='date';input.value=p[k]||'';input.style.minWidth='135px';input.disabled=!admin();
+        input.onchange=async()=>{
+          const next=input.value||null;
+          const start=k==='enrollment_start'?next:p.enrollment_start;
+          const end=k==='enrollment_end'?next:p.enrollment_end;
+          if(start&&end&&end<start){alert('종료일은 시작일보다 빠를 수 없습니다.');input.value=p[k]||'';return;}
+          input.disabled=true;
+          const {error}=await db.from('nstudy_profiles').update({[k]:next}).eq('id',p.id);
+          input.disabled=!admin();
+          if(error){input.value=p[k]||'';say('수강 기간 저장 실패: '+error.message);return;}
+          p[k]=next;await renderMembers();
+        };
+        td.appendChild(input);tr.appendChild(td);
+      }
+      const td=document.createElement('td'),sel=document.createElement('select');
+      [['auto','자동 판정'],['active','수강 중'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,label])=>sel.add(new Option(label,v)));
+      sel.value=p.enrollment_override||'auto';sel.disabled=!admin();
+      sel.onchange=async()=>{
+        const previous=p.enrollment_override||'auto';sel.disabled=true;
+        const {error}=await db.from('nstudy_profiles').update({enrollment_override:sel.value}).eq('id',p.id);
+        if(error){sel.value=previous;say('수강 상태 저장 실패: '+error.message)}else{p.enrollment_override=sel.value;await renderMembers()}
+        sel.disabled=!admin();
+      };
+      td.appendChild(sel);tr.appendChild(td);
+      const state=document.createElement('td');state.textContent=enrollmentLabels[enrollmentState(p)]||'확인 필요';tr.appendChild(state);
+    }else{
+      for(let i=0;i<4;i++){const td=document.createElement('td');td.textContent='—';tr.appendChild(td)}
     }
     for(const k of ['admin_access','blocked']){
       const td=document.createElement('td'),cb=document.createElement('input');
@@ -250,7 +291,37 @@ async function renderMembers(){
     };
     deleteTd.appendChild(del);tr.appendChild(deleteTd);body.appendChild(tr);
   }
-  table.appendChild(body);wrap.appendChild(table);root.appendChild(wrap);
+  table.appendChild(body);
+  const tools=document.createElement('div');tools.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0';
+  const filter=document.createElement('select');filter.setAttribute('aria-label','수강 상태 필터');filter.style.maxWidth='220px';
+  [['active','현재 수강 중인 학생'],['all','전체 학생'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,t])=>filter.add(new Option(t,v)));
+  const count=document.createElement('strong');
+  const rows=[...body.children];
+  const studentData=(data||[]).filter(p=>p.member_type==='학생');
+  const selected=()=>studentData.filter(p=>filter.value==='all'||enrollmentState(p)===filter.value);
+  const apply=()=>{let visible=0;rows.forEach((tr,i)=>{const p=(data||[])[i];const show=p.member_type==='학생'&&(filter.value==='all'||enrollmentState(p)===filter.value);tr.hidden=!show;if(show)visible++});count.textContent=visible+'명'};
+  filter.onchange=apply;
+  const printable=()=>selected().map(p=>({아이디:p.username||'',성명:p.full_name||'',학교:p.school||'',학년:p.grade||'',연락처:p.phone||'',이메일:p.contact_email||'',시작일:p.enrollment_start||'',종료일:p.enrollment_end||'',수강상태:enrollmentLabels[enrollmentState(p)]||''}));
+  const print=document.createElement('button');print.type='button';print.textContent='선택 명단 인쇄';print.style.width='auto';print.onclick=()=>{
+    const records=printable();if(!records.length)return alert('인쇄할 학생이 없습니다.');
+    const w=window.open('','_blank');if(!w)return alert('팝업 차단을 해제해 주세요.');
+    const d=w.document;d.title='NSTUDY 수강생 명단';
+    const style=d.createElement('style');style.textContent='body{font-family:Malgun Gothic,sans-serif;padding:20px}h2{font-size:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #888;padding:6px;text-align:left}th{background:#eee}@media print{@page{size:A4 landscape;margin:12mm}}';d.head.appendChild(style);
+    const h=d.createElement('h2');h.textContent='NSTUDY ACADEMY - '+filter.options[filter.selectedIndex].text;d.body.appendChild(h);
+    const sub=d.createElement('p');sub.textContent='인원: '+records.length+'명 / 인쇄일: '+new Date().toLocaleDateString('ko-KR');d.body.appendChild(sub);
+    const t=d.createElement('table'),thead=d.createElement('thead'),tr=d.createElement('tr');
+    const keys=Object.keys(records[0]);keys.forEach(k=>{const th=d.createElement('th');th.textContent=k;tr.appendChild(th)});thead.appendChild(tr);t.appendChild(thead);
+    const tb=d.createElement('tbody');records.forEach(r=>{const row=d.createElement('tr');keys.forEach(k=>{const td=d.createElement('td');td.textContent=r[k];row.appendChild(td)});tb.appendChild(row)});t.appendChild(tb);d.body.appendChild(t);
+    w.focus();setTimeout(()=>w.print(),250);
+  };
+  const csv=document.createElement('button');csv.type='button';csv.textContent='선택 명단 CSV 저장';csv.style.width='auto';csv.onclick=()=>{
+    const records=printable();if(!records.length)return alert('저장할 학생이 없습니다.');
+    const keys=Object.keys(records[0]);const quote=v=>'"'+String(v??'').replace(/"/g,'""').replace(/^[=+@\-\t\r]/,x=>"'"+x)+'"';
+    const contents='\ufeff'+[keys.map(quote).join(','),...records.map(r=>keys.map(k=>quote(r[k])).join(','))].join('\r\n');
+    const url=URL.createObjectURL(new Blob([contents],{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download='NSTUDY_수강생명단_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+  tools.append(filter,count,print,csv);root.append(tools,wrap);apply();
   if($('adminIntro'))$('adminIntro').textContent='기존 비밀번호는 확인할 수 없습니다. 일반 회원의 새 비밀번호 설정 및 삭제는 관리자만 사용할 수 있습니다. 관리자 계정은 보호됩니다.';
 }
 function initAdmin(){const a=$('adminPageLink');if(a)a.onclick=async e=>{e.preventDefault();if(!access())return say('관리 페이지 접근 권한이 없습니다.');$('admin-page').classList.remove('hidden');await renderMembers();$('admin-page').scrollIntoView({behavior:'smooth'})}}
