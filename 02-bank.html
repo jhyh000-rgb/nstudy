@@ -187,6 +187,14 @@ body.bank-page nav{flex-wrap:wrap}
 #commMaterialHeading[hidden]{display:none!important}
 #editor:not(.hidden){display:block}
 </style>
+<style>
+.computer-level-panel{margin-top:14px;padding:16px;border:1px solid #b4e4c1;border-radius:12px;background:#f6fff8}
+.computer-level-panel.hidden{display:none!important}
+.computer-level-title{font-weight:800;color:#166534;margin:0 0 12px}
+.computer-level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.computer-level-grid .category-card{width:100%;min-height:78px}
+@media(max-width:600px){.computer-level-grid{gap:8px}.computer-level-panel{padding:12px}}
+</style>
 </head>
 <body class="bank-page">
 
@@ -219,14 +227,21 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="조직이해능력"><strong>조직이해능력</strong><small>조직 · 업무 이해</small></button>
 <button class="category-card" data-category="직업윤리"><strong>직업윤리</strong><small>근로 · 공동체 윤리</small></button>
 </div></div>
-<div class="category-group bank-group-career" data-bank-section="career"><h3>② 취업 실전 준비 · 6개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
+<div class="category-group bank-group-career" data-bank-section="career"><h3>② 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
 <button class="category-card" data-category="한국사"><strong>한국사</strong><small>한국사능력검정시험 대비</small></button>
-<button class="category-card" data-category="컴활 1급"><strong>컴활 1급</strong><small>엑셀 · 데이터베이스</small></button>
-<button class="category-card" data-category="컴활 2급"><strong>컴활 2급</strong><small>엑셀 중심</small></button>
+<button class="category-card" id="computerQualificationToggle" type="button" aria-expanded="false" aria-controls="computerQualificationLevels"><strong>컴활</strong><small>클릭하여 1급 · 2급 선택</small></button>
 <button class="category-card active" data-category="TOEIC"><strong>TOEIC</strong><small>LC · RC · 실전 연습</small></button>
 <button class="category-card" data-category="자기소개서"><strong>자기소개서</strong><small>경험 정리 · 문항별 작성</small></button>
 <button class="category-card" data-category="면접"><strong>면접</strong><small>예상 질문 · 답변 연습</small></button>
-</div></div>
+</div>
+<div id="computerQualificationLevels" class="computer-level-panel hidden" aria-label="컴퓨터활용능력 급수 선택">
+  <p class="computer-level-title">컴활 급수를 선택하세요.</p>
+  <div class="computer-level-grid">
+    <button type="button" class="category-card" data-category="컴활 1급"><strong>컴활 1급</strong><small>엑셀 · 데이터베이스</small></button>
+    <button type="button" class="category-card" data-category="컴활 2급"><strong>컴활 2급</strong><small>엑셀 중심</small></button>
+  </div>
+</div>
+</div>
 
 <div class="category-group bank-group-certificate" id="certificate-bank" data-bank-section="certificate"><h3>③ 기능사 자격시험 · 5개 분야 / 40개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
 <button type="button" class="category-card certificate-category" data-category="기능사 · 전기·전자" data-certificate-group="전기·전자"><strong>전기·전자</strong><small>기능사 8개 과목</small></button>
@@ -275,7 +290,24 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261105-comqual-only-v2"></script>
+<script type="module" src="./nstudy-app.js?v=20261105-comqual-nested-v3"></script>
+<script>
+(function(){
+  const toggle=document.getElementById('computerQualificationToggle');
+  const levels=document.getElementById('computerQualificationLevels');
+  if(!toggle||!levels)return;
+  toggle.addEventListener('click',function(){
+    const open=levels.classList.toggle('hidden')===false;
+    toggle.setAttribute('aria-expanded',String(open));
+    toggle.classList.toggle('active',open);
+    if(!open){toggle.classList.remove('active')}
+  });
+  levels.querySelectorAll('[data-category]').forEach(function(button){
+    button.addEventListener('click',function(){toggle.setAttribute('aria-expanded','true')});
+  });
+})();
+</script>
+
 
 <script>
 /* 모든 문제은행 영역에서 해당 게시글 패널을 카드 바로 아래 펼칩니다. */
