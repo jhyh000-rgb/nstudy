@@ -40,7 +40,7 @@ function renderPosts(){
  if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category)+' 학습 자료';
  // 의사소통능력은 별도의 작성 버튼 없이 선택 영역 안에서 관리자 등록폼을 표시합니다.
  if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
- if(commCategory(category)&&$('editor'))$('editor').classList.add('hidden');
+ if(commCategory(category)&&$('editor')){$('editor').classList.add('hidden');$('editor').style.removeProperty('display');}
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
  if(panel&&grid){
    // 영역을 다시 그리기 전에 기존 게시글 컨테이너를 안전하게 원래 위치로 돌려놓습니다.
@@ -104,14 +104,21 @@ function renderPosts(){
    if(admin()){
     const editor=$('editor');
     if(editor){
-     const heading=document.createElement('h4');heading.textContent=subcategory+' 자료 등록';heading.className='comm-upload-heading';
+     // 원래 작성폼을 재사용하여 기존 Supabase/R2 저장 로직을 그대로 사용합니다.
+     // 다른 숨김 처리와 충돌하지 않도록 선택한 영역 안에 명시적으로 표시합니다.
+     const heading=document.createElement('h4');
+     heading.textContent=subcategory+' PDF · 이미지 · 유튜브 자료 등록';
+     heading.className='comm-upload-heading';
      region.appendChild(heading);
      region.appendChild(editor);
      editor.classList.remove('hidden');
+     editor.style.setProperty('display','block','important');
+     editor.setAttribute('aria-hidden','false');
      $('postCategory').value='의사소통능력';
      updateSkills();
      $('postSubcategory').value=subcategory;
      const body=$('postBody');if(body)body.required=false;
+     const title=$('postTitle');if(title)title.placeholder=subcategory+' 자료 제목';
     }
    }
    active.appendChild(region);
@@ -259,7 +266,7 @@ async function printCommBook(){
  w.focus();
 }
 
-function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';commUnitFilter='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=$('postCategory').value==='의사소통능력';if(commSelected&&!$('postSubcategory')?.value)throw Error('의사소통능력 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;commUnitFilter='';page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
+function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';commUnitFilter='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)){ $('postForm')?.reset();$('postCategory').value='의사소통능력';updateSkills();$('postSubcategory').value=subcategory; }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=$('postCategory').value==='의사소통능력';if(commSelected&&!$('postSubcategory')?.value)throw Error('의사소통능력 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;commUnitFilter='';page=1;e.target.reset();if(!commCategory(row.category))$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){
  const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;
  const previous=sel.value;
