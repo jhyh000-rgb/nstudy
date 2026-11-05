@@ -22,6 +22,19 @@ const STRUCTURED_CATALOGS={
  '자기소개서':{'자기소개서 작성 기초':[], '지원동기':[], '성장과정·성격':[], '직무역량·경험':[], '입사 후 포부':[], '첨삭·작성 사례':[], '실전모의고사':[]},
  '면접':{'면접 준비 기초':[], '자기소개·지원동기':[], '인성면접':[], '직무면접':[], '상황·경험면접':[], '모의면접·답변 사례':[], '실전모의고사':[]}
 };
+// 전기·전자 분야: 자격증별 학습 목차 (게시글은 '자격증 | 목차'로 구분 저장)
+const ELECTRIC_CATEGORY='기능사 · 전기·전자';
+const ELECTRIC_CHAPTERS={
+ '전기기능사':['전기이론','전기기기','전기설비','실전모의고사'],
+ '전자기기기능사':['전기전자공학','전자계산기 일반','전자측정','전자기기 및 음향영상기기','실전모의고사'],
+ '승강기기능사':['승강기개론','안전관리','승강기보수','기계·전기 기초이론','실전모의고사'],
+ '공조냉동기계기능사':['공조냉동','자동제어 및 안전관리','배관 일반','실전모의고사'],
+ '전자캐드기능사':['전자회로','전자CAD 실무','PCB 설계','실전모의고사']
+};
+let electricSubject='';
+const electricParts=s=>String(s||'').split(' | ');
+const electricPostSubject=p=>electricParts(p.subcategory)[0];
+const electricPostChapter=p=>electricParts(p.subcategory).slice(1).join(' | ')||'기존 자료';
 const commCategory=c=>Object.prototype.hasOwnProperty.call(STRUCTURED_CATALOGS,c);
 const skillCatalog=c=>STRUCTURED_CATALOGS[c]||COMM_CATALOG;
 const commGroup=s=>String(s||'').split(' | ')[0];
@@ -58,7 +71,7 @@ async function toggleNotice(p,checked,cb){
 function renderPosts(){
  const cards=document.querySelectorAll('.category-card');
  cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(commCategory(c.dataset.category)){badge?.remove();return}if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
- if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category)+' 학습 자료';
+ if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category===ELECTRIC_CATEGORY&&electricSubject?electricSubject+' 학습 자료':category+' 학습 자료');
  // 의사소통능력은 별도의 작성 버튼 없이 선택 영역 안에서 관리자 등록폼을 표시합니다.
  if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
  // 편집기 표시 상태는 선택 영역에 배치한 뒤 결정합니다.
@@ -66,13 +79,37 @@ function renderPosts(){
  if(panel&&grid){
    // 자료 목록과 등록폼은 원래의 bankResults 안에 고정합니다.
    // DOM을 반복 이동하면 폼이 사라지거나 숨겨진 부모 안에 들어갈 수 있습니다.
-   if($('postBody'))$('postBody').required=!commCategory(category);
+   if($('postBody'))$('postBody').required=!commCategory(category)&&category!==ELECTRIC_CATEGORY;
    grid.replaceChildren();
    const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
    const skills=commCategory(category)?[...new Set([...Object.keys(skillCatalog(category)),...storedSkills.map(commGroup).filter(Boolean),...(posts.some(p=>p.category===category&&!p.subcategory)?['기존 미분류 자료']:[])])]:certificateCategory(category)?[...new Set([...CERTIFICATE_SUBJECTS[category],...storedSkills])]:[...new Set(storedSkills)];
    panel.classList.toggle('hidden',!skills.length);
    if($('subcategoryHeading'))$('subcategoryHeading').textContent=commCategory(category)?category+' · 영역별 학습 목차':'세부 능력별 게시글';
-   if(commCategory(category)){
+   if(category===ELECTRIC_CATEGORY){
+     const subjects=[...new Set([...CERTIFICATE_SUBJECTS[ELECTRIC_CATEGORY],...storedSkills.map(electricPostSubject).filter(Boolean)])];
+     if($('subcategoryHeading'))$('subcategoryHeading').textContent='전기·전자 · 자격증별 학습 목차';
+     if(!electricSubject){
+       subjects.forEach((subject,index)=>{
+         const b=document.createElement('button');b.type='button';b.className='subcategory-btn';
+         const n=posts.filter(p=>p.category===category&&electricPostSubject(p)===subject).length;
+         b.textContent=String(index+1).padStart(2,'0')+' '+subject+' ('+n+'개)';
+         b.onclick=()=>{electricSubject=subject;subcategory='';structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(b);
+       });
+     }else{
+       const back=document.createElement('button');back.type='button';back.className='btn btn-secondary';back.textContent='← 전기·전자 자격증 목록';
+       back.onclick=()=>{electricSubject='';subcategory='';structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(back);
+       const chapters=ELECTRIC_CHAPTERS[electricSubject]||['실전모의고사'];
+       const existing=posts.some(p=>p.category===category&&electricPostSubject(p)===electricSubject&&electricPostChapter(p)==='기존 자료');
+       const all=existing?[...chapters,'기존 자료']:chapters;
+       all.forEach((chapter,index)=>{
+         const key=electricSubject+' | '+chapter;
+         const b=document.createElement('button');b.type='button';b.className='subcategory-btn'+(subcategory===key?' active':'');
+         const n=posts.filter(p=>p.category===category&&electricPostSubject(p)===electricSubject&&electricPostChapter(p)===chapter).length;
+         b.textContent=String(index+1).padStart(2,'0')+' '+chapter+' ('+n+'개)';
+         b.onclick=()=>{subcategory=subcategory===key?'':key;structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(b);
+       });
+     }
+   }else if(commCategory(category)){
 
      skills.forEach((skill,index)=>{
               const wrap=document.createElement('div');wrap.className='comm-group';wrap.style.setProperty('--comm-color',COMM_COLORS[index%COMM_COLORS.length]);wrap.style.setProperty('--comm-tint',COMM_COLORS[index%COMM_COLORS.length]+'14');
@@ -92,7 +129,7 @@ function renderPosts(){
  }
  const list=$('postList');if(!list)return;list.innerHTML='';
  
- const items=posts.filter(p=>p.category===category&&(commCategory(category)?(!subcategory||commGroup(p.subcategory)===subcategory||(subcategory==='기존 미분류 자료'&&!p.subcategory)):(!subcategory||p.subcategory===subcategory))).sort(noticeFirst);
+ const items=posts.filter(p=>p.category===category&&(category===ELECTRIC_CATEGORY?(!electricSubject?false:!subcategory?electricPostSubject(p)===electricSubject:(subcategory.endsWith(' | 기존 자료')?electricPostSubject(p)===electricSubject&&electricPostChapter(p)==='기존 자료':p.subcategory===subcategory)):commCategory(category)?(!subcategory||commGroup(p.subcategory)===subcategory||(subcategory==='기존 미분류 자료'&&!p.subcategory)):(!subcategory||p.subcategory===subcategory))).sort(noticeFirst);
  items.slice((page-1)*10,page*10).forEach((p,i)=>{
   const row=document.createElement('div');row.className='post-row';row.style.cssText='display:flex;align-items:center;gap:10px';
   const view=document.createElement('button');view.type='button';view.style.cssText='flex:1;min-width:0;text-align:left;background:transparent;border:0;color:inherit;cursor:pointer';
@@ -113,17 +150,17 @@ function renderPosts(){
  if($('postView'))$('postView').classList.add('hidden');
  // 의사소통능력: 선택된 영역의 목록과 작성폼을 제목 아래에 고정 표시합니다.
  const editor=$('editor');
- const activeCommunication=commCategory(category)&&!!subcategory;
+ const activeCommunication=(commCategory(category)||category===ELECTRIC_CATEGORY)&&!!subcategory;
  const registerButton=$('structuredRegisterButton');
- if(registerButton){registerButton.hidden=!activeCommunication||subcategory==='기존 미분류 자료';registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료');registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브)';}
+ if(registerButton){registerButton.hidden=!activeCommunication||(subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브)';}
  if($('commMaterialHeading')){
    $('commMaterialHeading').hidden=!activeCommunication;
    $('commMaterialHeading').textContent=activeCommunication?subcategory+' 학습 자료':'';
  }
  if($('categoryTitle'))$('categoryTitle').hidden=activeCommunication;
- if($('postList'))$('postList').hidden=commCategory(category)&&!subcategory;
+ if($('postList'))$('postList').hidden=(commCategory(category)||category===ELECTRIC_CATEGORY)&&!subcategory;
  if(editor){
-   const show=activeCommunication&&admin()&&structuredEditorOpen&&subcategory!=='기존 미분류 자료';
+   const show=activeCommunication&&admin()&&structuredEditorOpen&&subcategory!=='기존 미분류 자료'&&!subcategory.endsWith(' | 기존 자료');
    if(show){
      editor.classList.remove('hidden');
      editor.hidden=false;
@@ -286,16 +323,18 @@ async function printCommBook(){
  w.focus();
 }
 
-function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';structuredEditorOpen=false;commUnitFilter='';page=1;renderPosts()}));$('structuredRegisterButton')?.addEventListener('click',()=>{if(!admin())return say('게시물 등록은 관리자 로그인 후 이용할 수 있습니다.');structuredEditorOpen=!structuredEditorOpen;renderPosts();if(structuredEditorOpen)$('postTitle')?.focus()});$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)){ structuredEditorOpen=false; $('postForm')?.reset();$('postCategory').value=category;updateSkills();$('postSubcategory').value=subcategory;renderPosts(); }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=commCategory($('postCategory').value);if(commSelected&&$('postSubcategory')?.value==='기존 미분류 자료')throw Error('새 게시글은 정식 학습 목차를 선택해 주세요.');if(commSelected&&!$('postSubcategory')?.value)throw Error('학습 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;commUnitFilter='';page=1;e.target.reset();structuredEditorOpen=false;if(!commCategory(row.category))$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
+function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';electricSubject='';structuredEditorOpen=false;commUnitFilter='';page=1;renderPosts()}));$('structuredRegisterButton')?.addEventListener('click',()=>{if(!admin())return say('게시물 등록은 관리자 로그인 후 이용할 수 있습니다.');structuredEditorOpen=!structuredEditorOpen;renderPosts();if(structuredEditorOpen)$('postTitle')?.focus()});$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)||category===ELECTRIC_CATEGORY){ structuredEditorOpen=false; $('postForm')?.reset();$('postCategory').value=category;updateSkills();$('postSubcategory').value=subcategory;renderPosts(); }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=commCategory($('postCategory').value)||$('postCategory').value===ELECTRIC_CATEGORY;if(commSelected&&$('postSubcategory')?.value==='기존 미분류 자료')throw Error('새 게시글은 정식 학습 목차를 선택해 주세요.');if(commSelected&&$('postSubcategory')?.value.endsWith(' | 기존 자료'))throw Error('기존 자료 목차에는 새 게시글을 등록할 수 없습니다.');if(commSelected&&!$('postSubcategory')?.value)throw Error('학습 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;if(row.category===ELECTRIC_CATEGORY)electricSubject=electricPostSubject(row);commUnitFilter='';page=1;e.target.reset();structuredEditorOpen=false;if(!commCategory(row.category)&&row.category!==ELECTRIC_CATEGORY)$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){
  const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;
  const previous=sel.value;
  const stored=posts.filter(p=>p.category===c).map(p=>p.subcategory).filter(Boolean);
- const skills=commCategory(c)?[...new Set([...Object.keys(skillCatalog(c)),...stored.map(commGroup).filter(Boolean)])]:certificateCategory(c)?[...new Set([...CERTIFICATE_SUBJECTS[c],...stored])]:[...new Set(stored)];
+ const skills=c===ELECTRIC_CATEGORY&&electricSubject
+   ?(ELECTRIC_CHAPTERS[electricSubject]||['실전모의고사']).map(ch=>electricSubject+' | '+ch)
+   :commCategory(c)?[...new Set([...Object.keys(skillCatalog(c)),...stored.map(commGroup).filter(Boolean)])]:certificateCategory(c)?[...new Set([...CERTIFICATE_SUBJECTS[c],...stored])]:[...new Set(stored)];
  sel.replaceChildren(new Option(commCategory(c)?'학습 영역 선택':certificateCategory(c)?'기능사 자격증 선택':'세부 능력 선택',''));
- skills.forEach(name=>sel.add(new Option(name,name)));
+ skills.forEach(name=>sel.add(new Option(c===ELECTRIC_CATEGORY&&electricSubject?electricPostChapter({subcategory:name}):name,name)));
  if(skills.includes(previous))sel.value=previous;
- if(commCategory(c)&&!sel.value&&skills.includes(subcategory))sel.value=subcategory;
+ if((commCategory(c)||c===ELECTRIC_CATEGORY)&&!sel.value&&skills.includes(subcategory))sel.value=subcategory;
  sel.required=commCategory(c)||certificateCategory(c);
  
 }
