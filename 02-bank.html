@@ -215,19 +215,19 @@ body.bank-page nav{flex-wrap:wrap}
 <button type="button" class="category-card" data-category="수행평가(고등부)"><strong>수행평가(고등부)</strong><small>고등학교 과목별 수행평가</small></button>
 <button type="button" class="category-card" data-category="수행평가(중등부)"><strong>수행평가(중등부)</strong><small>중학교 과목별 수행평가</small></button>
 </div></div>
-<div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>의사소통능력은 영역을 선택하면 바로 자료가 표시됩니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
+<div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
-<div class="comm-book-tools" id="commBookTools" hidden><button type="button" class="btn btn-primary" id="commPrintBook">의사소통능력 전체 교재 인쇄 / PDF 저장</button><span class="small-note">영역별 순서로 정리 · PDF 첨부는 별도 링크</span></div>
+
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
-<div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
+<div class="editor hidden" id="editor"><form id="postForm"><div class="form-grid">
 <div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
 <div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
 <div class="field"><label for="postImage">이미지 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
-<div class="field full"><label for="postYoutube">유튜브 동영상 주소 (선택)</label><input id="postYoutube" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/><small class="small-note">유튜브 일반 영상, Shorts, 단축 주소를 지원합니다.</small></div>
-</div><p class="small-note">PDF·이미지는 Cloudflare R2에 저장됩니다(파일당 최대 10MB). 기존 첨부자료는 그대로 유지됩니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
+<div class="field full"><label for="postYoutube">유튜브 동영상 주소 (선택)</label><input id="postYoutube" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/></div>
+</div><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
 <div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div></div>
 </div></div></section>
 <section class="hidden" id="admin-page"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p class="small-note" id="adminIntro" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>

@@ -37,7 +37,10 @@ async function toggleNotice(p,checked,cb){
 function renderPosts(){
  const cards=document.querySelectorAll('.category-card');
  cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(commCategory(c.dataset.category)){badge?.remove();return}if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
- if($('categoryTitle'))$('categoryTitle').textContent=category+' 학습 자료';
+ if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category)+' 학습 자료';
+ // 의사소통능력에서는 작성 도구를 표시하지 않고 자료 열람만 제공합니다.
+ if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
+ if(commCategory(category)&&$('editor'))$('editor').classList.add('hidden');
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
  if(panel&&grid){
    // 영역을 다시 그리기 전에 기존 게시글 컨테이너를 안전하게 원래 위치로 돌려놓습니다.
@@ -50,7 +53,7 @@ function renderPosts(){
    panel.classList.toggle('hidden',!skills.length);
    if($('subcategoryHeading'))$('subcategoryHeading').textContent=commCategory(category)?'의사소통능력 · 영역별 학습 목차':'세부 능력별 게시글';
    if(commCategory(category)){
-     const intro=document.createElement('p');intro.className='small-note';intro.textContent='원하는 영역을 선택하면 아래에 PDF·이미지·유튜브 등 등록된 자료가 바로 표시됩니다.';grid.appendChild(intro);
+
      skills.forEach((skill,index)=>{
               const wrap=document.createElement('div');wrap.className='comm-group';wrap.style.setProperty('--comm-color',COMM_COLORS[index%COMM_COLORS.length]);wrap.style.setProperty('--comm-tint',COMM_COLORS[index%COMM_COLORS.length]+'14');
        const head=document.createElement('button');head.type='button';head.className='comm-group-head'+(subcategory===skill?' active':'');
@@ -67,7 +70,7 @@ function renderPosts(){
    });
  }
  const list=$('postList');if(!list)return;list.innerHTML='';
- if($('commBookTools'))$('commBookTools').hidden=!commCategory(category);
+ 
  const items=posts.filter(p=>p.category===category&&(commCategory(category)?(!subcategory||commGroup(p.subcategory)===subcategory):(!subcategory||p.subcategory===subcategory))).sort(noticeFirst);
  items.slice((page-1)*10,page*10).forEach((p,i)=>{
   const row=document.createElement('div');row.className='post-row';row.style.cssText='display:flex;align-items:center;gap:10px';
@@ -93,7 +96,7 @@ function renderPosts(){
   const active=Array.from(grid.querySelectorAll('.comm-group')).find(w=>w.querySelector('.comm-group-head.active'));
   if(active){
    const region=document.createElement('div');region.className='comm-area-materials';
-   const heading=document.createElement('h4');heading.textContent=subcategory+' 자료';region.appendChild(heading);
+   const heading=document.createElement('h4');heading.textContent=subcategory+' 학습 자료';region.appendChild(heading);
    list.hidden=false;region.appendChild(list);
    if($('postView'))region.appendChild($('postView'));
    active.appendChild(region);
