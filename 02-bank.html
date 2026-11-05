@@ -140,16 +140,19 @@ body.bank-page nav{flex-wrap:wrap}
 .comm-area-materials .post-view{margin-top:14px}
 
 /* 선택한 의사소통 영역의 관리자 전용 직접 자료 등록 */
-.comm-area-materials #editor{display:block!important;visibility:visible!important;opacity:1!important;margin-top:12px;position:static!important;height:auto!important;overflow:visible!important}
+
 .comm-area-materials .editor .field:has(#postCategory),
 .comm-area-materials .editor .field:has(#postSubcategory){display:none}
 .comm-upload-heading{margin:22px 0 8px;font-size:17px;color:#173d77}
 
 /* 선택한 의사소통능력 영역 안의 관리자 자료 등록폼을 항상 표시 */
-.comm-area-materials > #editor:not(.hidden){display:block!important;visibility:visible!important;opacity:1!important}
-.comm-area-materials #postForm{display:block!important}
+
+
 .comm-area-materials #postPdf,.comm-area-materials #postImage,.comm-area-materials #postYoutube{display:block;width:100%}
 .comm-area-materials .field:has(#postPdf),.comm-area-materials .field:has(#postImage),.comm-area-materials .field:has(#postYoutube){display:grid!important}
+#commMaterialHeading{margin:18px 0 12px;color:#2459a6;font-size:21px}
+#commMaterialHeading[hidden]{display:none!important}
+#editor:not(.hidden){display:block}
 </style>
 <style>
 /* 의사소통능력 목차: 기존 다른 과목의 레이아웃과 독립 */
@@ -160,6 +163,9 @@ body.bank-page nav{flex-wrap:wrap}
 .comm-group-head.active{background:#184c96;color:#fff}.comm-count{flex:none;font-size:12px;padding:3px 8px;border-radius:999px;background:#fff;color:#174783}
 .comm-units{padding:10px;display:grid;gap:5px}.comm-unit{border:1px solid #e2e8f0;border-radius:7px;background:white;padding:9px 11px;text-align:left;font-size:13px;cursor:pointer;color:#24364f}.comm-unit.active{background:#e0efff;border-color:#3874bc;font-weight:800}
 #postUnitField[hidden]{display:none!important}
+#commMaterialHeading{margin:18px 0 12px;color:#2459a6;font-size:21px}
+#commMaterialHeading[hidden]{display:none!important}
+#editor:not(.hidden){display:block}
 </style>
 <style>
 /* 색상 구분: 10개 영역마다 고유색, 인쇄 시에도 구분 가능 */
@@ -172,6 +178,9 @@ body.bank-page nav{flex-wrap:wrap}
 .comm-book-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0;padding:12px;border:1px solid #ccd8e9;border-radius:10px;background:#f8fbff}
 .comm-book-tools[hidden]{display:none!important}
 @media print{.comm-group-head{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+#commMaterialHeading{margin:18px 0 12px;color:#2459a6;font-size:21px}
+#commMaterialHeading[hidden]{display:none!important}
+#editor:not(.hidden){display:block}
 </style>
 </head>
 <body class="bank-page">
@@ -230,7 +239,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 
-<div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
+<h3 id="commMaterialHeading" hidden></h3><div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor" aria-label="PDF 이미지 유튜브 자료 등록"><form id="postForm"><div class="form-grid">
 <div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
@@ -260,7 +269,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261105-post-editor-restored-v3"></script>
+<script type="module" src="./nstudy-app.js?v=20261105-comm-editor-fixed-v4"></script>
 
 <script>
 /* 모든 문제은행 영역에서 해당 게시글 패널을 카드 바로 아래 펼칩니다. */

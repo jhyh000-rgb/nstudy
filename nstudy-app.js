@@ -43,14 +43,8 @@ function renderPosts(){
  // 편집기 표시 상태는 선택 영역에 배치한 뒤 결정합니다.
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
  if(panel&&grid){
-   // 영역을 다시 그리기 전에 기존 게시글 컨테이너를 안전하게 원래 위치로 돌려놓습니다.
-   const oldList=$('postList'),oldView=$('postView'),editor=$('editor');
-   const originalHost=$('editorActions')?.parentNode;
-   if(originalHost){
-     if(oldList)originalHost.insertBefore(oldList,editor&&editor.parentNode===originalHost?editor:$('editorActions'));
-     if(oldView)originalHost.insertBefore(oldView,editor&&editor.parentNode===originalHost?editor:$('editorActions'));
-     if(editor)originalHost.insertBefore(editor,$('editorActions'));
-   }
+   // 자료 목록과 등록폼은 원래의 bankResults 안에 고정합니다.
+   // DOM을 반복 이동하면 폼이 사라지거나 숨겨진 부모 안에 들어갈 수 있습니다.
    if($('postBody'))$('postBody').required=!commCategory(category);
    grid.replaceChildren();
    const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
@@ -95,43 +89,37 @@ function renderPosts(){
  if(!items.length)list.innerHTML='<p class="small-note">등록된 게시글이 없습니다.</p>';
  if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}
  if($('postView'))$('postView').classList.add('hidden');
- // 의사소통능력: 선택한 영역 카드 바로 아래에 해당 영역의 자료만 표시합니다.
- // 다른 과목의 목록/등록 기능에는 영향을 주지 않습니다.
- if(commCategory(category)){
-  const active=Array.from(grid.querySelectorAll('.comm-group')).find(w=>w.querySelector('.comm-group-head.active'));
-  if(active){
-   const region=document.createElement('div');region.className='comm-area-materials';
-   const heading=document.createElement('h4');heading.textContent=subcategory+' 학습 자료';region.appendChild(heading);
-   list.hidden=false;region.appendChild(list);
-   if($('postView'))region.appendChild($('postView'));
-   if(admin()){
-    const editor=$('editor');
-    if(editor){
-     // 원래 작성폼을 재사용하여 기존 Supabase/R2 저장 로직을 그대로 사용합니다.
-     // 다른 숨김 처리와 충돌하지 않도록 선택한 영역 안에 명시적으로 표시합니다.
-     const heading=document.createElement('h4');
-     heading.textContent='게시글 작성';
-     heading.className='comm-upload-heading';
-     region.appendChild(heading);
-     region.appendChild(editor);
+ // 의사소통능력: 선택된 영역의 목록과 작성폼을 제목 아래에 고정 표시합니다.
+ const editor=$('editor');
+ const activeCommunication=commCategory(category)&&!!subcategory;
+ if($('commMaterialHeading')){
+   $('commMaterialHeading').hidden=!activeCommunication;
+   $('commMaterialHeading').textContent=activeCommunication?subcategory+' 학습 자료':'';
+ }
+ if($('categoryTitle'))$('categoryTitle').hidden=activeCommunication;
+ if($('postList'))$('postList').hidden=commCategory(category)&&!subcategory;
+ if(editor){
+   const show=activeCommunication&&admin();
+   if(show){
      editor.classList.remove('hidden');
-     editor.removeAttribute('hidden');
      editor.hidden=false;
-     editor.style.setProperty('display','block','important');
-     editor.setAttribute('aria-hidden','false');
-     editor.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=false);
+     editor.style.display='block';
      $('postCategory').value='의사소통능력';
      updateSkills();
      $('postSubcategory').value=subcategory;
-     const body=$('postBody');if(body)body.required=false;
-     const form=$('postForm');if(form){form.style.display='block';form.hidden=false;}
-     ['postPdf','postImage','postYoutube'].forEach(id=>{const field=$(id)?.closest('.field');if(field){field.style.display='grid';field.hidden=false;}});
-     const title=$('postTitle');if(title)title.placeholder=subcategory+' 자료 제목';
-    }
+     if($('postBody'))$('postBody').required=false;
+     if($('postForm'))$('postForm').hidden=false;
+     ['postPdf','postImage','postYoutube'].forEach(id=>{
+       const field=$(id)?.closest('.field');
+       if(field){field.hidden=false;field.style.display='grid';}
+     });
+     if($('postTitle'))$('postTitle').placeholder=subcategory+' 자료 제목';
+   }else{
+     editor.classList.add('hidden');
+     editor.style.removeProperty('display');
    }
-   active.appendChild(region);
-  }else{list.hidden=true;}
- }else{list.hidden=false;const editor=$('editor');if(editor){editor.style.removeProperty('display');editor.classList.add('hidden');}}
+ }
+
 }
 // YouTube 주소는 영상 ID만 추출하여 안전한 embed 주소로 변환합니다.
 function youtubeVideoId(value){
