@@ -153,6 +153,11 @@ body.bank-page nav{flex-wrap:wrap}
 #commMaterialHeading{margin:18px 0 12px;color:#2459a6;font-size:21px}
 #commMaterialHeading[hidden]{display:none!important}
 #editor:not(.hidden){display:block}
+
+/* 취업 실전 준비: 각 학습 목차의 게시글 등록 기능 */
+.bank-group-career .comm-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;}
+#structuredRegisterButton:not(.hidden){display:inline-flex;align-items:center;justify-content:center;min-height:44px;white-space:normal;text-align:center;}
+#commMaterialHeading:not([hidden]){font-size:19px;margin:18px 0 8px;}
 </style>
 <style>
 /* 의사소통능력 목차: 기존 다른 과목의 레이아웃과 독립 */
@@ -245,8 +250,8 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
-<div class="field"><label for="postPdf">PDF 파일 등록 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
-<div class="field"><label for="postImage">이미지 파일 등록 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
+<div class="field"><label for="postPdf">PDF 파일 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
+<div class="field"><label for="postImage">이미지 파일 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
 <div class="field full"><label for="postYoutube">유튜브 영상 등록 (주소 입력)</label><input id="postYoutube" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/></div>
 </div><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
 <div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div></div>
@@ -269,7 +274,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261105-career-five-v1"></script>
+<script type="module" src="./nstudy-app.js?v=20261105-career-five-v2"></script>
 
 <script>
 /* 모든 문제은행 영역에서 해당 게시글 패널을 카드 바로 아래 펼칩니다. */
@@ -286,6 +291,7 @@ body.bank-page nav{flex-wrap:wrap}
       results.classList.add('bank-results-'+section.dataset.bankSection);
       const heading=document.getElementById('bankResultsHeading');
       if(heading)heading.textContent=button.dataset.category+' 문제은행';
+      if(section.dataset.bankSection==='career')results.scrollIntoView({behavior:'smooth',block:'nearest'});
       document.querySelectorAll('.category-group[data-bank-section] .category-card[data-category]').forEach(card=>{
         card.setAttribute('aria-expanded',String(card===button));
       });

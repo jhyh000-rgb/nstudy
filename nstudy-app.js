@@ -77,6 +77,7 @@ function renderPosts(){
        const head=document.createElement('button');head.type='button';head.className='comm-group-head'+(subcategory===skill?' active':'');
        const name=document.createElement('span');name.textContent=String(index+1).padStart(2,'0')+'  '+skill;
        head.append(name);
+       const count=document.createElement('span');count.className='subcategory-count';count.textContent=String(posts.filter(p=>p.category===category&&(skill==='기존 미분류 자료'?!p.subcategory:commGroup(p.subcategory)===skill)).length).padStart(2,'0')+'개';head.append(count);
        head.onclick=()=>{structuredEditorOpen=false;subcategory=subcategory===skill?'':skill;commUnitFilter='';page=1;renderPosts()};wrap.appendChild(head);
        grid.appendChild(wrap);
      });
@@ -112,7 +113,7 @@ function renderPosts(){
  const editor=$('editor');
  const activeCommunication=commCategory(category)&&!!subcategory;
  const registerButton=$('structuredRegisterButton');
- if(registerButton){registerButton.hidden=!activeCommunication||subcategory==='기존 미분류 자료';registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료');registerButton.textContent=structuredEditorOpen?'등록창 닫기':'게시물 등록';}
+ if(registerButton){registerButton.hidden=!activeCommunication||subcategory==='기존 미분류 자료';registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료');registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브)';}
  if($('commMaterialHeading')){
    $('commMaterialHeading').hidden=!activeCommunication;
    $('commMaterialHeading').textContent=activeCommunication?subcategory+' 학습 자료':'';
