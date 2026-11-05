@@ -40,14 +40,17 @@ function renderPosts(){
  if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category)+' 학습 자료';
  // 의사소통능력은 별도의 작성 버튼 없이 선택 영역 안에서 관리자 등록폼을 표시합니다.
  if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
- if(commCategory(category)&&$('editor')){$('editor').classList.add('hidden');$('editor').style.removeProperty('display');}
+ // 편집기 표시 상태는 선택 영역에 배치한 뒤 결정합니다.
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
  if(panel&&grid){
    // 영역을 다시 그리기 전에 기존 게시글 컨테이너를 안전하게 원래 위치로 돌려놓습니다.
    const oldList=$('postList'),oldView=$('postView'),editor=$('editor');
-   if(oldList&&editor)editor.parentNode.insertBefore(oldList,editor);
-   if(oldView&&editor)editor.parentNode.insertBefore(oldView,editor);
-   if(editor&&$('editorActions'))$('editorActions').parentNode.insertBefore(editor,$('editorActions'));
+   const originalHost=$('editorActions')?.parentNode;
+   if(originalHost){
+     if(oldList)originalHost.insertBefore(oldList,editor&&editor.parentNode===originalHost?editor:$('editorActions'));
+     if(oldView)originalHost.insertBefore(oldView,editor&&editor.parentNode===originalHost?editor:$('editorActions'));
+     if(editor)originalHost.insertBefore(editor,$('editorActions'));
+   }
    if($('postBody'))$('postBody').required=!commCategory(category);
    grid.replaceChildren();
    const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
@@ -107,11 +110,12 @@ function renderPosts(){
      // 원래 작성폼을 재사용하여 기존 Supabase/R2 저장 로직을 그대로 사용합니다.
      // 다른 숨김 처리와 충돌하지 않도록 선택한 영역 안에 명시적으로 표시합니다.
      const heading=document.createElement('h4');
-     heading.textContent=subcategory+' PDF · 이미지 · 유튜브 자료 등록';
+     heading.textContent='게시글 작성';
      heading.className='comm-upload-heading';
      region.appendChild(heading);
      region.appendChild(editor);
      editor.classList.remove('hidden');
+     editor.hidden=false;
      editor.style.setProperty('display','block','important');
      editor.setAttribute('aria-hidden','false');
      $('postCategory').value='의사소통능력';
@@ -123,7 +127,7 @@ function renderPosts(){
    }
    active.appendChild(region);
   }else{list.hidden=true;}
- }else{list.hidden=false;}
+ }else{list.hidden=false;const editor=$('editor');if(editor){editor.style.removeProperty('display');editor.classList.add('hidden');}}
 }
 // YouTube 주소는 영상 ID만 추출하여 안전한 embed 주소로 변환합니다.
 function youtubeVideoId(value){
