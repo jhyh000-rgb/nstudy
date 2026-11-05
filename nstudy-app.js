@@ -115,13 +115,17 @@ function renderPosts(){
      region.appendChild(heading);
      region.appendChild(editor);
      editor.classList.remove('hidden');
+     editor.removeAttribute('hidden');
      editor.hidden=false;
      editor.style.setProperty('display','block','important');
      editor.setAttribute('aria-hidden','false');
+     editor.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=false);
      $('postCategory').value='의사소통능력';
      updateSkills();
      $('postSubcategory').value=subcategory;
      const body=$('postBody');if(body)body.required=false;
+     const form=$('postForm');if(form){form.style.display='block';form.hidden=false;}
+     ['postPdf','postImage','postYoutube'].forEach(id=>{const field=$(id)?.closest('.field');if(field){field.style.display='grid';field.hidden=false;}});
      const title=$('postTitle');if(title)title.placeholder=subcategory+' 자료 제목';
     }
    }

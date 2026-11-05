@@ -144,6 +144,12 @@ body.bank-page nav{flex-wrap:wrap}
 .comm-area-materials .editor .field:has(#postCategory),
 .comm-area-materials .editor .field:has(#postSubcategory){display:none}
 .comm-upload-heading{margin:22px 0 8px;font-size:17px;color:#173d77}
+
+/* 선택한 의사소통능력 영역 안의 관리자 자료 등록폼을 항상 표시 */
+.comm-area-materials > #editor:not(.hidden){display:block!important;visibility:visible!important;opacity:1!important}
+.comm-area-materials #postForm{display:block!important}
+.comm-area-materials #postPdf,.comm-area-materials #postImage,.comm-area-materials #postYoutube{display:block;width:100%}
+.comm-area-materials .field:has(#postPdf),.comm-area-materials .field:has(#postImage),.comm-area-materials .field:has(#postYoutube){display:grid!important}
 </style>
 <style>
 /* 의사소통능력 목차: 기존 다른 과목의 레이아웃과 독립 */
