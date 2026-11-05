@@ -25,30 +25,6 @@ async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=
 function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
 const noticeFirst=(a,b)=>Number(!!b.is_notice)-Number(!!a.is_notice)||new Date(b.created_at)-new Date(a.created_at)||String(a.id).localeCompare(String(b.id));
 async function refreshPosts(){let query=user?db.from('nstudy_posts').select('*'):db.from('nstudy_public_post_previews').select('*');let {data,error}=await query.order('created_at',{ascending:false});if(error){say('게시글 조회 실패: '+error.message);return}posts=(data||[]).sort(noticeFirst);renderPosts()}
-// 기존 의사소통능력 게시글이 정확히 1개이고 분류되지 않았을 때만 관리자 확인 후 이동합니다.
-const COMM_LEGACY_TARGET='실전 모의고사';
-function commLegacyCandidate(){
- const all=posts.filter(p=>p.category==='의사소통능력');
- if(all.length!==1)return null;
- const p=all[0];
- const group=commGroup(p.subcategory);
- return !Object.prototype.hasOwnProperty.call(COMM_CATALOG,group)?p:null;
-}
-async function moveCommLegacy(){
- if(!admin())return say('관리자만 이동할 수 있습니다.');
- // 작업 직전에 DB에서 다시 확인하여 다른 글이 추가된 경우 이동하지 않습니다.
- const {data,error}=await db.from('nstudy_posts').select('id,title,subcategory').eq('category','의사소통능력').limit(2);
- if(error)return say('자료 확인 실패: '+error.message);
- if(!data||data.length!==1)return say('의사소통능력 자료가 정확히 1개일 때만 이동할 수 있습니다.');
- const p=data[0];
- if(Object.prototype.hasOwnProperty.call(COMM_CATALOG,commGroup(p.subcategory)))return say('이미 목차가 지정된 자료입니다. 변경하지 않았습니다.');
- if(!confirm('기존 자료 「'+(p.title||'제목 없음')+'」 1개를 09. 실전 모의고사로 옮기시겠습니까?\n제목·본문·PDF·이미지·유튜브는 변경되지 않습니다.'))return;
- const {data:updated,error:writeError}=await db.from('nstudy_posts').update({subcategory:COMM_LEGACY_TARGET}).eq('id',p.id).eq('category','의사소통능력').select('id');
- if(writeError)return say('목차 이동 실패: '+writeError.message);
- if(!updated||updated.length!==1)return say('이동 여부를 확인하지 못했습니다. 관리자에서 게시글을 확인해 주세요.');
- category='의사소통능력';subcategory='실전 모의고사';commUnitFilter='';page=1;
- await refreshPosts();say('기존 자료 1개를 실전 모의고사로 옮겼습니다.');
-}
 async function toggleNotice(p,checked,cb){
  if(!admin())return;
  const count=posts.filter(x=>x.category===p.category&&x.is_notice&&x.id!==p.id).length;
@@ -64,6 +40,10 @@ function renderPosts(){
  if($('categoryTitle'))$('categoryTitle').textContent=category+' 학습 자료';
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
  if(panel&&grid){
+   // 영역을 다시 그리기 전에 기존 게시글 컨테이너를 안전하게 원래 위치로 돌려놓습니다.
+   const oldList=$('postList'),oldView=$('postView'),editor=$('editor');
+   if(oldList&&editor)editor.parentNode.insertBefore(oldList,editor);
+   if(oldView&&editor)editor.parentNode.insertBefore(oldView,editor);
    grid.replaceChildren();
    const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
    const skills=commCategory(category)?Object.keys(COMM_CATALOG):certificateCategory(category)?[...new Set([...CERTIFICATE_SUBJECTS[category],...storedSkills])]:[...new Set(storedSkills)];
@@ -88,7 +68,6 @@ function renderPosts(){
  }
  const list=$('postList');if(!list)return;list.innerHTML='';
  if($('commBookTools'))$('commBookTools').hidden=!commCategory(category);
- const legacyMove=$('commMoveLegacy');if(legacyMove)legacyMove.hidden=!commCategory(category)||!admin()||!commLegacyCandidate();
  const items=posts.filter(p=>p.category===category&&(commCategory(category)?(!subcategory||commGroup(p.subcategory)===subcategory):(!subcategory||p.subcategory===subcategory))).sort(noticeFirst);
  items.slice((page-1)*10,page*10).forEach((p,i)=>{
   const row=document.createElement('div');row.className='post-row';row.style.cssText='display:flex;align-items:center;gap:10px';
@@ -108,6 +87,18 @@ function renderPosts(){
  if(!items.length)list.innerHTML='<p class="small-note">등록된 게시글이 없습니다.</p>';
  if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}
  if($('postView'))$('postView').classList.add('hidden');
+ // 의사소통능력: 선택한 영역 카드 바로 아래에 해당 영역의 자료만 표시합니다.
+ // 다른 과목의 목록/등록 기능에는 영향을 주지 않습니다.
+ if(commCategory(category)){
+  const active=Array.from(grid.querySelectorAll('.comm-group')).find(w=>w.querySelector('.comm-group-head.active'));
+  if(active){
+   const region=document.createElement('div');region.className='comm-area-materials';
+   const heading=document.createElement('h4');heading.textContent=subcategory+' 자료';region.appendChild(heading);
+   list.hidden=false;region.appendChild(list);
+   if($('postView'))region.appendChild($('postView'));
+   active.appendChild(region);
+  }else{list.hidden=true;}
+ }else{list.hidden=false;}
 }
 // YouTube 주소는 영상 ID만 추출하여 안전한 embed 주소로 변환합니다.
 function youtubeVideoId(value){
@@ -250,7 +241,7 @@ async function printCommBook(){
  w.focus();
 }
 
-function initBank(){$('commMoveLegacy')?.addEventListener('click',moveCommLegacy);$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';commUnitFilter='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=$('postCategory').value==='의사소통능력';if(commSelected&&!$('postSubcategory')?.value)throw Error('의사소통능력 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;commUnitFilter='';page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
+function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';commUnitFilter='';page=1;renderPosts()}));$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>$('editor').classList.add('hidden'));$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=$('postCategory').value==='의사소통능력';if(commSelected&&!$('postSubcategory')?.value)throw Error('의사소통능력 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;commUnitFilter='';page=1;e.target.reset();$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){
  const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;
  const previous=sel.value;

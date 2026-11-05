@@ -132,6 +132,12 @@ body.bank-page nav{flex-wrap:wrap}
 .bank-results-assessment{--result-color:#7c3aed;--result-light:#f7f2ff;--result-line:#dcc9ff}
 .bank-group-assessment>.bank-results{border:2px solid #7c3aed;background:#faf7ff}
 @media(max-width:600px){.category-group.bank-group-assessment{padding:13px}}
+
+/* 의사소통능력은 영역 선택 즉시 카드 안에 해당 게시글만 표시 */
+.comm-area-materials{padding:14px 16px;background:#fff;border-top:1px solid var(--comm-color,#d8e4f2)}
+.comm-area-materials h4{margin:0 0 10px;color:var(--comm-color,#2459a6)}
+.comm-area-materials .post-list{margin:0}
+.comm-area-materials .post-view{margin-top:14px}
 </style>
 <style>
 /* 의사소통능력 목차: 기존 다른 과목의 레이아웃과 독립 */
@@ -211,7 +217,7 @@ body.bank-page nav{flex-wrap:wrap}
 </div></div>
 <div class="bank-results bank-results-career hidden" id="bankResults" aria-live="polite"><div class="bank-results-heading" id="bankResultsHeading">선택한 과목 문제은행</div><div aria-live="polite" class="subcategory-panel hidden" id="subcategoryPanel"><h4 id="subcategoryHeading">세부 능력별 게시글</h4><p>의사소통능력은 영역을 선택하면 바로 자료가 표시됩니다.</p><div class="subcategory-grid" id="subcategoryGrid"></div></div>
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
-<div class="comm-book-tools" id="commBookTools" hidden><button type="button" class="btn btn-secondary" id="commMoveLegacy" hidden>기존 자료 1개를 실전 모의고사로 이동</button><button type="button" class="btn btn-primary" id="commPrintBook">의사소통능력 전체 교재 인쇄 / PDF 저장</button><span class="small-note">영역별 순서로 정리 · PDF 첨부는 별도 링크</span></div>
+<div class="comm-book-tools" id="commBookTools" hidden><button type="button" class="btn btn-primary" id="commPrintBook">의사소통능력 전체 교재 인쇄 / PDF 저장</button><span class="small-note">영역별 순서로 정리 · PDF 첨부는 별도 링크</span></div>
 <div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
 <div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
