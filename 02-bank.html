@@ -138,6 +138,12 @@ body.bank-page nav{flex-wrap:wrap}
 .comm-area-materials h4{margin:0 0 10px;color:var(--comm-color,#2459a6)}
 .comm-area-materials .post-list{margin:0}
 .comm-area-materials .post-view{margin-top:14px}
+
+/* 선택한 의사소통 영역의 관리자 전용 직접 자료 등록 */
+.comm-area-materials .editor{display:block!important;margin-top:12px}
+.comm-area-materials .editor .field:has(#postCategory),
+.comm-area-materials .editor .field:has(#postSubcategory){display:none}
+.comm-upload-heading{margin:22px 0 8px;font-size:17px;color:#173d77}
 </style>
 <style>
 /* 의사소통능력 목차: 기존 다른 과목의 레이아웃과 독립 */
@@ -248,7 +254,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261105-communication-final-2"></script>
+<script type="module" src="./nstudy-app.js?v=20261105-communication-upload-restore"></script>
 
 <script>
 /* 모든 문제은행 영역에서 해당 게시글 패널을 카드 바로 아래 펼칩니다. */

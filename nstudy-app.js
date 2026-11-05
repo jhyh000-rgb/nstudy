@@ -38,7 +38,7 @@ function renderPosts(){
  const cards=document.querySelectorAll('.category-card');
  cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(commCategory(c.dataset.category)){badge?.remove();return}if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
  if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category)+' 학습 자료';
- // 의사소통능력에서는 작성 도구를 표시하지 않고 자료 열람만 제공합니다.
+ // 의사소통능력은 별도의 작성 버튼 없이 선택 영역 안에서 관리자 등록폼을 표시합니다.
  if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
  if(commCategory(category)&&$('editor'))$('editor').classList.add('hidden');
  const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
@@ -47,6 +47,8 @@ function renderPosts(){
    const oldList=$('postList'),oldView=$('postView'),editor=$('editor');
    if(oldList&&editor)editor.parentNode.insertBefore(oldList,editor);
    if(oldView&&editor)editor.parentNode.insertBefore(oldView,editor);
+   if(editor&&$('editorActions'))$('editorActions').parentNode.insertBefore(editor,$('editorActions'));
+   if($('postBody'))$('postBody').required=!commCategory(category);
    grid.replaceChildren();
    const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
    const skills=commCategory(category)?Object.keys(COMM_CATALOG):certificateCategory(category)?[...new Set([...CERTIFICATE_SUBJECTS[category],...storedSkills])]:[...new Set(storedSkills)];
@@ -99,6 +101,19 @@ function renderPosts(){
    const heading=document.createElement('h4');heading.textContent=subcategory+' 학습 자료';region.appendChild(heading);
    list.hidden=false;region.appendChild(list);
    if($('postView'))region.appendChild($('postView'));
+   if(admin()){
+    const editor=$('editor');
+    if(editor){
+     const heading=document.createElement('h4');heading.textContent=subcategory+' 자료 등록';heading.className='comm-upload-heading';
+     region.appendChild(heading);
+     region.appendChild(editor);
+     editor.classList.remove('hidden');
+     $('postCategory').value='의사소통능력';
+     updateSkills();
+     $('postSubcategory').value=subcategory;
+     const body=$('postBody');if(body)body.required=false;
+    }
+   }
    active.appendChild(region);
   }else{list.hidden=true;}
  }else{list.hidden=false;}
