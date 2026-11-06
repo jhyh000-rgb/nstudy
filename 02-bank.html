@@ -261,13 +261,14 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
 
 <h3 id="commMaterialHeading" hidden></h3><div class="form-actions" style="margin:12px 0"><button type="button" class="btn btn-primary hidden" id="structuredRegisterButton" hidden>게시물 등록</button></div><div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
-<div class="editor hidden" id="editor" aria-label="PDF 이미지 유튜브 자료 등록"><form id="postForm"><div class="form-grid">
+<div class="editor hidden" id="editor" aria-label="PDF 이미지 유튜브 동영상 자료 등록"><form id="postForm"><div class="form-grid">
 <div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활 1급</option><option>컴활 2급</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
 <div class="field"><label for="postPdf">PDF 파일 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
 <div class="field"><label for="postImage">이미지 파일 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
+<div class="field full"><label for="postVideo">동영상 직접 업로드 (Cloudflare R2, 최대 300MB, MP4/WebM/MOV)</label><input id="postVideo" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v"/><progress id="videoProgress" max="100" value="0" style="width:100%;display:none"></progress><span id="videoStatus" class="small-note" aria-live="polite"></span></div>
 <div class="field full"><label for="postYoutube">유튜브 영상 등록 (주소 입력)</label><input id="postYoutube" type="url" inputmode="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off"/></div>
 </div><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
 <div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div></div>
@@ -290,7 +291,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261105-electric-chapters-v1"></script>
+<script type="module" src="./nstudy-app.js?v=20261106-r2-video-secure-v2"></script>
 <script>
 (function(){
   const toggle=document.getElementById('computerQualificationToggle');

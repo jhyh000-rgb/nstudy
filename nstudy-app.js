@@ -152,7 +152,7 @@ function renderPosts(){
  const editor=$('editor');
  const activeCommunication=(commCategory(category)||category===ELECTRIC_CATEGORY)&&!!subcategory;
  const registerButton=$('structuredRegisterButton');
- if(registerButton){registerButton.hidden=!activeCommunication||(subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브)';}
+ if(registerButton){registerButton.hidden=!activeCommunication||(subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브 · 동영상 파일)';}
  if($('commMaterialHeading')){
    $('commMaterialHeading').hidden=!activeCommunication;
    $('commMaterialHeading').textContent=activeCommunication?subcategory+' 학습 자료':'';
@@ -170,7 +170,7 @@ function renderPosts(){
      $('postSubcategory').value=subcategory;
      if($('postBody'))$('postBody').required=false;
      if($('postForm'))$('postForm').hidden=false;
-     ['postPdf','postImage','postYoutube'].forEach(id=>{
+     ['postPdf','postImage','postYoutube','postVideo'].forEach(id=>{
        const field=$(id)?.closest('.field');
        if(field){field.hidden=false;field.style.display='grid';}
      });
@@ -234,6 +234,13 @@ async function openPost(p){
    const link=document.createElement('a');link.href=downloadUrl;link.download=name;document.body.appendChild(link);link.click();link.remove();
   };actions.appendChild(dl);media.appendChild(actions);
  }
+ // R2에 직접 업로드한 동영상은 게시글 내부에서 재생합니다.
+ if(p.video_path){
+  const title=document.createElement('strong');title.textContent='동영상: '+(p.video_name||'강의 영상');media.appendChild(title);
+  const player=document.createElement('video');player.controls=true;player.controlsList='nodownload noremoteplayback';player.disablePictureInPicture=true;player.playsInline=true;player.preload='metadata';player.referrerPolicy='no-referrer';player.addEventListener('contextmenu',e=>e.preventDefault());player.style.cssText='display:block;width:100%;max-height:70vh;background:#111;border-radius:8px;margin:10px 0';media.appendChild(player);
+  try{const ticket=await videoRequest('/ticket',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:p.video_path})});player.src=ticket.url;player.load();}
+  catch(e){const msg=document.createElement('p');msg.className='small-note';msg.textContent='동영상을 재생할 수 없습니다: '+e.message;media.appendChild(msg)}
+ }
  // PDF·이미지와 함께 YouTube 영상을 게시글 안에 표시합니다.
  if(p.youtube_url){
   const id=youtubeVideoId(p.youtube_url);
@@ -268,6 +275,42 @@ async function openPost(p){
  v.appendChild(div);v.classList.remove('hidden');v.scrollIntoView({block:'start',behavior:'smooth'});
 }
 const R2_WORKER='https://nstudy-r2.jhyh000.workers.dev';
+// 새 영상 전용 Worker: 배포 후 실제 URL로 교체하세요.
+const VIDEO_WORKER='https://nstudy-video.YOUR-SUBDOMAIN.workers.dev';
+async function videoRequest(endpoint,options={}){
+ const {data:{session}}=await db.auth.getSession();
+ if(!session?.access_token)throw Error('동영상 업로드 및 재생은 로그인이 필요합니다.');
+ const r=await fetch(VIDEO_WORKER+endpoint,{...options,headers:{Authorization:'Bearer '+session.access_token,...options.headers}});
+ let data;try{data=await r.json()}catch{throw Error('동영상 서버 응답을 확인할 수 없습니다.');}
+ if(!r.ok)throw Error(data.error||'동영상 서버 요청 실패');return data;
+}
+async function uploadVideo(file){
+ if(!file)return {path:'',name:''};
+ if(!admin())throw Error('동영상 업로드는 관리자만 가능합니다.');
+ if(!['video/mp4','video/webm','video/quicktime','video/x-m4v'].includes(file.type))throw Error('MP4, WebM, MOV 형식만 가능합니다.');
+ if(file.size>300*1024*1024)throw Error('동영상은 최대 300MB까지 업로드할 수 있습니다.');
+ const status=$('videoStatus'),progress=$('videoProgress');if(progress){progress.style.display='block';progress.value=0;}
+ let state=null;let completed=false;
+ try{
+  state=await videoRequest('/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,size:file.size,type:file.type})});
+  const count=Math.ceil(file.size/state.partSize);if(count>10000)throw Error('분할 업로드 최대 조각 수를 초과했습니다.');
+  const parts=[];
+  for(let i=0;i<count;i++){
+   const blob=file.slice(i*state.partSize,Math.min((i+1)*state.partSize,file.size));
+   let result;
+   for(let attempt=0;attempt<3;attempt++){
+    try{result=await videoRequest('/part?key='+encodeURIComponent(state.key)+'&uploadId='+encodeURIComponent(state.uploadId)+'&number='+(i+1),{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:blob});break}
+    catch(e){if(attempt===2)throw e;}
+   }
+   parts.push(result);if(progress)progress.value=Math.round((i+1)/count*100);if(status)status.textContent='동영상 업로드 '+(i+1)+'/'+count+' 조각 완료';
+  }
+  const done=await videoRequest('/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:state.key,uploadId:state.uploadId,parts})});completed=true;
+  if(status)status.textContent='동영상 업로드 완료. 게시글을 저장하고 있습니다.';
+  return {path:done.path,name:file.name};
+ }catch(e){if(status)status.textContent='업로드 실패: '+e.message;throw e}
+ finally{if(state&&!completed){videoRequest('/abort',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:state.key,uploadId:state.uploadId})}).catch(console.warn)}}
+}
+
 async function attachmentUrl(path,downloadName=''){
  if(!path)return '';
  if(!path.startsWith('r2:')){
@@ -323,7 +366,7 @@ async function printCommBook(){
  w.focus();
 }
 
-function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';electricSubject='';structuredEditorOpen=false;commUnitFilter='';page=1;renderPosts()}));$('structuredRegisterButton')?.addEventListener('click',()=>{if(!admin())return say('게시물 등록은 관리자 로그인 후 이용할 수 있습니다.');structuredEditorOpen=!structuredEditorOpen;renderPosts();if(structuredEditorOpen)$('postTitle')?.focus()});$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)||category===ELECTRIC_CATEGORY){ structuredEditorOpen=false; $('postForm')?.reset();$('postCategory').value=category;updateSkills();$('postSubcategory').value=subcategory;renderPosts(); }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const commSelected=commCategory($('postCategory').value)||$('postCategory').value===ELECTRIC_CATEGORY;if(commSelected&&$('postSubcategory')?.value==='기존 미분류 자료')throw Error('새 게시글은 정식 학습 목차를 선택해 주세요.');if(commSelected&&$('postSubcategory')?.value.endsWith(' | 기존 자료'))throw Error('기존 자료 목차에는 새 게시글을 등록할 수 없습니다.');if(commSelected&&!$('postSubcategory')?.value)throw Error('학습 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;if(row.category===ELECTRIC_CATEGORY)electricSubject=electricPostSubject(row);commUnitFilter='';page=1;e.target.reset();structuredEditorOpen=false;if(!commCategory(row.category)&&row.category!==ELECTRIC_CATEGORY)$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
+function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';electricSubject='';structuredEditorOpen=false;commUnitFilter='';page=1;renderPosts()}));$('structuredRegisterButton')?.addEventListener('click',()=>{if(!admin())return say('게시물 등록은 관리자 로그인 후 이용할 수 있습니다.');structuredEditorOpen=!structuredEditorOpen;renderPosts();if(structuredEditorOpen)$('postTitle')?.focus()});$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)||category===ELECTRIC_CATEGORY){ structuredEditorOpen=false; $('postForm')?.reset();$('postCategory').value=category;updateSkills();$('postSubcategory').value=subcategory;renderPosts(); }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const video=await uploadVideo($('postVideo')?.files[0]);const commSelected=commCategory($('postCategory').value)||$('postCategory').value===ELECTRIC_CATEGORY;if(commSelected&&$('postSubcategory')?.value==='기존 미분류 자료')throw Error('새 게시글은 정식 학습 목차를 선택해 주세요.');if(commSelected&&$('postSubcategory')?.value.endsWith(' | 기존 자료'))throw Error('기존 자료 목차에는 새 게시글을 등록할 수 없습니다.');if(commSelected&&!$('postSubcategory')?.value)throw Error('학습 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,youtube_url:youtubeUrl||null,video_path:video.path||null,video_name:video.name||null};const {error}=await db.from('nstudy_posts').insert(row);if(error)throw error;category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;if(row.category===ELECTRIC_CATEGORY)electricSubject=electricPostSubject(row);commUnitFilter='';page=1;e.target.reset();structuredEditorOpen=false;if(!commCategory(row.category)&&row.category!==ELECTRIC_CATEGORY)$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
 function updateSkills(){
  const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;
  const previous=sel.value;
