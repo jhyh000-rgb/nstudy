@@ -118,7 +118,8 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
 <div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input accept="application/pdf" id="postPdf" type="file"/></div>
 <div class="field"><label for="postImage">이미지 첨부 (선택)</label><input accept="image/*" id="postImage" type="file"/></div>
-</div><p class="small-note">첨부파일은 Supabase 저장소에 저장됩니다. 파일당 최대 10MB입니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
+<div class="field full"><label for="postVideo">동영상 첨부 (선택 · 최대 300MB)</label><input accept="video/mp4,video/webm,video/quicktime,video/x-m4v" id="postVideo" type="file"/><progress id="videoProgress" max="100" value="0" style="display:none;width:100%"></progress><span id="videoStatus" class="small-note" aria-live="polite"></span></div>
+</div><p class="small-note">이미지·PDF는 Supabase에 파일당 최대 10MB, 동영상은 Cloudflare R2에 최대 300MB로 저장됩니다. 게시글 보기에서 A3 컬러 인쇄를 선택할 수 있습니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" id="cancelPost" type="button">취소</button></div></form></div>
 <div class="form-actions hidden" id="editorActions" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div>
 </div></div></section>
 <section class="hidden" id="admin-page"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p class="small-note" id="adminIntro" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
@@ -139,6 +140,6 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261021-pdfprint"></script>
+<script type="module" src="./nstudy-app.js?v=20261107-r2video"></script>
 </body>
 </html>
