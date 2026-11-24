@@ -205,7 +205,12 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 </div><div id="adminMembers"></div></div></div></section>
 <section id="contact" class="cta"><div class="container"><h2>NSTUDY와 취업 준비를 시작하세요.</h2><p>교육과정 및 상담 문의</p><a class="phone" href="tel:01093375509">010-9337-5509</a></div></section>
 </main>
-<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="./images/logo01.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#certificate">기능사 자격시험</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="./02-bank.html">문제은행</a></p></div></div></footer>
+<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="./images/logo01.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#certificate">기능사 자격시험</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="./02-bank.html">문제은행</a></p></div></div>
+<div class="container" id="visitorStats" hidden style="margin-top:24px;padding-top:20px;border-top:1px solid #334155" aria-label="관리자 방문 현황">
+<h3>방문 현황 <small style="font-size:12px;color:#aab4c3">관리자 전용 · 한국 시간 기준</small></h3>
+<p aria-live="polite">오늘 방문 <strong id="visitorToday">—</strong> · 누적 방문 <strong id="visitorTotal">—</strong></p>
+<p id="visitorMessage" role="status"></p>
+</div></footer>
 
 <aside id="nstudyVideoPopup" hidden aria-label="추천 학습 동영상">
 <div class="nstudy-popup-top"><span id="nstudyPopupTitle">추천 학습 동영상</span><button type="button" class="nstudy-popup-close" id="nstudyPopupClose" aria-label="팝업 닫기">×</button></div>
@@ -213,7 +218,7 @@ footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid
 <div class="nstudy-popup-bottom"><label><input type="checkbox" id="nstudyPopupToday"> 오늘 하루 보지 않기</label><span>소리는 영상에서 켜세요</span></div>
 </aside>
 <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
-<script type="module" src="./nstudy-app.js?v=20261102-members-table-fix"></script>
+<script type="module" src="./nstudy-app.js?v=20261124-visitors"></script>
 <script type="module" src="./nstudy-popup.js?v=20261102-1"></script>
 <script>
 (()=>{const root=document.querySelector('.hero');if(!root)return;
@@ -229,5 +234,6 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInterv
 play();
 })();
 </script>
+<script type="module" src="./nstudy-visitors.js?v=20261124-1"></script>
 </body>
 </html>
