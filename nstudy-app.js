@@ -242,7 +242,7 @@ async function openPost(p){
  const v=$('postView');if(!v)return;
  if(!user){
   v.replaceChildren();v.classList.add('hidden');
-  if(p.can_preview!==true){say('로그인 후 이용하실 수 있습니다. 과목별 최신 등록 3개만 무료 공개됩니다.');return;}
+  if(p.can_preview!==true){say('로그인 후 이용하실 수 있습니다. 과목별 현재 정렬 상위 3개만 무료 공개됩니다.');return;}
   const {data,error}=await db.rpc('nstudy_guest_post_detail',{p_id:String(p.id)});
   if(sequence!==postOpenSequence)return;
   if(error){say('자료 조회 실패: '+error.message);return;}
