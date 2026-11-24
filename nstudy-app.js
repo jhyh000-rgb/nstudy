@@ -79,7 +79,13 @@ async function movePost(p,direction){
  finally{postOrderSaving=false;await refreshPosts();}
 }
 
-async function refreshPosts(){let query=user?db.from('nstudy_posts').select('*'):db.from('nstudy_public_post_previews').select('*');let {data,error}=await query.order('created_at',{ascending:false});if(error){say('게시글 조회 실패: '+error.message);return}posts=(data||[]).sort(noticeFirst);renderPosts()}
+async function refreshPosts(){
+ const {data,error}=user
+  ?await db.from('nstudy_posts').select('*').order('created_at',{ascending:false})
+  :await db.rpc('nstudy_guest_post_catalog');
+ if(error){posts=[];renderPosts();say('게시글 조회 실패: '+error.message);return;}
+ posts=(data||[]).sort(noticeFirst);renderPosts();
+}
 async function toggleNotice(p,checked,cb){
  if(!admin())return;
  const count=posts.filter(x=>x.category===p.category&&x.is_notice&&x.id!==p.id).length;
@@ -90,6 +96,7 @@ async function toggleNotice(p,checked,cb){
  cb.disabled=false;
 }
 function renderPosts(){
+ postOpenSequence++;
  const cards=document.querySelectorAll('.category-card');
  cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(commCategory(c.dataset.category)){badge?.remove();return}if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
  if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category===ELECTRIC_CATEGORY&&electricSubject?electricSubject+' 학습 자료':category+' 학습 자료');
@@ -156,8 +163,8 @@ function renderPosts(){
   const view=document.createElement('button');view.type='button';view.style.cssText='flex:1;min-width:0;text-align:left;background:transparent;border:0;color:inherit;cursor:pointer';
   const title=document.createElement('span');title.style.cssText='display:block;font-weight:700';
   if(p.is_notice){const tag=document.createElement('span');tag.textContent='[공지] ';tag.style.cssText='color:#b45309;font-weight:800';title.appendChild(tag)}
-  title.appendChild(document.createTextNode(p.title||''));
-  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=(p.body||'').slice(0,55);
+  title.appendChild(document.createTextNode((!user&&p.can_preview!==true?'🔒 ':'')+(p.title||'')));
+  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=user?(p.body||'').slice(0,55):(p.can_preview===true?'무료 공개 자료 · 클릭하여 보기':'로그인 후 이용하실 수 있습니다.');
   view.append(title,desc);view.onclick=()=>openPost(p);row.appendChild(view);
   if(admin()){
    const peers=postOrderGroup(p),position=peers.findIndex(x=>x.id===p.id);
@@ -229,8 +236,20 @@ function youtubeVideoId(value){
   return /^[A-Za-z0-9_-]{11}$/.test(id)?id:'';
  }catch{return ''}
 }
+let postOpenSequence=0;
 async function openPost(p){
+ const sequence=++postOpenSequence;
  const v=$('postView');if(!v)return;
+ if(!user){
+  v.replaceChildren();v.classList.add('hidden');
+  if(p.can_preview!==true){say('로그인 후 이용하실 수 있습니다. 과목별 최신 등록 3개만 무료 공개됩니다.');return;}
+  const {data,error}=await db.rpc('nstudy_guest_post_detail',{p_id:String(p.id)});
+  if(sequence!==postOpenSequence)return;
+  if(error){say('자료 조회 실패: '+error.message);return;}
+  if(!data){say('현재 공개 대상이 아닙니다. 목록을 새로 불러옵니다.');await refreshPosts();return;}
+  p=data;
+ }
+
  v.replaceChildren();
  const heading=document.createElement('h3');heading.textContent=p.title||'';v.appendChild(heading);
  const info=document.createElement('p');info.className='small-note';info.textContent=p.category||'';v.appendChild(info);
