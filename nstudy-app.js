@@ -58,7 +58,27 @@ const pdfViewerUrl=signedUrl=>{
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=u;profile=null;if(user){const {data,error}=await db.from('nstudy_profiles').select('*').eq('id',user.id).maybeSingle();if(error)console.error(error);profile=data;if(profile?.blocked){await db.auth.signOut();user=null;profile=null;say('로그인이 제한된 계정입니다.')}}renderHeader();if($('postList'))await refreshPosts();if($('admin-page')&&!$('admin-page').classList.contains('hidden'))await renderMembers()}
 function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
-const noticeFirst=(a,b)=>Number(!!b.is_notice)-Number(!!a.is_notice)||new Date(b.created_at)-new Date(a.created_at)||String(a.id).localeCompare(String(b.id));
+const noticeFirst=(a,b)=>Number(!!b.is_notice)-Number(!!a.is_notice)
+ ||(a.sort_order??Number.MAX_SAFE_INTEGER)-(b.sort_order??Number.MAX_SAFE_INTEGER)
+ ||new Date(b.created_at)-new Date(a.created_at)||String(a.id).localeCompare(String(b.id));
+let postOrderSaving=false;
+const postOrderGroup=p=>posts.filter(x=>x.category===p.category&&(x.subcategory||'')===(p.subcategory||'')&&!!x.is_notice===!!p.is_notice).sort(noticeFirst);
+async function movePost(p,direction){
+ if(!admin()||postOrderSaving)return;
+ const group=postOrderGroup(p),index=group.findIndex(x=>x.id===p.id),target=index+direction;
+ if(index<0||target<0||target>=group.length)return;
+ const expected=group.map(x=>String(x.id)),order=[...expected];
+ [order[index],order[target]]=[order[target],order[index]];
+ postOrderSaving=true;renderPosts();
+ try{
+  const {error}=await db.rpc('nstudy_reorder_posts',{p_category:p.category,p_subcategory:p.subcategory||'',p_notice:!!p.is_notice,p_expected:expected,p_order:order});
+  if(error)throw error;
+  group.forEach(x=>{x.sort_order=order.indexOf(String(x.id));});
+  say('게시물 순서를 저장했습니다.');
+ }catch(e){say('순서 저장 실패: '+(e.message||String(e))+' (최초 사용 전 순서관리 SQL을 실행해 주세요.)');}
+ finally{postOrderSaving=false;await refreshPosts();}
+}
+
 async function refreshPosts(){let query=user?db.from('nstudy_posts').select('*'):db.from('nstudy_public_post_previews').select('*');let {data,error}=await query.order('created_at',{ascending:false});if(error){say('게시글 조회 실패: '+error.message);return}posts=(data||[]).sort(noticeFirst);renderPosts()}
 async function toggleNotice(p,checked,cb){
  if(!admin())return;
@@ -140,6 +160,15 @@ function renderPosts(){
   const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=(p.body||'').slice(0,55);
   view.append(title,desc);view.onclick=()=>openPost(p);row.appendChild(view);
   if(admin()){
+   const peers=postOrderGroup(p),position=peers.findIndex(x=>x.id===p.id);
+   const controls=document.createElement('div');controls.style.cssText='display:flex;flex-direction:column;gap:5px;flex-shrink:0';
+   for(const [label,direction] of [['▲ 위로',-1],['▼ 아래로',1]]){
+    const button=document.createElement('button');button.type='button';button.className='btn btn-secondary';button.textContent=label;
+    button.setAttribute('aria-label',(p.title||'게시물')+' '+label);
+    button.disabled=postOrderSaving||position+direction<0||position+direction>=peers.length;
+    button.onclick=()=>movePost(p,direction);controls.appendChild(button);
+   }
+   row.appendChild(controls);
    const label=document.createElement('label');label.style.cssText='display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;cursor:pointer';
    const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!p.is_notice;cb.setAttribute('aria-label',p.title+' 공지 설정');cb.onchange=()=>toggleNotice(p,cb.checked,cb);
    label.append(cb,document.createTextNode('공지'));row.appendChild(label);
