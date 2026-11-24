@@ -123,7 +123,7 @@ body.bank-page nav{flex-wrap:wrap}
 @keyframes bankExpand{from{opacity:.6;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.category-group[data-bank-section]>.bank-results{padding:12px;margin-top:14px}}
 
-/* ④ 수행평가: 기존 문제은행 카드 디자인 유지 */
+/* ⑤ 수행평가: 기존 문제은행 카드 디자인 유지 */
 .bank-group-assessment{--group-color:#7c3aed;--group-light:#f7f2ff;--group-line:#dcc9ff}
 .category-group.bank-group-assessment{padding:20px;border:1px solid var(--group-line);border-left:6px solid var(--group-color);border-radius:14px;background:var(--group-light);margin:0 0 20px}
 .category-group.bank-group-assessment h3{color:var(--group-color);font-size:19px;font-weight:900}
@@ -227,7 +227,10 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="조직이해능력"><strong>조직이해능력</strong><small>조직 · 업무 이해</small></button>
 <button class="category-card" data-category="직업윤리"><strong>직업윤리</strong><small>근로 · 공동체 윤리</small></button>
 </div></div>
-<div class="category-group bank-group-career" data-bank-section="career"><h3>② 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
+<div class="category-group bank-group-career" id="mock-exam-bank" data-bank-section="mock"><h3>② 실전 모의고사</h3><p class="certificate-intro">공기업·공공기관, 삼성 등 대기업, 기능사 시험 대비 모의고사를 확인하세요.</p><div class="category-grid" role="group" aria-label="실전 모의고사">
+<button type="button" class="category-card" data-category="실전 모의고사"><strong>실전 모의고사</strong><small>공기업·공공기관 · 대기업 · 기능사</small></button>
+</div></div>
+<div class="category-group bank-group-career" data-bank-section="career"><h3>③ 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
 <button class="category-card" data-category="한국사"><strong>한국사</strong><small>한국사능력검정시험 대비</small></button>
 <button class="category-card" id="computerQualificationToggle" type="button" aria-expanded="false" aria-controls="computerQualificationLevels"><strong>컴활</strong><small>클릭하여 1급 · 2급 선택</small></button>
 <button class="category-card active" data-category="TOEIC"><strong>TOEIC</strong><small>LC · RC · 실전 연습</small></button>
@@ -243,7 +246,7 @@ body.bank-page nav{flex-wrap:wrap}
 </div>
 </div>
 
-<div class="category-group bank-group-certificate" id="certificate-bank" data-bank-section="certificate"><h3>③ 기능사 자격시험 · 5개 분야 / 40개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
+<div class="category-group bank-group-certificate" id="certificate-bank" data-bank-section="certificate"><h3>④ 기능사 자격시험 · 5개 분야 / 40개 과목</h3><p class="certificate-intro">전공 분야를 선택한 다음 아래에서 기능사 자격증을 선택하세요.</p><div class="category-grid certificate-grid" aria-label="기능사 자격시험 분야" role="group">
 <button type="button" class="category-card certificate-category" data-category="기능사 · 전기·전자" data-certificate-group="전기·전자"><strong>전기·전자</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · 기계·자동차" data-certificate-group="기계·자동차"><strong>기계·자동차</strong><small>기능사 8개 과목</small></button>
 <button type="button" class="category-card certificate-category" data-category="기능사 · IT·정보통신" data-certificate-group="IT·정보통신"><strong>IT·정보통신</strong><small>기능사 8개 과목</small></button>
@@ -251,7 +254,7 @@ body.bank-page nav{flex-wrap:wrap}
 <button type="button" class="category-card certificate-category" data-category="기능사 · 조리·제과" data-certificate-group="조리·제과"><strong>조리·제과</strong><small>기능사 8개 과목</small></button>
 </div></div>
 <div class="category-group bank-group-assessment" id="assessment-bank" data-bank-section="assessment">
-<h3>④ 수행평가 · 2개 영역</h3>
+<h3>⑤ 수행평가 · 2개 영역</h3>
 <p class="certificate-intro">고등부와 중등부의 과목별 수행평가 학습자료를 확인하세요.</p>
 <div class="category-grid" aria-label="수행평가 영역" role="group">
 <button type="button" class="category-card" data-category="수행평가(고등부)"><strong>수행평가(고등부)</strong><small>고등학교 과목별 수행평가</small></button>
@@ -262,7 +265,7 @@ body.bank-page nav{flex-wrap:wrap}
 
 <h3 id="commMaterialHeading" hidden></h3><div class="form-actions" style="margin:12px 0"><button type="button" class="btn btn-primary hidden" id="structuredRegisterButton" hidden>게시물 등록</button></div><div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor" aria-label="PDF 이미지 유튜브 동영상 자료 등록"><form id="postForm"><div class="form-grid">
-<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>한국사</option><option>컴활 1급</option><option>컴활 2급</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>실전 모의고사</option><option>한국사</option><option>컴활 1급</option><option>컴활 2급</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
@@ -291,7 +294,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261106-r2-video-secure-v2"></script>
+<script type="module" src="./nstudy-app.js?v=20261124-mock-exam"></script>
 <script>
 (function(){
   const toggle=document.getElementById('computerQualificationToggle');
@@ -315,7 +318,7 @@ body.bank-page nav{flex-wrap:wrap}
 (function(){
   const results=document.getElementById('bankResults');
   if(!results)return;
-  const sectionClasses=['bank-results-ncs','bank-results-career','bank-results-certificate','bank-results-assessment'];
+  const sectionClasses=['bank-results-ncs','bank-results-career','bank-results-certificate','bank-results-assessment','bank-results-mock'];
   document.querySelectorAll('.category-group[data-bank-section] .category-card[data-category]').forEach(button=>{
     button.addEventListener('click',()=>{
       const section=button.closest('.category-group[data-bank-section]');
