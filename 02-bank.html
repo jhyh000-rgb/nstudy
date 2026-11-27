@@ -227,8 +227,9 @@ body.bank-page nav{flex-wrap:wrap}
 <button class="category-card" data-category="조직이해능력"><strong>조직이해능력</strong><small>조직 · 업무 이해</small></button>
 <button class="category-card" data-category="직업윤리"><strong>직업윤리</strong><small>근로 · 공동체 윤리</small></button>
 </div></div>
-<div class="category-group bank-group-career" id="mock-exam-bank" data-bank-section="mock"><h3>② 실전 모의고사</h3><p class="certificate-intro">공기업·공공기관, 삼성 등 대기업, 기능사 시험 대비 모의고사를 확인하세요.</p><div class="category-grid" role="group" aria-label="실전 모의고사">
-<button type="button" class="category-card" data-category="실전 모의고사"><strong>실전 모의고사</strong><small>공기업·공공기관 · 대기업 · 기능사</small></button>
+<div class="category-group bank-group-career" id="mock-exam-bank" data-bank-section="mock"><h3>② 실전 모의고사</h3><p class="certificate-intro">NCS 종합 시험과 각 기업별 채용시험 대비 모의고사를 선택하세요.</p><div class="category-grid" role="group" aria-label="실전 모의고사">
+<button type="button" class="category-card" data-category="NCS 종합 실전모의고사"><strong>NCS 실전 모의고사</strong><small>직업기초능력 종합 문제 · 정답 · 해설</small></button>
+<button type="button" class="category-card" data-category="실전 모의고사"><strong>각 기업별 실전모의고사</strong><small>공기업·공공기관 · 삼성 등 대기업 · 기존 기능사 자료</small></button>
 </div></div>
 <div class="category-group bank-group-career" data-bank-section="career"><h3>③ 취업 실전 준비 · 5개 영역</h3><div aria-label="취업 실전 준비 영역" class="category-grid career-grid" id="careerCategoryGrid" role="group">
 <button class="category-card" data-category="한국사"><strong>한국사</strong><small>한국사능력검정시험 대비</small></button>
@@ -265,7 +266,7 @@ body.bank-page nav{flex-wrap:wrap}
 
 <h3 id="commMaterialHeading" hidden></h3><div class="form-actions" style="margin:12px 0"><button type="button" class="btn btn-primary hidden" id="structuredRegisterButton" hidden>게시물 등록</button></div><div class="post-list" id="postList"></div><article class="post-view hidden" id="postView"></article>
 <div class="editor hidden" id="editor" aria-label="PDF 이미지 유튜브 동영상 자료 등록"><form id="postForm"><div class="form-grid">
-<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option>실전 모의고사</option><option>한국사</option><option>컴활 1급</option><option>컴활 2급</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>의사소통능력</option><option>수리능력</option><option>문제해결능력</option><option>자기개발능력</option><option>자원관리능력</option><option>대인관계능력</option><option>정보능력</option><option>기술능력</option><option>조직이해능력</option><option>직업윤리</option><option value="NCS 종합 실전모의고사">NCS 실전 모의고사</option><option value="실전 모의고사">각 기업별 실전모의고사</option><option>한국사</option><option>컴활 1급</option><option>컴활 2급</option><option>자기소개서</option><option>면접</option><option>TOEIC</option><option value="기능사 · 전기·전자">기능사 · 전기·전자</option><option value="기능사 · 기계·자동차">기능사 · 기계·자동차</option><option value="기능사 · IT·정보통신">기능사 · IT·정보통신</option><option value="기능사 · 화학·환경">기능사 · 화학·환경</option><option value="기능사 · 조리·제과">기능사 · 조리·제과</option><option value="수행평가(고등부)">수행평가(고등부)</option><option value="수행평가(중등부)">수행평가(중등부)</option></select></div>
 <div class="field"><label for="postSubcategory">세부 능력</label><select id="postSubcategory"><option value="">세부 능력 / 기능사 과목 선택</option></select></div>
 <div class="field"><label for="postTitle">제목</label><input id="postTitle" maxlength="120" placeholder="게시글 제목을 입력하세요" required=""/></div>
 <div class="field full"><label for="postBody">본문</label><textarea id="postBody" placeholder="학습 내용, 문제, 해설 등을 입력하세요." required=""></textarea></div>
@@ -294,7 +295,7 @@ body.bank-page nav{flex-wrap:wrap}
 <div class="hidden" id="logoutPanel"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
 </div></div>
 <div aria-live="polite" class="toast hidden" id="toast" role="status"></div>
-<script type="module" src="./nstudy-app.js?v=20261127-history-register"></script>
+<script type="module" src="./nstudy-app.js?v=20261127-mock-types"></script>
 <script>
 (function(){
   const toggle=document.getElementById('computerQualificationToggle');
