@@ -1,609 +1,234 @@
-import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-export const db=createClient('https://ljjurwyhhbokrkcbfqwh.supabase.co','sb_publishable_wG_7bLxeoVA1DY35GPK0yA_GsXYGODM');
-const COMM_COLORS=['#2459a6','#087f8c','#477a36','#9757a7','#b26819','#b23b5a','#416e9a','#3b8176','#7956b2'];
-const COMM_CATALOG={'문서이해능력':[], '문서작성능력':[], '경청능력':[], '의사표현능력':[], '기초외국어능력':[], '어휘·어법 집중훈련':[], '독해 유형별 집중훈련':[], '장문·복합문서 독해':[], '실전 모의고사':[]};
-const CERTIFICATE_SUBJECTS={"기능사 · 전기·전자": ["전기기능사", "전자기기기능사", "승강기기능사", "공조냉동기계기능사", "전자캐드기능사"], "기능사 · 기계·자동차": ["컴퓨터응용선반기능사", "컴퓨터응용밀링기능사", "설비보전기능사", "자동차정비기능사", "전산응용기계제도기능사"], "기능사 · IT·정보통신": ["정보처리기능사", "정보기기운용기능사", "통신선로기능사", "컴퓨터그래픽기능사", "전자출판기능사"], "기능사 · 화학·환경": ["위험물기능사", "가스기능사", "환경기능사", "화학분석기능사", "에너지관리기능사"], "기능사 · 조리·제과": ["한식조리기능사", "양식조리기능사", "제빵기능사", "제과기능사", "중식조리기능사"]};
-const STRUCTURED_CATALOGS={
- '실전 모의고사':{'공기업·공공기관':[], '대기업':[], '기능사':[]},
- '의사소통능력':COMM_CATALOG,
- '수리능력':{'기초연산능력':[], '기초통계능력':[], '도표분석능력':[], '실전모의고사':[]},
- '문제해결능력':{'사고력':[], '문제처리능력':[], '실전모의고사':[]},
- '자기개발능력':{'자아인식능력':[], '자기관리능력':[], '경력개발능력':[], '실전모의고사':[]},
- '자원관리능력':{'시간자원관리능력':[], '예산자원관리능력':[], '물적자원관리능력':[], '인적자원관리능력':[], '실전모의고사':[]},
- '대인관계능력':{'팀워크능력':[], '리더십능력':[], '갈등관리능력':[], '협상능력':[], '고객서비스능력':[], '실전모의고사':[]},
- '정보능력':{'컴퓨터활용능력':[], '정보처리능력':[], '실전모의고사':[]},
- '기술능력':{'기술이해능력':[], '기술선택능력':[], '기술적용능력':[], '실전모의고사':[]},
- '조직이해능력':{'국제감각':[], '조직체제이해능력':[], '경영이해능력':[], '업무이해능력':[], '실전모의고사':[]},
- '직업윤리':{'근로윤리':[], '공동체윤리':[], '실전모의고사':[]},
- '한국사':{'선사시대와 고대':[], '고려시대':[], '조선시대':[], '근대사':[], '일제강점기':[], '현대사':[], '실전모의고사':[]},
- '컴활 1급':{'컴퓨터 일반':[], '스프레드시트 일반':[], '데이터베이스 일반':[], '스프레드시트 실무':[], '데이터베이스 실무':[], '실전모의고사':[]},
- '컴활 2급':{'컴퓨터 일반':[], '스프레드시트 일반':[], '스프레드시트 실무':[], '실전모의고사':[]},
- '컴활':{'컴퓨터 일반':[], '스프레드시트 일반':[], '데이터베이스 일반':[], '스프레드시트 실무':[], '데이터베이스 실무':[], '실전모의고사':[]},
- 'TOEIC':{'LC Part 1·2':[], 'LC Part 3·4':[], 'RC Part 5·6':[], 'RC Part 7':[], '어휘·문법':[], '실전모의고사':[]},
- '자기소개서':{'자기소개서 작성 기초':[], '지원동기':[], '성장과정·성격':[], '직무역량·경험':[], '입사 후 포부':[], '첨삭·작성 사례':[], '실전모의고사':[]},
- '면접':{'면접 준비 기초':[], '자기소개·지원동기':[], '인성면접':[], '직무면접':[], '상황·경험면접':[], '모의면접·답변 사례':[], '실전모의고사':[]}
-};
-// 전기·전자 분야: 자격증별 학습 목차 (게시글은 '자격증 | 목차'로 구분 저장)
-const ELECTRIC_CATEGORY='기능사 · 전기·전자';
-const ELECTRIC_CHAPTERS={
- '전기기능사':['전기이론','전기기기','전기설비','실전모의고사'],
- '전자기기기능사':['전기전자공학','전자계산기 일반','전자측정','전자기기 및 음향영상기기','실전모의고사'],
- '승강기기능사':['승강기개론','안전관리','승강기보수','기계·전기 기초이론','실전모의고사'],
- '공조냉동기계기능사':['공조냉동','자동제어 및 안전관리','배관 일반','실전모의고사'],
- '전자캐드기능사':['전자회로','전자CAD 실무','PCB 설계','실전모의고사']
-};
-let electricSubject='';
-const electricParts=s=>String(s||'').split(' | ');
-const electricPostSubject=p=>electricParts(p.subcategory)[0];
-const electricPostChapter=p=>electricParts(p.subcategory).slice(1).join(' | ')||'기존 자료';
-const commCategory=c=>Object.prototype.hasOwnProperty.call(STRUCTURED_CATALOGS,c);
-const skillCatalog=c=>STRUCTURED_CATALOGS[c]||COMM_CATALOG;
-const commGroup=s=>String(s||'').split(' | ')[0];
-const commUnit=s=>String(s||'').includes(' | ')?String(s).split(' | ').slice(1).join(' | '):'';
-const commMatches=(p,g,u)=>!g||commGroup(p.subcategory)===g&&(!u||commUnit(p.subcategory)===u);
-let commUnitFilter='';
-let structuredEditorOpen=false;
-const certificateCategory=c=>Object.prototype.hasOwnProperty.call(CERTIFICATE_SUBJECTS,c);
-const $=id=>document.getElementById(id);let user=null,profile=null,posts=[],category='TOEIC',subcategory='',page=1;
-const admin=()=>profile?.role==='admin'&&!profile.blocked;
-const access=()=>admin()||!!profile?.admin_access&&!profile?.blocked;
-const say=s=>{let t=$('toast');if(!t){alert(s);return}t.textContent=s;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),4000)};
-// 스마트폰·태블릿은 PDF.js 화면을 사용하고 PC는 기존 PDF 방식 유지
-const isMobilePdfDevice=()=>/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-const pdfViewerUrl=signedUrl=>{
- const viewer=new URL('./pdf-viewer.html',location.href);
- viewer.hash=encodeURIComponent(signedUrl);
- return viewer.href;
-};
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function refreshAuth(){const {data:{user:u}}=await db.auth.getUser();user=u;profile=null;if(user){const {data,error}=await db.from('nstudy_profiles').select('*').eq('id',user.id).maybeSingle();if(error)console.error(error);profile=data;if(profile?.blocked){await db.auth.signOut();user=null;profile=null;say('로그인이 제한된 계정입니다.')}}renderHeader();if($('postList'))await refreshPosts();if($('admin-page')&&!$('admin-page').classList.contains('hidden'))await renderMembers()}
-function renderHeader(){if($('userStatus'))$('userStatus').textContent=profile?.username||'';const a=$('openAccount');if(a){a.textContent=user?'로그아웃':'로그인';a.href=user?'#logout':'./001-login.html?return='+encodeURIComponent(location.pathname.split('/').pop()||'index.html');a.onclick=user?async e=>{e.preventDefault();await db.auth.signOut();await refreshAuth()}:null}if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin())}
-const noticeFirst=(a,b)=>Number(!!b.is_notice)-Number(!!a.is_notice)
- ||(a.sort_order??Number.MAX_SAFE_INTEGER)-(b.sort_order??Number.MAX_SAFE_INTEGER)
- ||new Date(b.created_at)-new Date(a.created_at)||String(a.id).localeCompare(String(b.id));
-let postOrderSaving=false;
-const postOrderGroup=p=>posts.filter(x=>x.category===p.category&&(x.subcategory||'')===(p.subcategory||'')&&!!x.is_notice===!!p.is_notice).sort(noticeFirst);
-async function movePost(p,direction){
- if(!admin()||postOrderSaving)return;
- const group=postOrderGroup(p),index=group.findIndex(x=>x.id===p.id),target=index+direction;
- if(index<0||target<0||target>=group.length)return;
- const expected=group.map(x=>String(x.id)),order=[...expected];
- [order[index],order[target]]=[order[target],order[index]];
- postOrderSaving=true;renderPosts();
- try{
-  const {error}=await db.rpc('nstudy_reorder_posts',{p_category:p.category,p_subcategory:p.subcategory||'',p_notice:!!p.is_notice,p_expected:expected,p_order:order});
-  if(error)throw error;
-  group.forEach(x=>{x.sort_order=order.indexOf(String(x.id));});
-  say('게시물 순서를 저장했습니다.');
- }catch(e){say('순서 저장 실패: '+(e.message||String(e))+' (최초 사용 전 순서관리 SQL을 실행해 주세요.)');}
- finally{postOrderSaving=false;await refreshPosts();}
-}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NSTUDY ACADEMY | NCS 취업교육 전문 아카데미</title>
+<meta name="description" content="NSTUDY - NCS 필기부터 공기업·대기업 취업까지 체계적으로 준비하는 취업교육 전문 아카데미">
+<style>
+:root{--blue:#1769e0;--navy:#101828;--ink:#18212f;--muted:#687487;--pale:#f5f8fc;--line:#e5eaf0}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;color:var(--ink);line-height:1.65;background:#fff}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.container{width:min(1200px,92%);margin:auto}
+.topbar{background:var(--navy);color:#fff;font-size:13px;padding:7px 0}.topbar .container{display:flex;justify-content:space-between}
+header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid var(--line)}
+.nav{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;width:185px;height:58px;flex-shrink:0}.logo img{width:100%;height:100%;object-fit:contain;object-position:left center}
+nav{display:flex;align-items:center;gap:20px;font-size:14px;font-weight:700}nav a:hover{color:var(--blue)}
+.nav-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.nav-btn,.btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;padding:11px 17px;font-weight:800}
+.nav-btn{background:var(--blue);color:#fff}.login-btn{background:#eef4ff;color:#1455b8}
+.hero{min-height:590px;display:flex;align-items:center;color:#fff;background:linear-gradient(90deg,rgba(5,18,40,.9),rgba(5,18,40,.53),rgba(5,18,40,.2)),url("https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg") center/cover no-repeat}
+.hero-content{max-width:720px;padding:70px 0}.hero-small{display:inline-block;border:1px solid #ffffff88;padding:6px 14px;border-radius:30px;margin-bottom:22px;font-size:13px}
+.hero h1{font-size:clamp(38px,5vw,66px);line-height:1.15;letter-spacing:-2px;margin-bottom:24px}.hero h1 span{color:#62b0ff}.hero p{font-size:19px;color:#e8eef7;margin-bottom:30px}
+.hero-buttons{display:flex;gap:12px;flex-wrap:wrap}.btn-primary{background:var(--blue);color:#fff}.btn-white{background:#fff;color:var(--ink)}
+.trust{background:var(--pale);padding:25px 0}.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:18px}.trust strong{display:block;font-size:22px}.trust span{font-size:13px;color:var(--muted)}
+section{padding:82px 0}.section-head{text-align:center;max-width:760px;margin:0 auto 42px}.section-label{color:var(--blue);font-size:13px;font-weight:900;letter-spacing:2px;margin-bottom:8px}.section-head h2{font-size:clamp(28px,4vw,40px);letter-spacing:-1.5px;margin-bottom:12px}.section-head p{color:var(--muted)}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:55px;align-items:center}.about-img{height:430px;border-radius:14px;overflow:hidden}.about-img img{width:100%;height:100%;object-fit:cover}.about-text h2{font-size:36px;line-height:1.3;margin:10px 0 20px}.about-text p{color:var(--muted);margin-bottom:20px}.check{list-style:none}.check li{margin:10px 0;font-weight:700}.check li:before{content:"✓";color:var(--blue);font-weight:900;margin-right:10px}
+.programs,.gallery{background:#f6f8fb}.program-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:.2s}.card:hover{transform:translateY(-4px);box-shadow:0 12px 30px #14285012}.card-img{height:210px}.card-img img{width:100%;height:100%;object-fit:cover}.card-body{padding:24px}.card-body h3{font-size:20px;margin-bottom:8px}.card-body p{color:var(--muted);font-size:14px}
+.class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.class-card{position:relative;height:330px;border-radius:12px;overflow:hidden}.class-card img{width:100%;height:100%;object-fit:cover;transition:.4s}.class-card:hover img{transform:scale(1.05)}.class-overlay{position:absolute;inset:auto 0 0;padding:65px 18px 18px;color:#fff;background:linear-gradient(transparent,#000d)}.class-overlay small{opacity:.8}.class-overlay h3{font-size:19px}
+.process{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.process-item{text-align:center;padding:25px 12px;border:1px solid var(--line);border-radius:10px}.process-number{width:44px;height:44px;margin:0 auto 14px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:900}.process-item h3{font-size:16px;margin-bottom:6px}.process-item p{font-size:13px;color:var(--muted)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.gallery-item{height:245px;border-radius:10px;overflow:hidden}.gallery-item img{width:100%;height:100%;object-fit:cover;transition:.3s}.gallery-item:hover img{transform:scale(1.04)}
+.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.system-box{padding:28px;border:1px solid var(--line);border-radius:12px}.system-box h3{font-size:21px;margin-bottom:9px}.system-box p{color:var(--muted)}
+.director{background:var(--navy);color:#fff}.director-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:50px;align-items:center}.director-img{height:430px;border-radius:12px;overflow:hidden}.director-img img{width:100%;height:100%;object-fit:cover}.director-text h2{font-size:38px;line-height:1.3;margin:12px 0 22px}.director-text p{color:#c3ccd9;margin-bottom:18px}
+.cta{background:var(--blue);color:#fff;text-align:center}.cta h2{font-size:clamp(28px,4vw,40px);margin-bottom:10px}.cta p{margin-bottom:20px}.phone{font-size:clamp(26px,4vw,36px);font-weight:900}
+footer{background:#0b1220;color:#aab4c3;padding:42px 0}.footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:35px}.footer-logo-wrap{width:180px;margin-bottom:14px}.footer-logo{width:100%;height:auto}footer h3{color:#fff;margin-bottom:10px}footer p{font-size:13px;margin:4px 0}#adminPageLink{color:#101a2c;font-weight:700}#adminPageLink:hover{color:#243b5e;text-decoration:underline}
+.problem-bank{background:#f7f9fc}.bank-shell{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px;box-shadow:0 10px 30px #14285008}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}.tab{border:1px solid #dce4ef;background:#fff;color:#354052;border-radius:8px;padding:10px 18px;font-weight:800}.tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.bank-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.bank-toolbar h3{font-size:22px}.small-note{font-size:13px;color:var(--muted)}
+.post-list{display:grid;gap:10px}.post-row{width:100%;text-align:left;border:1px solid var(--line);border-radius:9px;background:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:15px}.post-row:hover{border-color:#9bbdf7;background:#fbfdff}.post-row strong{display:block}.post-row small{color:var(--muted)}.lock-label{font-size:12px;color:#a05b00;background:#fff4dc;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.post-view{margin-top:20px;border:1px solid var(--line);border-radius:10px;padding:24px;background:#fff}.post-view h3{font-size:25px;margin-bottom:8px}.post-body{white-space:pre-wrap;margin:20px 0;overflow-wrap:anywhere}.post-media{display:grid;gap:12px}.post-media img{max-width:100%;max-height:520px;object-fit:contain;border:1px solid var(--line);border-radius:8px}.post-media a{color:var(--blue);text-decoration:underline;overflow-wrap:anywhere}
+.editor{margin-top:25px;padding:22px;border:1px dashed #b7c7dd;border-radius:10px;background:#fbfcff}.editor h3{margin-bottom:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:13px;font-weight:800}.field input,.field textarea,.field select{width:100%;border:1px solid #ccd5e2;border-radius:7px;padding:10px;background:#fff}.field textarea{min-height:130px;resize:vertical}.field.full{grid-column:1/-1}.form-actions{display:flex;gap:8px;flex-wrap:wrap}.btn-secondary{background:#edf1f6;color:#263548}.hidden{display:none!important}
+.modal-backdrop{position:fixed;inset:0;background:#10182899;z-index:2000;display:grid;place-items:center;padding:18px}.modal{width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;padding:25px;box-shadow:0 20px 60px #0003}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-head h2{font-size:24px}.close-btn{border:0;background:#edf1f6;border-radius:50%;width:34px;height:34px;font-size:20px}.naver-login-box{margin:4px 0 18px;text-align:center;font-family:"Malgun Gothic",Arial,sans-serif}.naver-login-caption{font-size:14px;color:#555;margin:0 0 14px}.naver-login-button{display:flex;width:100%;min-height:56px;align-items:center;justify-content:center;gap:7px;border:0;border-radius:5px;background:#03a857;color:#fff;font-size:20px;font-weight:800;letter-spacing:-.4px}.naver-login-button:hover{background:#029b4f}.naver-login-button .naver-word{font-weight:900}.login-links{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px;color:#777;font-size:14px}.login-links button{border:0;background:transparent;color:inherit;padding:2px 0;cursor:pointer}.login-links button:hover{text-decoration:underline;color:#333}.login-links .separator{color:#c5c5c5}.login-divider{display:flex;align-items:center;gap:12px;margin:18px 0;color:#999;font-size:12px}.login-divider:before,.login-divider:after{content:"";height:1px;background:#e5eaf0;flex:1}.modal-menu{display:flex;gap:8px;margin-bottom:18px}.modal-menu button{flex:1;border:1px solid var(--line);background:#f7f9fc;padding:9px;border-radius:7px;font-weight:800}.modal-menu button.active{background:#eaf2ff;color:#1455b8;border-color:#b5cffb}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:3000;background:#172235;color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 25px #0003;max-width:90%;text-align:center}
+.user-status{font-size:12px;color:var(--muted);margin-right:4px}
+.admin-table-wrap{overflow-x:auto}.admin-table{width:100%;border-collapse:collapse;font-size:14px}.admin-table th,.admin-table td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;white-space:nowrap}.admin-table th{background:#f5f8fc}.admin-table input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}.admin-notice{padding:14px;background:#f5f8fc;border-radius:8px;margin-bottom:14px}
+@media(max-width:1050px){.nav{flex-wrap:wrap;padding:10px 0}.nav nav{order:3;width:100%;justify-content:center;flex-wrap:wrap;padding-bottom:8px}.about,.director-grid{gap:30px}.class-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.topbar{display:none}.nav{min-height:65px}.logo{width:135px;height:45px}nav{gap:12px;font-size:13px}.nav-actions{margin-left:auto}.nav-btn,.btn{padding:9px 12px;font-size:13px}.hero{min-height:540px}.hero h1{font-size:39px;letter-spacing:-1.5px}.hero p{font-size:16px}.trust-grid{grid-template-columns:1fr 1fr}section{padding:62px 0}.about,.director-grid,.system-grid{grid-template-columns:1fr}.about-img,.director-img{height:300px}.about-text h2,.director-text h2{font-size:30px}.program-grid,.class-grid,.gallery-grid{grid-template-columns:1fr}.class-card{height:300px}.process{grid-template-columns:1fr 1fr}.gallery-item{height:220px}.footer-grid{grid-template-columns:1fr}.bank-shell{padding:15px}.post-row{padding:12px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}.post-view{padding:16px}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="container"><span>NSTUDY ACADEMY</span><span>취업교육 전문 아카데미</span></div></div>
+<header><div class="container nav">
+<a href="#home" class="logo" aria-label="NSTUDY 홈"><img src="images/logo001.png" alt="NSTUDY 로고"></a>
+<nav aria-label="주 메뉴">
+<a href="#about">NSTUDY</a><a href="#program">교육과정</a><a href="#classroom">강의실</a><a href="#system">교육시스템</a><a href="#gallery">학생갤러리</a><a href="#problem-bank">문제은행</a>
+</nav>
+<div class="nav-actions"><span id="userStatus" class="user-status"></span><button class="nav-btn login-btn" id="openAccount">로그인</button><a href="#contact" class="nav-btn">상담문의</a></div>
+</div></header>
+<main>
+<section class="hero" id="home"><div class="container"><div class="hero-content">
+<div class="hero-small">BUSAN · NCS · CAREER ACADEMY</div>
+<h1>우리의 모든 노력이<br><span>취업의 결과</span>로 연결됩니다.</h1>
+<p>NCS 필기부터 면접, 공기업·대기업 취업까지<br>체계적인 학습 시스템으로 준비하세요.</p>
+<div class="hero-buttons"><a href="#program" class="btn btn-primary">교육과정 보기</a><a href="#contact" class="btn btn-white">상담 문의</a></div>
+</div></div></section>
+<div class="trust"><div class="container trust-grid"><div><strong>NCS</strong><span>필기시험 대비</span></div><div><strong>공기업</strong><span>취업 준비</span></div><div><strong>대기업</strong><span>취업 준비</span></div><div><strong>CAREER</strong><span>취업 전략</span></div></div></div>
+<section id="about"><div class="container about"><div class="about-img"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="학생 학습 모습" loading="lazy"></div><div class="about-text"><div class="section-label">NSTUDY ACADEMY</div><h2>단순한 자격증 공부가 아닌<br>취업을 위한 교육</h2><p>NSTUDY는 학생이 학교에서 쌓은 전공과 실무 역량을 취업 준비와 연결할 수 있도록 학습 방향과 준비 과정을 체계적으로 구성하는 교육 공간을 지향합니다.</p><ul class="check"><li>NCS 필기시험 준비</li><li>공기업 취업 준비</li><li>대기업 취업 준비</li><li>전공·실무 역량 기반 취업 전략</li></ul></div></div></section>
+<section id="program" class="programs"><div class="container"><div class="section-head"><div class="section-label">PROGRAM</div><h2>취업 준비를 단계별로</h2><p>학생의 목표에 맞춰 필요한 학습 영역을 체계적으로 구성합니다.</p></div><div class="program-grid">
+<article class="card"><div class="card-img"><img src="https://edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="학생 학습" loading="lazy"></div><div class="card-body"><h3>NCS 필기 집중반</h3><p>NCS 직업기초능력평가를 중심으로 문제 유형과 풀이 전략을 학습합니다.</p></div></article>
+<article class="card"><div class="card-img"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="교실 수업" loading="lazy"></div><div class="card-body"><h3>공기업 취업반</h3><p>필기부터 자기소개서와 면접까지 취업 준비 과정을 단계적으로 학습합니다.</p></div></article>
+<article class="card"><div class="card-img"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="시험 준비" loading="lazy"></div><div class="card-body"><h3>대기업 취업반</h3><p>기업 채용 과정에 맞춰 필기와 면접 등 취업 준비에 필요한 영역을 학습합니다.</p></div></article>
+</div></div></section>
+<section id="classroom"><div class="container"><div class="section-head"><div class="section-label">CLASSROOM</div><h2>집중할 수 있는 학습 공간</h2><p>깔끔하고 집중도 높은 교육 공간 콘셉트입니다.</p></div><div class="class-grid">
+<div class="class-card"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="집중 학습 강의실" loading="lazy"><div class="class-overlay"><small>CLASS 01</small><h3>집중 학습 강의실</h3></div></div>
+<div class="class-card"><img src="https://cdn.edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="자기주도 학습" loading="lazy"><div class="class-overlay"><small>CLASS 02</small><h3>자기주도 학습 공간</h3></div></div>
+<div class="class-card"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="실전 문제풀이" loading="lazy"><div class="class-overlay"><small>CLASS 03</small><h3>실전 문제풀이 강의실</h3></div></div>
+<div class="class-card"><img src="https://image.fnnews.com/resource/media/image/2025/11/09/202511091820348792_e.jpg" alt="취업시험 대비" loading="lazy"><div class="class-overlay"><small>CLASS 04</small><h3>취업시험 대비 공간</h3></div></div>
+</div></div></section>
+<section><div class="container"><div class="section-head"><div class="section-label">EDUCATION PROCESS</div><h2>취업 준비의 전체 흐름</h2></div><div class="process">
+<div class="process-item"><div class="process-number">01</div><h3>목표 설정</h3><p>희망 분야와 취업 방향을 정리합니다.</p></div><div class="process-item"><div class="process-number">02</div><h3>기초 학습</h3><p>NCS와 직무 기초를 학습합니다.</p></div><div class="process-item"><div class="process-number">03</div><h3>실전 문제</h3><p>다양한 유형의 문제를 풀어봅니다.</p></div><div class="process-item"><div class="process-number">04</div><h3>취업 준비</h3><p>지원서와 면접 준비를 진행합니다.</p></div><div class="process-item"><div class="process-number">05</div><h3>최종 준비</h3><p>실전 상황에 맞춰 준비합니다.</p></div>
+</div></div></section>
+<section id="gallery" class="gallery"><div class="container"><div class="section-head"><div class="section-label">STUDENT GALLERY</div><h2>공부하는 학생들의 모습</h2><p>NSTUDY가 지향하는 집중 학습 환경을 보여주는 이미지입니다.</p></div><div class="gallery-grid">
+<div class="gallery-item"><img src="https://edu.chosun.com/site/data/img_dir/2023/12/06/2023120680167_0.jpg" alt="학생 공부" loading="lazy"></div><div class="gallery-item"><img src="https://cdn.edu.donga.com/news/photo/201701/6091_133451_0854.jpg" alt="학생 학원 수업" loading="lazy"></div><div class="gallery-item"><img src="https://sejongcampus.sjeduhs.kr/upload/sejongcampus-h/na/bbs_6794/2025/11/3b6a388687e0a07fad4708d7021e7cc9.jpg" alt="학생 교실" loading="lazy"></div><div class="gallery-item"><img src="https://image.fnnews.com/resource/media/image/2025/11/09/202511091820348792_e.jpg" alt="학생 자습" loading="lazy"></div><div class="gallery-item"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="시험 공부" loading="lazy"></div><div class="gallery-item"><img src="https://cdn-web.ruangguru.com/landing-pages/assets/hs/yaja.jpg" alt="자기주도 학습" loading="lazy"></div>
+</div></div></section>
+<section id="system"><div class="container"><div class="section-head"><div class="section-label">NSTUDY SYSTEM</div><h2>체계적인 교육 시스템</h2><p>학습 방향과 실전 준비를 함께 구성합니다.</p></div><div class="system-grid">
+<div class="system-box"><h3>01. NCS 문제풀이</h3><p>NCS 유형별 문제를 단계적으로 학습하고 실전 문제풀이 능력을 키울 수 있도록 구성합니다.</p></div><div class="system-box"><h3>02. 취업 전략</h3><p>목표 기업과 직무를 정하고 필요한 준비 영역을 체계적으로 확인합니다.</p></div><div class="system-box"><h3>03. 자기소개서</h3><p>자신의 전공과 경험을 취업 준비 과정에서 효과적으로 표현할 수 있도록 준비합니다.</p></div><div class="system-box"><h3>04. 면접 준비</h3><p>예상 질문과 답변을 준비하고 실제 면접 상황을 고려한 연습을 진행합니다.</p></div>
+</div></div></section>
+<section class="director"><div class="container director-grid"><div class="director-img"><img src="https://www.chosun.com/resizer/v2/LMQM2ZT35RE5FFQDMPVEJAQ2EE.jpg?auth=f711e819e9dd5e95c528babec424bc5a0918568c8eef21e03dffac486d180475&width=616" alt="학생 학습 모습" loading="lazy"></div><div class="director-text"><div class="section-label">NSTUDY EDUCATION</div><h2>학생의 현재 실력을<br>취업 준비와 연결합니다.</h2><p>학교에서 배운 전공과 실무 역량은 취업을 준비하는 중요한 기반이 될 수 있습니다.</p><p>NSTUDY는 학생들이 자신의 역량을 파악하고 NCS 필기와 취업 준비를 단계적으로 진행할 수 있도록 교육 과정을 구성합니다.</p><a href="#contact" class="btn btn-primary">상담 문의하기</a></div></div></section>
 
-async function refreshPosts(){
- const {data,error}=user
-  ?await db.from('nstudy_posts').select('*').order('created_at',{ascending:false})
-  :await db.rpc('nstudy_guest_post_catalog');
- if(error){posts=[];renderPosts();say('게시글 조회 실패: '+error.message);return;}
- posts=(data||[]).sort(noticeFirst);renderPosts();
-}
-async function toggleNotice(p,checked,cb){
- if(!admin())return;
- const count=posts.filter(x=>x.category===p.category&&x.is_notice&&x.id!==p.id).length;
- if(checked&&count>=2){cb.checked=false;return say('이 과목에는 공지글을 최대 2개까지 설정할 수 있습니다.')}
- cb.disabled=true;
- const {error}=await db.from('nstudy_posts').update({is_notice:checked}).eq('id',p.id);
- if(error){cb.checked=!checked;say('공지 설정 실패: '+error.message)}else{await refreshPosts();say(checked?'공지로 설정되었습니다.':'공지 설정이 해제되었습니다.')}
- cb.disabled=false;
-}
+<section id="problem-bank" class="problem-bank"><div class="container"><div class="section-head"><div class="section-label">NSTUDY STUDY ARCHIVE</div><h2>문제은행</h2><p>과목별 학습 자료와 게시글을 확인하세요. 비회원은 각 과목의 최신 게시글 3개를 열람할 수 있습니다.</p></div>
+<div class="bank-shell">
+<div class="tabs" role="tablist" aria-label="문제은행 과목"><button class="tab active" data-category="TOEIC">TOEIC</button><button class="tab" data-category="통합사회">통합사회</button><button class="tab" data-category="통합과학">통합과학</button><button class="tab" data-category="면접">면접</button></div>
+<div class="bank-toolbar"><h3 id="categoryTitle">TOEIC 학습 자료</h3><span class="small-note" id="accessNote">비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.</span></div>
+<div id="postList" class="post-list"></div><article id="postView" class="post-view hidden"></article>
+<div id="editor" class="editor hidden"><h3>새 게시글 작성</h3><form id="postForm"><div class="form-grid">
+<div class="field"><label for="postCategory">과목</label><select id="postCategory"><option>TOEIC</option><option>통합사회</option><option>통합과학</option><option>면접</option></select></div>
+<div class="field"><label for="postTitle">제목</label><input id="postTitle" required maxlength="120" placeholder="게시글 제목을 입력하세요"></div>
+<div class="field full"><label for="postBody">본문</label><textarea id="postBody" required placeholder="학습 내용, 문제, 해설 등을 입력하세요."></textarea></div>
+<div class="field"><label for="postPdf">PDF 첨부 (선택)</label><input id="postPdf" type="file" accept="application/pdf"></div>
+<div class="field"><label for="postImage">이미지 첨부 (선택)</label><input id="postImage" type="file" accept="image/*"></div>
+</div><p class="small-note">이 HTML 데모는 첨부파일을 현재 브라우저에 저장합니다. 파일은 1개당 1MB 이하로 권장합니다.</p><div class="form-actions"><button class="btn btn-primary" type="submit">게시글 등록</button><button class="btn btn-secondary" type="button" id="cancelPost">취소</button></div></form></div>
+<div id="editorActions" class="form-actions hidden" style="margin-top:18px"><button class="btn btn-primary" id="showEditor">게시글 작성</button></div>
+</div></div></section>
+<section id="admin-page" class="hidden"><div class="container"><div class="section-head"><div class="section-label">NSTUDY ADMIN</div><h2>회원 관리</h2><p>회원 목록을 확인하고 관리 페이지 접근 권한을 설정합니다.</p></div><div class="bank-shell"><p id="adminIntro" class="small-note" style="margin-bottom:16px"></p><div id="adminMembers"></div></div></div></section>
+<section id="contact" class="cta"><div class="container"><h2>NSTUDY와 취업 준비를 시작하세요.</h2><p>교육과정 및 상담 문의</p><a class="phone" href="tel:01093375509">010-9337-5509</a></div></section>
+</main>
+<footer><div class="container footer-grid"><div><div class="footer-logo-wrap"><img class="footer-logo" src="images/logo001.png" alt="NSTUDY 로고"></div><p>NSTUDY ACADEMY</p><p>취업교육 전문 아카데미</p></div><div><h3>CONTACT</h3><p>전화 : 010-9337-5509</p><p>웹사이트 : www.nstudy.co.kr</p><p><a href="#admin-page" id="adminPageLink">관리</a></p></div><div><h3>MENU</h3><p><a href="#about">NSTUDY</a></p><p><a href="#program">교육과정</a></p><p><a href="#classroom">강의실</a></p><p><a href="#gallery">학생갤러리</a></p><p><a href="#problem-bank">문제은행</a></p></div></div></footer>
+
+<div id="accountBackdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="accountTitle"><div class="modal"><div class="modal-head"><h2 id="accountTitle">회원 메뉴</h2><button class="close-btn" id="closeAccount" aria-label="닫기">×</button></div><div class="modal-menu"><button class="active" data-account-tab="login">로그인</button><button data-account-tab="register">회원가입</button><button data-account-tab="logout">로그아웃</button></div>
+<div id="loginPanel">
+<div class="naver-login-box"><p class="naver-login-caption">NSTUDY 계정으로 편리하게 이용하세요</p><button type="button" class="naver-login-button" id="nstudyLoginButton"><span class="naver-word">NSTUDY</span><span>로그인</span></button><div class="login-links"><button type="button" id="findIdButton">아이디 찾기</button><span class="separator">|</span><button type="button" id="findPwButton">비밀번호 찾기</button><span class="separator">|</span><button type="button" id="goRegisterButton">회원가입</button></div></div>
+<div class="login-divider">또는 NSTUDY 계정으로 로그인</div>
+<form id="loginForm"><div class="field"><label for="loginId">ID</label><input id="loginId" autocomplete="username" required></div><div class="field"><label for="loginPw">PW</label><input id="loginPw" type="password" autocomplete="current-password" required></div><button class="btn btn-primary" type="submit">로그인</button></form></div>
+<form id="registerForm" class="hidden"><div class="form-grid">
+<div class="field"><label for="regId">ID</label><input id="regId" required minlength="4" autocomplete="username"></div><div class="field"><label for="regPw">PW</label><input id="regPw" type="password" required minlength="6" autocomplete="new-password"></div>
+<div class="field"><label for="regType">회원 유형</label><select id="regType" required><option value="학생">학생</option><option value="학부모">학부모</option><option value="강사">강사</option></select></div><div class="field"><label for="regName">성명</label><input id="regName" required></div><div class="field"><label for="regSchool">학교</label><input id="regSchool" required></div>
+<div class="field"><label for="regGrade">학년</label><input id="regGrade" required placeholder="예: 고등학교 2학년"></div><div class="field"><label for="regPhone">전화번호</label><input id="regPhone" type="tel" required></div>
+<div class="field full"><label for="regAddress">주소</label><input id="regAddress" required autocomplete="street-address"></div><div class="field full"><label for="regEmail">이메일</label><input id="regEmail" type="email" required autocomplete="email"></div>
+</div><button class="btn btn-primary" type="submit">회원가입 완료</button></form>
+<div id="logoutPanel" class="hidden"><p id="logoutMessage" style="margin-bottom:15px">현재 로그인 상태가 아닙니다.</p><button class="btn btn-primary" id="logoutButton" type="button">로그아웃</button></div>
+
+</div></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script>
+(() => {
+"use strict";
+const categories=["TOEIC","통합사회","통합과학","면접"];
+const seed = {
+"TOEIC":[
+{title:"TOEIC 학습 시작하기: 시험 구성과 준비 순서",body:"TOEIC은 Listening Comprehension(LC)과 Reading Comprehension(RC)으로 구성됩니다. 먼저 시험 구성과 자신의 현재 수준을 확인한 뒤, 어휘·문법·독해·청취를 나누어 학습 계획을 세워 보세요."},
+{title:"Part 5 문법 문제를 푸는 기본 순서",body:"빈칸 앞뒤의 문장 구조를 먼저 살펴보고 품사, 수일치, 시제, 태, 접속사 여부를 확인합니다. 선택지를 보기 전에 빈칸에 필요한 문법 요소를 예측하면 불필요한 오답을 줄이는 데 도움이 됩니다."},
+{title:"Part 7 독해: 질문을 활용한 시간 관리",body:"문제의 질문과 핵심 단서를 확인한 뒤 지문에서 관련 정보를 찾습니다. 모든 문장을 같은 속도로 읽기보다 글의 목적, 대상, 날짜, 요청 사항 등 질문과 연결되는 부분을 정확히 확인하세요."},
+{title:"고득점 학습 자료 및 실전 연습 세트",body:"이 게시글은 로그인 사용자에게 제공되는 추가 학습 자료 예시입니다. 실제 운영 시 정답·해설·PDF 자료를 작성자가 첨부해 활용할 수 있습니다."}],
+"통합사회":[
+{title:"통합사회 핵심 개념: 인간, 사회, 환경",body:"사회 현상은 인간의 삶과 사회 구조, 자연환경이 서로 영향을 주고받는 맥락에서 이해할 수 있습니다. 자료를 읽을 때는 핵심 개념과 사례가 어떻게 연결되는지 정리해 보세요."},
+{title:"인권과 헌법의 기본 원리",body:"인권은 인간이라면 누구나 가지는 기본적 권리입니다. 헌법은 국민의 기본권을 보장하고 국가 권력의 행사를 제한하는 근본 규범이라는 점을 사례와 함께 이해하는 것이 중요합니다."},
+{title:"시장 경제와 합리적 선택",body:"선택에는 기회비용이 따릅니다. 합리적 선택을 분석할 때는 선택으로 얻는 편익과 포기해야 하는 대안의 가치를 함께 고려하고, 수요와 공급의 변화가 시장에 미치는 영향을 살펴보세요."},
+{title:"사회 자료 분석 심화 문제",body:"로그인 회원용 심화 자료 예시입니다. 실제 게시글 작성 기능을 통해 표·이미지·PDF와 함께 문제 및 해설을 추가할 수 있습니다."}],
+"통합과학":[
+{title:"과학 탐구의 과정과 변인",body:"과학 탐구에서는 문제를 명확히 설정하고 가설을 세운 뒤, 변인을 통제하며 자료를 수집합니다. 독립 변인, 종속 변인, 통제 변인을 구분하면 실험 설계와 결과 해석이 쉬워집니다."},
+{title:"물질의 성질과 입자 모형",body:"물질의 성질을 설명할 때는 관찰 결과와 입자 수준의 모형을 연결해 보세요. 상태 변화에서는 물질 자체가 다른 물질로 바뀌는지, 입자의 배열과 운동 상태가 달라지는지 구분하는 것이 중요합니다."},
+{title:"생태계와 에너지 흐름",body:"생태계에서는 생산자, 소비자, 분해자가 상호작용합니다. 에너지는 먹이 관계를 따라 전달되며 단계가 올라갈수록 이용 가능한 에너지의 양이 줄어드는 경향이 있습니다."},
+{title:"통합과학 탐구 자료 모음",body:"로그인 회원용 심화 자료 예시입니다. 실제 운영 시 탐구 문제, 그림, 실험 자료 PDF 등을 첨부할 수 있습니다."}],
+"면접":[
+{title:"면접 준비의 첫 단계: 직무와 경험 정리",body:"지원 직무에서 요구하는 역량을 확인하고 자신의 경험을 연결해 보세요. 경험은 상황, 과제, 행동, 결과 순서로 정리하면 답변의 핵심을 명확하게 전달할 수 있습니다."},
+{title:"자기소개 답변을 구성하는 방법",body:"자기소개는 지원 직무와 관련된 강점, 이를 뒷받침하는 구체적인 경험, 입사 후 기여 방향을 간결하게 연결합니다. 추상적인 장점보다 실제 행동과 결과를 제시하는 것이 좋습니다."},
+{title:"상황형 질문에 답하는 연습",body:"상황형 질문은 문제를 어떻게 파악하고, 어떤 기준으로 대안을 선택하며, 어떻게 소통할지를 보여주는 기회입니다. 결론을 먼저 말하고 이유와 실행 방안을 덧붙여 답변을 구성해 보세요."},
+{title:"심화 모의면접 질문 및 피드백",body:"로그인 회원용 심화 자료 예시입니다. 실제 운영 시 직무별 질문, 답변 예시, 면접 체크리스트 PDF 등을 첨부할 수 있습니다."}]
+};
+let posts = load("nstudy_posts", null) || seed;
+let accounts = load("nstudy_accounts", {});
+// ssjj는 관리자, jcm0011은 관리 페이지 접근 허용 회원으로 항상 설정합니다.
+["ssjj", "jcm0011"].forEach(fixedId => {
+ const accountId = Object.keys(accounts).find(id => id.toLowerCase() === fixedId);
+ if (accountId && accounts[accountId]) {
+   accounts[accountId].adminAccess = true;
+   if (fixedId === "ssjj") accounts[accountId].blocked = false;
+ }
+});
+save("nstudy_accounts", accounts);
+let currentUser = sessionStorage.getItem("nstudy_current_user") || "";
+if(currentUser && accounts[currentUser] && accounts[currentUser].blocked===true){currentUser="";sessionStorage.removeItem("nstudy_current_user");}
+let activeCategory = "TOEIC";
+let toastTimer;
+function load(key,fallback){try{const x=localStorage.getItem(key);return x?JSON.parse(x):fallback}catch(e){return fallback}}
+function save(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){showToast("저장 공간이 부족합니다. 첨부파일 크기를 줄여 주세요.");return false}}
+function showToast(message){const el=document.getElementById("toast");el.textContent=message;el.classList.remove("hidden");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.add("hidden"),3000)}
+function loggedIn(){return !!currentUser && !!accounts[currentUser]}
+function isAdmin(){return loggedIn() && currentUser.toLowerCase()==="ssjj"}
+function canAccessAdmin(){return isAdmin() || (loggedIn() && accounts[currentUser].adminAccess===true)}
+function renderAdmin(){const root=document.getElementById("adminMembers");root.innerHTML="";const intro=document.getElementById("adminIntro");if(!canAccessAdmin()){intro.textContent="관리자 또는 관리 페이지 접근 권한이 승인된 회원만 이용할 수 있습니다.";root.innerHTML="<p>접근 권한이 없습니다.</p>";return}
+ intro.textContent=isAdmin()?"관리자 모드: 회원 접근 권한, 로그인 차단, 회원 삭제를 관리할 수 있습니다. 비밀번호는 현재 데모 구조상 브라우저에 저장된 값이 표시됩니다.":"회원 접근 모드: 회원 목록만 확인할 수 있습니다. 권한 변경은 관리자만 가능합니다.";
+ const entries=Object.entries(accounts);if(!entries.length){root.innerHTML="<p>등록된 회원이 없습니다.</p>";return}
+ const wrap=document.createElement("div");wrap.className="admin-table-wrap";const table=document.createElement("table");table.className="admin-table";const headers=["관리 페이지 접근","로그인 차단","아이디"];if(isAdmin())headers.push("비밀번호");headers.push("회원 유형","성명","학교","학년","전화번호","이메일");if(isAdmin())headers.push("회원 정보 삭제");const thead=document.createElement("thead"),hr=document.createElement("tr");headers.forEach(h=>{const th=document.createElement("th");th.textContent=h;hr.appendChild(th)});thead.appendChild(hr);table.appendChild(thead);const tbody=document.createElement("tbody");
+ entries.forEach(([id,a])=>{const tr=document.createElement("tr");const isRoot=id.toLowerCase()==="ssjj";const isFixedAccess=["ssjj","jcm0011"].includes(id.toLowerCase());
+ const accessTd=document.createElement("td"),accessCb=document.createElement("input");accessCb.type="checkbox";accessCb.checked=isFixedAccess||a.adminAccess===true;accessCb.setAttribute("aria-label",id+" 관리 페이지 접근 허용");accessCb.disabled=!isAdmin()||isFixedAccess;accessCb.addEventListener("change",()=>{accounts[id].adminAccess=accessCb.checked;if(save("nstudy_accounts",accounts))showToast(accessCb.checked?"관리 페이지 접근을 허용했습니다.":"관리 페이지 접근 권한을 해제했습니다.");else accessCb.checked=!accessCb.checked});accessTd.appendChild(accessCb);tr.appendChild(accessTd);
+ const blockTd=document.createElement("td"),blockCb=document.createElement("input");blockCb.type="checkbox";blockCb.checked=isRoot?false:a.blocked===true;blockCb.setAttribute("aria-label",id+" 로그인 차단");blockCb.disabled=!isAdmin()||isRoot;blockCb.addEventListener("change",()=>{if(isRoot){blockCb.checked=false;return}accounts[id].blocked=blockCb.checked;if(save("nstudy_accounts",accounts)){showToast(blockCb.checked?"해당 회원의 로그인을 차단했습니다.":"해당 회원의 로그인 차단을 해제했습니다.")}else blockCb.checked=!blockCb.checked});blockTd.appendChild(blockCb);tr.appendChild(blockTd);
+ const values=[id];if(isAdmin())values.push(a.pw||"");values.push(a.type||"학생",a.name||"",a.school||"",a.grade||"",a.phone||"",a.email||"");values.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+ if(isAdmin()){const deleteTd=document.createElement("td"),del=document.createElement("button");del.type="button";del.className="btn btn-secondary";del.textContent="회원 삭제";del.addEventListener("click",()=>{const message=isRoot?"관리자 ID ssjj를 삭제하면 현재 관리자 권한과 관리 페이지 접근 권한을 잃게 됩니다. 계정 정보와 작성 게시글을 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.":"정말로 회원 '"+id+"'의 계정 정보와 해당 회원이 작성한 게시글을 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.";if(!confirm(message))return;delete accounts[id];Object.keys(posts).forEach(cat=>{posts[cat]=(posts[cat]||[]).filter(post=>post.author!==id)});if(!save("nstudy_accounts",accounts)||!save("nstudy_posts",posts)){showToast("저장에 실패했습니다. 새로고침 전 저장 상태를 확인해 주세요.");return}if(currentUser===id){currentUser="";sessionStorage.removeItem("nstudy_current_user");updateAccountUI()}renderAdmin();showToast("회원 계정과 해당 회원 작성 게시글을 삭제했습니다.")});deleteTd.appendChild(del);tr.appendChild(deleteTd)}
+ tbody.appendChild(tr)});table.appendChild(tbody);wrap.appendChild(table);root.appendChild(wrap);
+ }
+function openAdminPage(e){if(e)e.preventDefault();if(!canAccessAdmin()){showToast("관리 페이지 접근 권한이 없습니다. 관리자에게 권한을 요청해 주세요.");return}document.getElementById("admin-page").classList.remove("hidden");renderAdmin();document.getElementById("admin-page").scrollIntoView({behavior:"smooth",block:"start"})}
+function updateAccountUI(){document.getElementById("userStatus").textContent=loggedIn()?currentUser+"님":"";document.getElementById("openAccount").textContent=loggedIn()?"회원 메뉴":"로그인";document.getElementById("accessNote").textContent=loggedIn()?"로그인 상태: 모든 게시글을 열람할 수 있습니다.":"비회원은 과목별 최신 게시글 3개까지 열람할 수 있습니다.";document.getElementById("editorActions").classList.toggle("hidden",!loggedIn());document.getElementById("editor").classList.add("hidden");renderPosts();if(!canAccessAdmin())document.getElementById("admin-page").classList.add("hidden")}
 function renderPosts(){
- postOpenSequence++;
- const cards=document.querySelectorAll('.category-card');
- cards.forEach(c=>{c.classList.toggle('active',c.dataset.category===category);const n=posts.filter(p=>p.category===c.dataset.category).length;let badge=c.querySelector('.category-count');if(commCategory(c.dataset.category)){badge?.remove();return}if(!badge){badge=document.createElement('span');badge.className='category-count';c.appendChild(badge)}badge.textContent=String(n).padStart(2,'0')+'개'});
- if($('categoryTitle'))$('categoryTitle').textContent=(commCategory(category)&&subcategory?subcategory:category===ELECTRIC_CATEGORY&&electricSubject?electricSubject+' 학습 자료':category+' 학습 자료');
- // 의사소통능력은 별도의 작성 버튼 없이 선택 영역 안에서 관리자 등록폼을 표시합니다.
- if($('editorActions'))$('editorActions').classList.toggle('hidden',!admin()||commCategory(category));
- // 편집기 표시 상태는 선택 영역에 배치한 뒤 결정합니다.
- const panel=$('subcategoryPanel'),grid=$('subcategoryGrid');
- if(panel&&grid){
-   // 자료 목록과 등록폼은 원래의 bankResults 안에 고정합니다.
-   // DOM을 반복 이동하면 폼이 사라지거나 숨겨진 부모 안에 들어갈 수 있습니다.
-   if($('postBody'))$('postBody').required=!commCategory(category)&&category!==ELECTRIC_CATEGORY;
-   grid.replaceChildren();
-   const storedSkills=posts.filter(p=>p.category===category).map(p=>p.subcategory).filter(Boolean);
-   const skills=commCategory(category)?[...new Set([...Object.keys(skillCatalog(category)),...storedSkills.map(commGroup).filter(Boolean),...(posts.some(p=>p.category===category&&!p.subcategory)?['기존 미분류 자료']:[])])]:certificateCategory(category)?[...new Set([...CERTIFICATE_SUBJECTS[category],...storedSkills])]:[...new Set(storedSkills)];
-   panel.classList.toggle('hidden',!skills.length);
-   if($('subcategoryHeading'))$('subcategoryHeading').textContent=commCategory(category)?category+' · 영역별 학습 목차':'세부 능력별 게시글';
-   if(category===ELECTRIC_CATEGORY){
-     const subjects=[...new Set([...CERTIFICATE_SUBJECTS[ELECTRIC_CATEGORY],...storedSkills.map(electricPostSubject).filter(Boolean)])];
-     if($('subcategoryHeading'))$('subcategoryHeading').textContent='전기·전자 · 자격증별 학습 목차';
-     if(!electricSubject){
-       subjects.forEach((subject,index)=>{
-         const b=document.createElement('button');b.type='button';b.className='subcategory-btn';
-         const n=posts.filter(p=>p.category===category&&electricPostSubject(p)===subject).length;
-         b.textContent=String(index+1).padStart(2,'0')+' '+subject+' ('+n+'개)';
-         b.onclick=()=>{electricSubject=subject;subcategory='';structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(b);
-       });
-     }else{
-       const back=document.createElement('button');back.type='button';back.className='btn btn-secondary';back.textContent='← 전기·전자 자격증 목록';
-       back.onclick=()=>{electricSubject='';subcategory='';structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(back);
-       const chapters=ELECTRIC_CHAPTERS[electricSubject]||['실전모의고사'];
-       const existing=posts.some(p=>p.category===category&&electricPostSubject(p)===electricSubject&&electricPostChapter(p)==='기존 자료');
-       const all=existing?[...chapters,'기존 자료']:chapters;
-       all.forEach((chapter,index)=>{
-         const key=electricSubject+' | '+chapter;
-         const b=document.createElement('button');b.type='button';b.className='subcategory-btn'+(subcategory===key?' active':'');
-         const n=posts.filter(p=>p.category===category&&electricPostSubject(p)===electricSubject&&electricPostChapter(p)===chapter).length;
-         b.textContent=String(index+1).padStart(2,'0')+' '+chapter+' ('+n+'개)';
-         b.onclick=()=>{subcategory=subcategory===key?'':key;structuredEditorOpen=false;page=1;renderPosts()};grid.appendChild(b);
-       });
-     }
-   }else if(commCategory(category)){
-
-     skills.forEach((skill,index)=>{
-              const wrap=document.createElement('div');wrap.className='comm-group';wrap.style.setProperty('--comm-color',COMM_COLORS[index%COMM_COLORS.length]);wrap.style.setProperty('--comm-tint',COMM_COLORS[index%COMM_COLORS.length]+'14');
-       const head=document.createElement('button');head.type='button';head.className='comm-group-head'+(subcategory===skill?' active':'');
-       const name=document.createElement('span');name.textContent=String(index+1).padStart(2,'0')+'  '+skill;
-       head.append(name);
-       const count=document.createElement('span');count.className='subcategory-count';count.textContent=String(posts.filter(p=>p.category===category&&(skill==='기존 미분류 자료'?!p.subcategory:commGroup(p.subcategory)===skill)).length).padStart(2,'0')+'개';head.append(count);
-       head.onclick=()=>{structuredEditorOpen=false;subcategory=subcategory===skill?'':skill;commUnitFilter='';page=1;renderPosts()};wrap.appendChild(head);
-       grid.appendChild(wrap);
-     });
-   }else skills.forEach(skill=>{
-     const b=document.createElement('button');b.type='button';b.className='subcategory-btn'+(skill===subcategory?' active':'');
-     const label=document.createElement('span');label.textContent=skill;
-     const badge=document.createElement('span');badge.className='subcategory-count';badge.textContent=String(posts.filter(p=>p.category===category&&p.subcategory===skill).length).padStart(2,'0')+'개';
-     b.append(label,badge);b.onclick=()=>{subcategory=subcategory===skill?'':skill;page=1;renderPosts()};grid.appendChild(b);
-   });
- }
- const list=$('postList');if(!list)return;list.innerHTML='';
- 
- const items=posts.filter(p=>p.category===category&&(category===ELECTRIC_CATEGORY?(!electricSubject?false:!subcategory?electricPostSubject(p)===electricSubject:(subcategory.endsWith(' | 기존 자료')?electricPostSubject(p)===electricSubject&&electricPostChapter(p)==='기존 자료':p.subcategory===subcategory)):commCategory(category)?(!subcategory||commGroup(p.subcategory)===subcategory||(subcategory==='기존 미분류 자료'&&!p.subcategory)):(!subcategory||p.subcategory===subcategory))).sort(noticeFirst);
- items.slice((page-1)*10,page*10).forEach((p,i)=>{
-  const row=document.createElement('div');row.className='post-row';row.style.cssText='display:flex;align-items:center;gap:10px';
-  const view=document.createElement('button');view.type='button';view.style.cssText='flex:1;min-width:0;text-align:left;background:transparent;border:0;color:inherit;cursor:pointer';
-  const title=document.createElement('span');title.style.cssText='display:block;font-weight:700';
-  if(p.is_notice){const tag=document.createElement('span');tag.textContent='[공지] ';tag.style.cssText='color:#b45309;font-weight:800';title.appendChild(tag)}
-  title.appendChild(document.createTextNode((!user&&p.can_preview!==true?'🔒 ':'')+(p.title||'')));
-  const desc=document.createElement('small');desc.style.cssText='display:block;color:#687487';desc.textContent=user?(p.body||'').slice(0,55):(p.can_preview===true?'무료 공개 자료 · 클릭하여 보기':'로그인 후 이용하실 수 있습니다.');
-  view.append(title,desc);view.onclick=()=>openPost(p);row.appendChild(view);
-  if(admin()){
-   const peers=postOrderGroup(p),position=peers.findIndex(x=>x.id===p.id);
-   const controls=document.createElement('div');controls.style.cssText='display:flex;flex-direction:column;gap:5px;flex-shrink:0';
-   for(const [label,direction] of [['▲ 위로',-1],['▼ 아래로',1]]){
-    const button=document.createElement('button');button.type='button';button.className='btn btn-secondary';button.textContent=label;
-    button.setAttribute('aria-label',(p.title||'게시물')+' '+label);
-    button.disabled=postOrderSaving||position+direction<0||position+direction>=peers.length;
-    button.onclick=()=>movePost(p,direction);controls.appendChild(button);
-   }
-   row.appendChild(controls);
-   const label=document.createElement('label');label.style.cssText='display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;cursor:pointer';
-   const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!p.is_notice;cb.setAttribute('aria-label',p.title+' 공지 설정');cb.onchange=()=>toggleNotice(p,cb.checked,cb);
-   label.append(cb,document.createTextNode('공지'));row.appendChild(label);
-  }
-  list.appendChild(row);
- });
- if(!items.length)list.innerHTML='<p class="small-note">등록된 게시글이 없습니다.</p>';
- if(items.length>10){const nav=document.createElement('div');nav.className='form-actions';nav.style.marginTop='16px';for(let n=1;n<=Math.ceil(items.length/10);n++){const b=document.createElement('button');b.className='btn '+(n===page?'btn-primary':'btn-secondary');b.textContent=n;b.onclick=()=>{page=n;renderPosts()};nav.appendChild(b)}list.appendChild(nav)}
- if($('postView'))$('postView').classList.add('hidden');
- // 의사소통능력: 선택된 영역의 목록과 작성폼을 제목 아래에 고정 표시합니다.
- const editor=$('editor');
- const activeCommunication=(commCategory(category)||category===ELECTRIC_CATEGORY)&&!!subcategory;
- const registerButton=$('structuredRegisterButton');
- if(registerButton){registerButton.hidden=!activeCommunication||(subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.classList.toggle('hidden',!activeCommunication||subcategory==='기존 미분류 자료'||subcategory.endsWith(' | 기존 자료'));registerButton.textContent=structuredEditorOpen?'등록창 닫기':'＋ 게시물 등록 (이미지 · PDF · 유튜브 · 동영상 파일)';}
- if($('commMaterialHeading')){
-   $('commMaterialHeading').hidden=!activeCommunication;
-   $('commMaterialHeading').textContent=activeCommunication?subcategory+' 학습 자료':'';
- }
- if($('categoryTitle'))$('categoryTitle').hidden=activeCommunication;
- if($('postList'))$('postList').hidden=(commCategory(category)||category===ELECTRIC_CATEGORY)&&!subcategory;
- if(editor){
-   const show=activeCommunication&&admin()&&structuredEditorOpen&&subcategory!=='기존 미분류 자료'&&!subcategory.endsWith(' | 기존 자료');
-   if(show){
-     editor.classList.remove('hidden');
-     editor.hidden=false;
-     editor.style.display='block';
-     $('postCategory').value=category;
-     updateSkills();
-     $('postSubcategory').value=subcategory;
-     if($('postBody'))$('postBody').required=false;
-     if($('postForm'))$('postForm').hidden=false;
-     ['postPdf','postImage','postYoutube','postVideo'].forEach(id=>{
-       const field=$(id)?.closest('.field');
-       if(field){field.hidden=false;field.style.display='grid';}
-     });
-     if($('postTitle'))$('postTitle').placeholder=subcategory+' 자료 제목';
-   }else{
-     editor.classList.add('hidden');
-     editor.style.removeProperty('display');
-   }
- }
-
+ const list=document.getElementById("postList");list.innerHTML="";document.getElementById("categoryTitle").textContent=activeCategory+" 학습 자료";
+ const items=posts[activeCategory]||[];
+ items.forEach((post,index)=>{const locked=!loggedIn()&&index>=3;const btn=document.createElement("button");btn.type="button";btn.className="post-row";
+ const left=document.createElement("span");const strong=document.createElement("strong");strong.textContent=post.title;const small=document.createElement("small");small.textContent=(post.date||"학습 자료")+" · "+(post.body||"").slice(0,48);left.append(strong,small);
+ const right=document.createElement("span");right.className=locked?"lock-label":"small-note";right.textContent=locked?"🔒 로그인 필요":"게시글 보기";btn.append(left,right);
+ btn.addEventListener("click",()=>openPost(index));list.appendChild(btn)});
+ document.getElementById("postView").classList.add("hidden");
 }
-// YouTube 주소는 영상 ID만 추출하여 안전한 embed 주소로 변환합니다.
-function youtubeVideoId(value){
- if(!value)return '';
- try{
-  const u=new URL(value.trim());
-  if(u.protocol!=='https:'&&u.protocol!=='http:')return '';
-  const host=u.hostname.toLowerCase().replace(/^(www\.|m\.)/,'');
-  const parts=u.pathname.split('/').filter(Boolean);
-  let id='';
-  if(host==='youtu.be')id=parts[0]||'';
-  else if(host==='youtube.com'||host==='youtube-nocookie.com'){
-   if(parts[0]==='watch')id=u.searchParams.get('v')||'';
-   else if(['shorts','embed','live'].includes(parts[0]))id=parts[1]||'';
-  }
-  return /^[A-Za-z0-9_-]{11}$/.test(id)?id:'';
- }catch{return ''}
+function openPost(index){const items=posts[activeCategory]||[];const post=items[index];if(!post)return;if(!loggedIn()&&index>=3){showToast("로그인 후 볼 수 있습니다.");return}
+ const view=document.getElementById("postView");view.innerHTML="";const h=document.createElement("h3");h.textContent=post.title;const meta=document.createElement("p");meta.className="small-note";meta.textContent=activeCategory+" · "+(post.date||"학습 자료");const body=document.createElement("div");body.className="post-body";body.textContent=post.body||"";view.append(h,meta,body);
+ const media=document.createElement("div");media.className="post-media";
+ if(post.imageData){const img=document.createElement("img");img.src=post.imageData;img.alt=post.imageName||"첨부 이미지";media.appendChild(img)}
+ if(post.pdfData){const a=document.createElement("a");a.href=post.pdfData;a.download=post.pdfName||"학습자료.pdf";a.textContent="PDF 열기/다운로드: "+(post.pdfName||"학습자료.pdf");a.target="_blank";a.rel="noopener";media.appendChild(a)}
+ if(media.childNodes.length)view.appendChild(media);
+ const close=document.createElement("button");close.className="btn btn-secondary";close.style.marginTop="20px";close.textContent="목록으로";close.addEventListener("click",()=>view.classList.add("hidden"));view.appendChild(close);view.classList.remove("hidden");view.scrollIntoView({behavior:"smooth",block:"start"});
 }
-let postOpenSequence=0;
-async function openPost(p){
- const sequence=++postOpenSequence;
- const v=$('postView');if(!v)return;
- if(!user){
-  v.replaceChildren();v.classList.add('hidden');
-  if(p.can_preview!==true){say('로그인 후 이용하실 수 있습니다. 과목별 현재 정렬 상위 3개만 무료 공개됩니다.');return;}
-  const {data,error}=await db.rpc('nstudy_guest_post_detail',{p_id:String(p.id)});
-  if(sequence!==postOpenSequence)return;
-  if(error){say('자료 조회 실패: '+error.message);return;}
-  if(!data){say('현재 공개 대상이 아닙니다. 목록을 새로 불러옵니다.');await refreshPosts();return;}
-  p=data;
- }
-
- v.replaceChildren();
- const heading=document.createElement('h3');heading.textContent=p.title||'';v.appendChild(heading);
- const info=document.createElement('p');info.className='small-note';info.textContent=p.category||'';v.appendChild(info);
- const body=document.createElement('div');body.className='post-body';body.textContent=p.body||'';v.appendChild(body);
- const media=document.createElement('div');media.className='post-media';v.appendChild(media);
- for(const kind of ['image','pdf']){
-  const path=p[kind+'_path'];if(!path)continue;
-  const name=p[kind+'_name']||(kind==='pdf'?'학습자료.pdf':'첨부 이미지');
-  const label=document.createElement('strong');label.textContent=(kind==='pdf'?'PDF: ':'이미지: ')+name;media.appendChild(label);
-  let url;try{url=await attachmentUrl(path)}catch(error){
-   const warning=document.createElement('p');warning.className='small-note';warning.textContent='첨부파일을 열 수 없습니다: '+error.message;media.appendChild(warning);console.error(error);continue;
-  }
-  if(kind==='image'){
-   const img=document.createElement('img');img.src=url;img.alt=name;img.loading='lazy';img.style.cssText='max-width:100%;height:auto;object-fit:contain';
-   img.onerror=()=>{const warning=document.createElement('p');warning.textContent='이미지를 표시할 수 없습니다. 아래 원본 보기 버튼을 이용해 주세요.';img.replaceWith(warning)};
-   media.appendChild(img);
-  }else{
-   const frame=document.createElement('iframe');
-   frame.src=isMobilePdfDevice()?pdfViewerUrl(url):url+'#toolbar=1&view=FitH';
-   frame.title='PDF 미리보기: '+name;frame.loading='lazy';
-   frame.style.cssText='display:block;width:100%;height:70vh;min-height:380px;border:1px solid #dce4ef;border-radius:8px;background:#f8fafc';
-   media.appendChild(frame);
-   if(isMobilePdfDevice()){
-    const tip=document.createElement('p');tip.className='small-note';tip.textContent='화면이 작으면 아래 PDF 전체 화면 보기 버튼으로 크게 볼 수 있습니다.';media.appendChild(tip);
-   }
-  }
-  const actions=document.createElement('div');actions.className='form-actions';actions.style.margin='8px 0 16px';
-  const open=document.createElement('a');open.className='btn btn-secondary';open.href=(kind==='pdf'&&isMobilePdfDevice())?pdfViewerUrl(url):url;open.target='_blank';open.rel='noopener noreferrer';open.textContent=kind==='pdf'?'PDF 전체 화면 보기':'이미지 원본 보기';actions.appendChild(open);
-  const dl=document.createElement('button');dl.type='button';dl.className='btn btn-secondary';dl.textContent='다운로드';dl.onclick=async()=>{
-   let downloadUrl;try{downloadUrl=await attachmentUrl(path,name)}catch(error){say('다운로드 실패: '+error.message);return}
-   const link=document.createElement('a');link.href=downloadUrl;link.download=name;document.body.appendChild(link);link.click();link.remove();
-  };actions.appendChild(dl);media.appendChild(actions);
- }
- // R2에 직접 업로드한 동영상은 게시글 내부에서 재생합니다.
- if(p.video_path){
-  const title=document.createElement('strong');title.textContent='동영상: '+(p.video_name||'강의 영상');media.appendChild(title);
-  const player=document.createElement('video');player.controls=true;player.controlsList='nodownload noremoteplayback';player.disablePictureInPicture=true;player.playsInline=true;player.preload='metadata';player.referrerPolicy='no-referrer';player.addEventListener('contextmenu',e=>e.preventDefault());player.style.cssText='display:block;width:100%;max-height:70vh;background:#111;border-radius:8px;margin:10px 0';media.appendChild(player);
-  try{const ticket=await videoRequest('/ticket',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path:p.video_path})});player.src=ticket.url;player.load();}
-  catch(e){const msg=document.createElement('p');msg.className='small-note';msg.textContent='동영상을 재생할 수 없습니다: '+e.message;media.appendChild(msg)}
- }
- // PDF·이미지와 함께 YouTube 영상을 게시글 안에 표시합니다.
- if(p.youtube_url){
-  const id=youtubeVideoId(p.youtube_url);
-  if(id){
-   const label=document.createElement('strong');label.textContent='유튜브 동영상';media.appendChild(label);
-   const wrap=document.createElement('div');wrap.className='youtube-embed';
-   const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+id;
-   iframe.title='유튜브 동영상';iframe.loading='lazy';iframe.referrerPolicy='strict-origin-when-cross-origin';
-   iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-   iframe.allowFullscreen=true;wrap.appendChild(iframe);media.appendChild(wrap);
-   const link=document.createElement('a');link.href='https://www.youtube.com/watch?v='+id;
-   link.target='_blank';link.rel='noopener noreferrer';link.textContent='유튜브에서 직접 보기';media.appendChild(link);
-  }
- }
- const div=document.createElement('div');div.className='post-actions';
- const pr=document.createElement('button');pr.className='btn btn-primary';pr.textContent='인쇄';pr.onclick=async()=>{
-  if(!p.pdf_path){alert('첨부된 PDF 문서가 없습니다.');return;}
-  const pdfWindow=window.open('','_blank');
-  if(!pdfWindow){alert('팝업 차단을 해제해 주세요.');return;}
-  let pdfUrl;try{pdfUrl=await attachmentUrl(p.pdf_path)}catch(error){pdfWindow.close();alert('PDF 문서를 열 수 없습니다: '+error.message);return;}
-  if(isMobilePdfDevice()){
-    pdfWindow.location.replace(pdfViewerUrl(pdfUrl));
-  }else{
-    pdfWindow.location.replace(pdfUrl);
-  }
-};
- const back=document.createElement('button');back.className='btn btn-secondary';back.textContent='목록으로';back.onclick=()=>v.classList.add('hidden');div.append(pr,back);
- if(admin()){
-  const edit=document.createElement('button');edit.className='btn btn-secondary';edit.textContent='수정';edit.onclick=async()=>{const title=prompt('수정할 제목',p.title);if(title===null)return;const body=prompt('수정할 본문',p.body);if(body===null)return;const yt=prompt('유튜브 주소 (없으면 빈칸)',p.youtube_url||'');if(yt===null)return;if(yt.trim()&&!youtubeVideoId(yt))return say('올바른 유튜브 주소를 입력해 주세요.');const{error}=await db.from('nstudy_posts').update({title:title.trim(),body:body.trim(),youtube_url:yt.trim()||null}).eq('id',p.id);if(error)return say('수정 실패: '+error.message);await refreshPosts();say('게시글이 수정되었습니다.')};
-  const del=document.createElement('button');del.className='btn btn-secondary';del.textContent='삭제';del.onclick=async()=>{if(!confirm('이 게시글을 삭제하시겠습니까? 첨부파일은 별도로 남을 수 있습니다.'))return;const{error}=await db.from('nstudy_posts').delete().eq('id',p.id);if(error)return say('삭제 실패: '+error.message);await refreshPosts();say('게시글이 삭제되었습니다.')};div.append(edit,del);
- }
- v.appendChild(div);v.classList.remove('hidden');v.scrollIntoView({block:'start',behavior:'smooth'});
-}
-const R2_WORKER='https://nstudy-r2.jhyh000.workers.dev';
-// 새 영상 전용 Worker: 배포 후 실제 URL로 교체하세요.
-const VIDEO_WORKER='https://nstudy-video.YOUR-SUBDOMAIN.workers.dev';
-async function videoRequest(endpoint,options={}){
- const {data:{session}}=await db.auth.getSession();
- if(!session?.access_token)throw Error('동영상 업로드 및 재생은 로그인이 필요합니다.');
- const r=await fetch(VIDEO_WORKER+endpoint,{...options,headers:{Authorization:'Bearer '+session.access_token,...options.headers}});
- let data;try{data=await r.json()}catch{throw Error('동영상 서버 응답을 확인할 수 없습니다.');}
- if(!r.ok)throw Error(data.error||'동영상 서버 요청 실패');return data;
-}
-async function uploadVideo(file){
- if(!file)return {path:'',name:''};
- if(!admin())throw Error('동영상 업로드는 관리자만 가능합니다.');
- if(!['video/mp4','video/webm','video/quicktime','video/x-m4v'].includes(file.type))throw Error('MP4, WebM, MOV 형식만 가능합니다.');
- if(file.size>300*1024*1024)throw Error('동영상은 최대 300MB까지 업로드할 수 있습니다.');
- const status=$('videoStatus'),progress=$('videoProgress');if(progress){progress.style.display='block';progress.value=0;}
- let state=null;let completed=false;
- try{
-  state=await videoRequest('/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:file.name,size:file.size,type:file.type})});
-  const count=Math.ceil(file.size/state.partSize);if(count>10000)throw Error('분할 업로드 최대 조각 수를 초과했습니다.');
-  const parts=[];
-  for(let i=0;i<count;i++){
-   const blob=file.slice(i*state.partSize,Math.min((i+1)*state.partSize,file.size));
-   let result;
-   for(let attempt=0;attempt<3;attempt++){
-    try{result=await videoRequest('/part?key='+encodeURIComponent(state.key)+'&uploadId='+encodeURIComponent(state.uploadId)+'&number='+(i+1),{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:blob});break}
-    catch(e){if(attempt===2)throw e;}
-   }
-   parts.push(result);if(progress)progress.value=Math.round((i+1)/count*100);if(status)status.textContent='동영상 업로드 '+(i+1)+'/'+count+' 조각 완료';
-  }
-  const done=await videoRequest('/complete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:state.key,uploadId:state.uploadId,parts})});completed=true;
-  if(status)status.textContent='동영상 업로드 완료. 게시글을 저장하고 있습니다.';
-  return {path:done.path,name:file.name};
- }catch(e){if(status)status.textContent='업로드 실패: '+e.message;throw e}
- finally{if(state&&!completed){videoRequest('/abort',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:state.key,uploadId:state.uploadId})}).catch(console.warn)}}
-}
-
-async function attachmentUrl(path,downloadName=''){
- if(!path)return '';
- if(!path.startsWith('r2:')){
-  const {data,error}=await db.storage.from('nstudy-attachments').createSignedUrl(path,3600,downloadName?{download:downloadName}:undefined);
-  if(error||!data?.signedUrl)throw Error(error?.message||'Supabase 첨부파일 주소 생성 실패');
-  return data.signedUrl;
- }
- const {data:{session}}=await db.auth.getSession();
- if(!session?.access_token)throw Error('R2 첨부파일을 열려면 로그인이 필요합니다.');
- const response=await fetch(R2_WORKER+'/sign',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({path:path.slice(3),download:!!downloadName})});
- const result=await response.json();
- if(!response.ok||!result.url)throw Error(result.error||'R2 첨부파일 주소 생성 실패');
- return result.url;
-}
-async function upload(file){
- if(!file)return {path:'',name:''};
- if(!['application/pdf','image/png','image/jpeg','image/webp'].includes(file.type))throw Error('PDF, JPG, PNG, WEBP 파일만 가능합니다.');
- if(file.size>10*1024*1024)throw Error('첨부파일은 10MB 이하만 가능합니다.');
- const {data:{session}}=await db.auth.getSession();
- if(!session?.access_token)throw Error('로그인이 필요합니다.');
- const response=await fetch(R2_WORKER+'/upload',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,'Content-Type':file.type,'X-File-Name':encodeURIComponent(file.name)},body:file});
- let result;try{result=await response.json()}catch{throw Error('R2 서버 응답을 확인할 수 없습니다.');}
- if(!response.ok||!result.path)throw Error(result.error||'R2 업로드 실패');
- return {path:'r2:'+result.path,name:file.name};
-}
-// 교재 인쇄: 현재 로그인 권한으로 읽을 수 있는 본문과 이미지, 첨부 링크를 목차 순으로 정리합니다.
-async function printCommBook(){
- if(category!=='의사소통능력')return say('의사소통능력을 선택해 주세요.');
- const rows=posts.filter(p=>p.category==='의사소통능력');
- if(!rows.length)return say('인쇄할 자료가 없습니다.');
- const w=window.open('','_blank');if(!w)return say('팝업 차단을 해제해 주세요.');
- w.document.title='NSTUDY 의사소통능력 학습교재';
- const d=w.document;d.documentElement.lang='ko';d.body.innerHTML='';
- const style=d.createElement('style');style.textContent=`@page{size:A4;margin:17mm 15mm}body{font-family:Arial,'Malgun Gothic',sans-serif;color:#18243b;line-height:1.65;font-size:11pt}h1{font-size:27pt;margin-top:35mm}h2{font-size:18pt;border-bottom:3px solid var(--c);padding:10px 0;color:var(--c);break-before:page}h3{font-size:13pt;margin:18px 0 6px;color:var(--c)}.toc{break-after:page}.toc p{margin:3px 0}.item{break-inside:avoid-page;margin:16px 0;padding:12px 0;border-bottom:1px solid #ddd}.body{white-space:pre-wrap;overflow-wrap:anywhere}.media{font-size:9pt;color:#555;overflow-wrap:anywhere}img{max-width:100%;max-height:210mm;object-fit:contain;display:block;margin:10px auto}a{color:#2459a6}button{padding:9px 14px;cursor:pointer}@media print{.no-print{display:none}a{text-decoration:none}}`;d.head.appendChild(style);
- const make=(tag,text,parent=d.body)=>{const e=d.createElement(tag);e.textContent=text;parent.appendChild(e);return e};
- make('h1','NCS 의사소통능력 학습교재');make('p','NSTUDY ACADEMY · 학습자료 모음');make('p','발행일: '+new Date().toLocaleDateString('ko-KR'));
- const note=make('p','※ 본문과 이미지가 인쇄됩니다. PDF 첨부는 링크로 표시되며 PDF 원문을 책 속에 자동 합치지는 않습니다.');note.style.color='#555';
- const toc=d.createElement('section');toc.className='toc';d.body.appendChild(toc);make('h2','차례',toc);
- const keys=Object.keys(COMM_CATALOG);keys.forEach((g,gi)=>{const c=COMM_COLORS[gi];const chapter=rows.filter(p=>commGroup(p.subcategory)===g);const p=make('p',String(gi+1).padStart(2,'0')+' '+g,toc);p.style.color=c;});
- const sortChapter=(a,b)=>{const u=commUnit(a.subcategory),v=commUnit(b.subcategory);return u.localeCompare(v,'ko',{numeric:true})||new Date(a.created_at)-new Date(b.created_at)};
- for(const [gi,g] of keys.entries()){
-  const c=COMM_COLORS[gi], section=d.createElement('section');section.style.setProperty('--c',c);d.body.appendChild(section);
-  make('h2',String(gi+1).padStart(2,'0')+' '+g,section);
-  const chapter=rows.filter(p=>commGroup(p.subcategory)===g).sort(sortChapter);
-  for(const p of chapter){const item=d.createElement('div');item.className='item';section.appendChild(item);
-   make('h3',p.title||'제목 없음',item);
-   const body=make('div',p.body||'',item);body.className='body';
-   if(p.image_path){try{const url=await attachmentUrl(p.image_path);const img=d.createElement('img');img.src=url;img.alt=p.image_name||'첨부 이미지';item.appendChild(img)}catch{make('p','[이미지 링크를 불러오지 못했습니다]',item)}}
-   if(p.pdf_path){try{const url=await attachmentUrl(p.pdf_path);const a=d.createElement('a');a.href=url;a.textContent='PDF 첨부: '+(p.pdf_name||'첨부자료');a.className='media';item.appendChild(a)}catch{make('p','[PDF 링크를 불러오지 못했습니다]',item)}}
-  }
- }
- const btn=make('button','인쇄 / PDF로 저장');btn.className='no-print';btn.onclick=()=>w.print();
- w.focus();
-}
-
-// 선택하지 않은 미디어의 DB 열은 보내지 않습니다. 구형 DB에서도 일반 게시글을 저장합니다.
-function postMediaFields(youtubeUrl,video){
- const fields={};
- if(youtubeUrl)fields.youtube_url=youtubeUrl;
- if(video?.path){fields.video_path=video.path;fields.video_name=video.name||'';}
- return fields;
-}
-
-function initBank(){$('commPrintBook')?.addEventListener('click',printCommBook);if(location.hash==='#certificate-bank'){category='기능사 · 전기·전자';subcategory='';}document.querySelectorAll('.category-card').forEach(c=>c.addEventListener('click',()=>{category=c.dataset.category;subcategory='';electricSubject='';structuredEditorOpen=false;commUnitFilter='';page=1;renderPosts()}));$('structuredRegisterButton')?.addEventListener('click',()=>{if(!admin())return say('게시물 등록은 관리자 로그인 후 이용할 수 있습니다.');structuredEditorOpen=!structuredEditorOpen;renderPosts();if(structuredEditorOpen)$('postTitle')?.focus()});$('showEditor')?.addEventListener('click',()=>{if(!admin())return say('관리자만 작성할 수 있습니다.');$('editor').classList.remove('hidden');$('postCategory').value=category;updateSkills()});$('cancelPost')?.addEventListener('click',()=>{if(commCategory(category)||category===ELECTRIC_CATEGORY){ structuredEditorOpen=false; $('postForm')?.reset();$('postCategory').value=category;updateSkills();$('postSubcategory').value=subcategory;renderPosts(); }else $('editor').classList.add('hidden')});$('postCategory')?.addEventListener('change',updateSkills);$('postForm')?.addEventListener('submit',async e=>{e.preventDefault();if(!admin())return say('관리자만 작성할 수 있습니다.');try{const youtubeUrl=$('postYoutube')?.value.trim()||'';if(youtubeUrl&&!youtubeVideoId(youtubeUrl))throw Error('올바른 유튜브 주소를 입력해 주세요.');const pdf=await upload($('postPdf').files[0]);const image=await upload($('postImage').files[0]);const video=await uploadVideo($('postVideo')?.files[0]);const commSelected=commCategory($('postCategory').value)||$('postCategory').value===ELECTRIC_CATEGORY;if(commSelected&&$('postSubcategory')?.value==='기존 미분류 자료')throw Error('새 게시글은 정식 학습 목차를 선택해 주세요.');if(commSelected&&$('postSubcategory')?.value.endsWith(' | 기존 자료'))throw Error('기존 자료 목차에는 새 게시글을 등록할 수 없습니다.');if(commSelected&&!$('postSubcategory')?.value)throw Error('학습 영역을 선택해 주세요.');const row={category:$('postCategory').value,subcategory:$('postSubcategory').value,title:$('postTitle').value.trim(),body:$('postBody').value.trim(),author_id:user.id,author_username:profile.username,image_path:image.path,image_name:image.name,pdf_path:pdf.path,pdf_name:pdf.name,...postMediaFields(youtubeUrl,video)};const {error}=await db.from('nstudy_posts').insert(row);if(error){if(/video_(name|path)/.test(error.message||''))throw Error('동영상 저장용 DB 항목이 없습니다. 제공된 01-video-columns.sql을 Supabase SQL Editor에서 실행한 뒤 다시 등록해 주세요.');throw error;}category=row.category;subcategory=commCategory(row.category)?commGroup(row.subcategory):row.subcategory;if(row.category===ELECTRIC_CATEGORY)electricSubject=electricPostSubject(row);commUnitFilter='';page=1;e.target.reset();structuredEditorOpen=false;if(!commCategory(row.category)&&row.category!==ELECTRIC_CATEGORY)$('editor').classList.add('hidden');await refreshPosts();say('게시글이 서버에 저장되었습니다.')}catch(err){say('저장 실패: '+err.message)}});updateSkills()}
-function updateSkills(){
- const c=$('postCategory')?.value,sel=$('postSubcategory');if(!sel)return;
- const previous=sel.value;
- const stored=posts.filter(p=>p.category===c).map(p=>p.subcategory).filter(Boolean);
- const skills=c===ELECTRIC_CATEGORY&&electricSubject
-   ?(ELECTRIC_CHAPTERS[electricSubject]||['실전모의고사']).map(ch=>electricSubject+' | '+ch)
-   :commCategory(c)?[...new Set([...Object.keys(skillCatalog(c)),...stored.map(commGroup).filter(Boolean)])]:certificateCategory(c)?[...new Set([...CERTIFICATE_SUBJECTS[c],...stored])]:[...new Set(stored)];
- sel.replaceChildren(new Option(commCategory(c)?'학습 영역 선택':certificateCategory(c)?'기능사 자격증 선택':'세부 능력 선택',''));
- skills.forEach(name=>sel.add(new Option(c===ELECTRIC_CATEGORY&&electricSubject?electricPostChapter({subcategory:name}):name,name)));
- if(skills.includes(previous))sel.value=previous;
- if((commCategory(c)||c===ELECTRIC_CATEGORY)&&!sel.value&&skills.includes(subcategory))sel.value=subcategory;
- sel.required=commCategory(c)||certificateCategory(c);
- 
-}
-const enrollmentState=p=>{
- if(p.enrollment_override&&p.enrollment_override!=='auto')return p.enrollment_override;
- const today=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Seoul'});
- if(!p.enrollment_start)return 'pending';
- if(p.enrollment_start>today)return 'pending';
- if(p.enrollment_end&&p.enrollment_end<today)return 'completed';
- return 'active';
-};
-const enrollmentLabels={active:'수강 중',pending:'수강 대기',paused:'휴원',completed:'수강 종료'};
-let memberRenderSequence=0;
-async function renderMembers(){
-  const renderSequence=++memberRenderSequence;
-  const root=$('adminMembers');
-  if(!root)return;
-  if(!access()){root.textContent='관리 권한이 없습니다.';return;}
-  const {data,error}=await db.from('nstudy_profiles').select('id,username,member_type,full_name,school,grade,phone,contact_email,role,admin_access,blocked,enrollment_start,enrollment_end,enrollment_override,parent_phone,address').order('username');
-  if(error){root.textContent=error.message;return;}
-  root.innerHTML='';
-  const wrap=document.createElement('div');wrap.className='admin-table-wrap';
-  const table=document.createElement('table');table.className='admin-table';
-  // 회원관리 입력칸만 축소: 홈페이지의 공통 input {width:100%} 규칙보다 우선 적용
-  wrap.style.setProperty('overflow-x','auto');
-  wrap.style.setProperty('max-width','100%');
-  table.style.setProperty('width','max-content','important');
-  table.style.setProperty('min-width','0','important');
-  table.style.setProperty('table-layout','auto');
-  const compactWidths={username:67,full_name:122,member_type:95,school:110,grade:57,phone:98,parent_phone:130,address:170,contact_email:190};
-  const compactControl=(el,width)=>{el.style.setProperty('width',width+'px','important');el.style.setProperty('min-width','0','important');el.style.setProperty('max-width',width+'px','important');el.style.setProperty('box-sizing','border-box');el.style.setProperty('padding','6px 5px','important');el.style.setProperty('font-size','13px','important');};
-  table.innerHTML='<thead><tr><th>아이디</th><th>성명</th><th>회원 유형</th><th>학교</th><th>학년</th><th>본인 전화번호</th><th>학부모 전화번호</th><th>주소</th><th>이메일</th><th>수강 시작일</th><th>수강 종료일</th><th>상태 지정</th><th>현재 상태</th><th>관리 접근</th><th>차단</th><th>비밀번호 관리</th><th>회원 삭제</th></tr></thead>';
-  const body=document.createElement('tbody');
-  for(const p of data||[]){
-    const tr=document.createElement('tr');
-    // 회원정보는 관리자가 편집하고 저장합니다. 인증 이메일과 로그인 비밀번호는 별도 인증 절차가 필요합니다.
-    const fields=[['username','아이디'],['full_name','성명'],['member_type','회원 유형'],['school','학교'],['grade','학년'],['phone','본인 전화번호'],['parent_phone','학부모 전화번호'],['address','주소'],['contact_email','연락 이메일']];
-    for(const [k,label] of fields){
-      const td=document.createElement('td');
-      const input=k==='member_type'?document.createElement('select'):document.createElement('input');
-      if(k==='member_type') ['학생','학부모','강사'].forEach(v=>input.add(new Option(v,v)));
-      else {input.type=k==='contact_email'?'email':k.includes('phone')?'tel':'text';}
-      compactControl(input,compactWidths[k]||110);
-      input.value=p[k]||'';input.setAttribute('aria-label',p.username+' '+label);input.disabled=!admin();
-      input.onchange=async()=>{
-        const old=p[k]||'',next=input.value.trim();
-        if(k==='username'&&!/^[a-zA-Z0-9_]{4,30}$/.test(next)){alert('아이디는 영문, 숫자, 밑줄(_) 4~30자로 입력하세요.');input.value=old;return;}
-        if(k==='contact_email'&&next&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(next)){alert('이메일 형식을 확인하세요.');input.value=old;return;}
-        if(k==='member_type'&&p.role==='admin'){alert('관리자 계정의 회원 유형은 변경하지 않습니다.');input.value=old;return;}
-        input.disabled=true;
-        const {error}=await db.from('nstudy_profiles').update({[k]:next||null}).eq('id',p.id);
-        input.disabled=!admin();
-        if(error){input.value=old;say(label+' 저장 실패: '+error.message);return;}
-        p[k]=next; say(label+' 저장 완료');
-        if(k==='member_type')await renderMembers();
-      };
-      td.appendChild(input);tr.appendChild(td);
-    }
-    // 수강 상태는 학생 계정에만 적용합니다. 기본값은 날짜 기준 자동 판정입니다.
-    if(p.member_type==='학생'){
-      for(const k of ['enrollment_start','enrollment_end']){
-        const td=document.createElement('td'),input=document.createElement('input');
-        input.type='date';input.value=p[k]||'';compactControl(input,135);input.disabled=!admin();
-        input.onchange=async()=>{
-          const next=input.value||null;
-          const start=k==='enrollment_start'?next:p.enrollment_start;
-          const end=k==='enrollment_end'?next:p.enrollment_end;
-          if(start&&end&&end<start){alert('종료일은 시작일보다 빠를 수 없습니다.');input.value=p[k]||'';return;}
-          input.disabled=true;
-          const {error}=await db.from('nstudy_profiles').update({[k]:next}).eq('id',p.id);
-          input.disabled=!admin();
-          if(error){input.value=p[k]||'';say('수강 기간 저장 실패: '+error.message);return;}
-          p[k]=next;await renderMembers();
-        };
-        td.appendChild(input);tr.appendChild(td);
-      }
-      const td=document.createElement('td'),sel=document.createElement('select');
-      [['auto','자동 판정'],['active','수강 중'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,label])=>sel.add(new Option(label,v)));
-      sel.value=p.enrollment_override||'auto';compactControl(sel,105);sel.disabled=!admin();
-      sel.onchange=async()=>{
-        const previous=p.enrollment_override||'auto';sel.disabled=true;
-        const {error}=await db.from('nstudy_profiles').update({enrollment_override:sel.value}).eq('id',p.id);
-        if(error){sel.value=previous;say('수강 상태 저장 실패: '+error.message)}else{p.enrollment_override=sel.value;await renderMembers()}
-        sel.disabled=!admin();
-      };
-      td.appendChild(sel);tr.appendChild(td);
-      const state=document.createElement('td');state.textContent=enrollmentLabels[enrollmentState(p)]||'확인 필요';tr.appendChild(state);
-    }else{
-      for(let i=0;i<4;i++){const td=document.createElement('td');td.textContent='—';tr.appendChild(td)}
-    }
-    for(const k of ['admin_access','blocked']){
-      const td=document.createElement('td'),cb=document.createElement('input');
-      cb.type='checkbox';cb.checked=!!p[k];cb.disabled=!admin()||p.id===user.id;
-      cb.onchange=async()=>{
-        const {error}=await db.from('nstudy_profiles').update({[k]:cb.checked}).eq('id',p.id);
-        if(error){cb.checked=!cb.checked;say(error.message);}
-        else say('권한 정보가 저장되었습니다.');
-      };
-      td.appendChild(cb);tr.appendChild(td);
-    }
-    const protectedAccount=p.id===user.id||p.role==='admin';
-    const pwdTd=document.createElement('td'),pwd=document.createElement('button');
-    pwd.type='button';pwd.textContent='새 비밀번호 설정';pwd.disabled=!admin()||protectedAccount;
-    pwd.onclick=async()=>{
-      const newPassword=prompt(`${p.username} 회원의 새 비밀번호를 입력하세요. (8~72자)\n기존 비밀번호는 조회할 수 없습니다.`);
-      if(newPassword===null)return;
-      if(newPassword.length<8||newPassword.length>72){alert('비밀번호는 8~72자로 입력해 주세요.');return;}
-      if(!confirm(`${p.username} 회원의 비밀번호를 변경하시겠습니까?`))return;
-      pwd.disabled=true;
-      try{
-        const {data,error}=await db.functions.invoke('nstudy-admin-members',{body:{action:'set_password',userId:p.id,newPassword}});
-        if(error)throw error;
-        if(data?.error)throw new Error(data.error);
-        alert('새 비밀번호가 설정되었습니다.');
-      }catch(e){alert('비밀번호 변경 실패: '+(e.message||String(e)));}
-      finally{pwd.disabled=false;}
-    };
-    pwdTd.appendChild(pwd);tr.appendChild(pwdTd);
-    const deleteTd=document.createElement('td'),del=document.createElement('button');
-    del.type='button';del.textContent='삭제';del.disabled=!admin()||protectedAccount;
-    del.style.background='#b42318';del.style.color='#fff';
-    del.onclick=async()=>{
-      if(!confirm(`${p.username} 회원을 삭제하시겠습니까?\n삭제된 회원은 다시 로그인할 수 없습니다.\n기존 게시글은 유지됩니다.`))return;
-      const check=prompt(`삭제를 확정하려면 회원 아이디 "${p.username}"를 정확히 입력하세요.`);
-      if(check!==p.username){if(check!==null)alert('아이디가 일치하지 않아 삭제하지 않았습니다.');return;}
-      del.disabled=true;
-      try{
-        const {data,error}=await db.functions.invoke('nstudy-admin-members',{body:{action:'delete',userId:p.id}});
-        if(error)throw error;
-        if(data?.error)throw new Error(data.error);
-        alert('회원 계정이 삭제되었습니다.');
-        await renderMembers();
-      }catch(e){alert('회원 삭제 실패: '+(e.message||String(e)));del.disabled=false;}
-    };
-    deleteTd.appendChild(del);tr.appendChild(deleteTd);body.appendChild(tr);
-  }
-  table.appendChild(body);
-  wrap.appendChild(table);
-  const tools=document.createElement('div');tools.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0';
-  const filter=document.createElement('select');filter.setAttribute('aria-label','수강 상태 필터');filter.style.maxWidth='220px';
-  [['members','전체 회원'],['active','현재 수강 중인 학생'],['all','전체 학생'],['pending','수강 대기'],['paused','휴원'],['completed','수강 종료']].forEach(([v,t])=>filter.add(new Option(t,v)));
-  const count=document.createElement('strong');
-  const rows=[...body.children];
-  const studentData=(data||[]).filter(p=>p.member_type==='학생');
-  const selected=()=>filter.value==='members'?(data||[]):studentData.filter(p=>filter.value==='all'||enrollmentState(p)===filter.value);
-  const apply=()=>{let visible=0;rows.forEach((tr,i)=>{const p=(data||[])[i];const show=filter.value==='members'||(p.member_type==='학생'&&(filter.value==='all'||enrollmentState(p)===filter.value));tr.hidden=!show;if(show)visible++});count.textContent=visible+'명'};
-  filter.onchange=()=>{apply();print.hidden=false;csv.hidden=false;};
-  const printable=()=>selected().map(p=>({아이디:p.username||'',성명:p.full_name||'',회원유형:p.member_type||'',학교:p.school||'',학년:p.grade||'',본인전화:p.phone||'',학부모전화:p.parent_phone||'',주소:p.address||'',이메일:p.contact_email||'',시작일:p.enrollment_start||'',종료일:p.enrollment_end||'',수강상태:p.member_type==='학생'?(enrollmentLabels[enrollmentState(p)]||''):''}));
-  const print=document.createElement('button');print.type='button';print.textContent='선택 명단 인쇄';print.style.width='auto';print.hidden=true;print.onclick=()=>{
-    const records=printable();if(!records.length)return alert('인쇄할 학생이 없습니다.');
-    const w=window.open('','_blank');if(!w)return alert('팝업 차단을 해제해 주세요.');
-    const d=w.document;d.title='NSTUDY 수강생 명단';
-    const style=d.createElement('style');style.textContent='body{font-family:Malgun Gothic,sans-serif;padding:20px}h2{font-size:20px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #888;padding:6px;text-align:left}th{background:#eee}@media print{@page{size:A4 landscape;margin:12mm}}';d.head.appendChild(style);
-    const h=d.createElement('h2');h.textContent='NSTUDY ACADEMY - '+filter.options[filter.selectedIndex].text;d.body.appendChild(h);
-    const sub=d.createElement('p');sub.textContent='인원: '+records.length+'명 / 인쇄일: '+new Date().toLocaleDateString('ko-KR');d.body.appendChild(sub);
-    const t=d.createElement('table'),thead=d.createElement('thead'),tr=d.createElement('tr');
-    const keys=Object.keys(records[0]);keys.forEach(k=>{const th=d.createElement('th');th.textContent=k;tr.appendChild(th)});thead.appendChild(tr);t.appendChild(thead);
-    const tb=d.createElement('tbody');records.forEach(r=>{const row=d.createElement('tr');keys.forEach(k=>{const td=d.createElement('td');td.textContent=r[k];row.appendChild(td)});tb.appendChild(row)});t.appendChild(tb);d.body.appendChild(t);
-    w.focus();setTimeout(()=>w.print(),250);
-  };
-  const csv=document.createElement('button');csv.type='button';csv.textContent='선택 명단 CSV 저장';csv.style.width='auto';csv.hidden=true;csv.onclick=()=>{
-    const records=printable();if(!records.length)return alert('저장할 학생이 없습니다.');
-    const keys=Object.keys(records[0]);const quote=v=>'"'+String(v??'').replace(/"/g,'""').replace(/^[=+@\-\t\r]/,x=>"'"+x)+'"';
-    const contents='\ufeff'+[keys.map(quote).join(','),...records.map(r=>keys.map(k=>quote(r[k])).join(','))].join('\r\n');
-    const url=URL.createObjectURL(new Blob([contents],{type:'text/csv;charset=utf-8'}));
-    const a=document.createElement('a');a.href=url;a.download='NSTUDY_수강생명단_'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-  };
-  tools.append(filter,count,print,csv);root.append(tools,wrap);apply();
-  if($('adminIntro'))$('adminIntro').textContent='기존 비밀번호는 확인할 수 없습니다. 일반 회원의 새 비밀번호 설정 및 삭제는 관리자만 사용할 수 있습니다. 관리자 계정은 보호됩니다.';
-}
-function initAdmin(){const a=$('adminPageLink');if(a)a.onclick=async e=>{e.preventDefault();if(!access())return say('관리 페이지 접근 권한이 없습니다.');$('admin-page').classList.remove('hidden');await renderMembers();$('admin-page').scrollIntoView({behavior:'smooth'})}}
-async function init(){initAdmin();if($('postList'))initBank();await refreshAuth();if(location.hash==='#certificate-bank')setTimeout(()=>document.getElementById('certificate-bank')?.scrollIntoView({block:'start'}),120);db.auth.onAuthStateChange(()=>{setTimeout(refreshAuth,0)})}init();
+document.querySelectorAll(".tab").forEach(tab=>tab.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t===tab));activeCategory=tab.dataset.category;renderPosts()}));
+document.getElementById("showEditor").addEventListener("click",()=>{document.getElementById("postCategory").value=activeCategory;document.getElementById("editor").classList.remove("hidden");document.getElementById("editor").scrollIntoView({behavior:"smooth",block:"start"})});
+document.getElementById("cancelPost").addEventListener("click",()=>document.getElementById("editor").classList.add("hidden"));
+function readFile(file){return new Promise((resolve,reject)=>{if(!file){resolve(null);return}if(file.size>1024*1024){reject(new Error(file.name+" 파일이 1MB를 초과합니다."));return}const r=new FileReader();r.onload=()=>resolve({name:file.name,data:r.result});r.onerror=()=>reject(new Error("파일을 읽을 수 없습니다."));r.readAsDataURL(file)})}
+document.getElementById("postForm").addEventListener("submit",async e=>{e.preventDefault();if(!loggedIn()){showToast("게시글 작성은 로그인 후 이용할 수 있습니다.");return}
+ try{const pdf=await readFile(document.getElementById("postPdf").files[0]);const image=await readFile(document.getElementById("postImage").files[0]);const cat=document.getElementById("postCategory").value;
+ const post={title:document.getElementById("postTitle").value.trim(),body:document.getElementById("postBody").value.trim(),date:new Date().toLocaleDateString("ko-KR"),author:currentUser,pdfName:pdf?.name||"",pdfData:pdf?.data||"",imageName:image?.name||"",imageData:image?.data||""};
+ if(!post.title||!post.body){showToast("제목과 본문을 입력해 주세요.");return}
+ posts[cat]=posts[cat]||[];posts[cat].unshift(post);if(!save("nstudy_posts",posts))return;activeCategory=cat;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.category===cat));e.target.reset();document.getElementById("editor").classList.add("hidden");renderPosts();showToast("게시글이 등록되었습니다.");
+ }catch(err){showToast(err.message||"게시글 등록에 실패했습니다.")}});
+const backdrop=document.getElementById("accountBackdrop");
+function openAccount(){backdrop.classList.remove("hidden");setAccountTab("login");document.getElementById("logoutMessage").textContent=loggedIn()?currentUser+"님으로 로그인되어 있습니다.":"현재 로그인 상태가 아닙니다."}
+function closeAccount(){backdrop.classList.add("hidden")}
+document.getElementById("nstudyLoginButton").addEventListener("click",()=>{setAccountTab("login");document.getElementById("loginId").focus();showToast("아래 NSTUDY 계정 입력란에서 로그인해 주세요.");});
+document.getElementById("findIdButton").addEventListener("click",()=>showToast("아이디 찾기는 본인 확인 기능을 서버에 연결해야 사용할 수 있습니다."));
+document.getElementById("findPwButton").addEventListener("click",()=>showToast("비밀번호 찾기는 이메일 또는 휴대전화 본인 확인 기능을 서버에 연결해야 합니다."));
+document.getElementById("goRegisterButton").addEventListener("click",()=>setAccountTab("register"));
+document.getElementById("openAccount").addEventListener("click",openAccount);document.getElementById("closeAccount").addEventListener("click",closeAccount);backdrop.addEventListener("click",e=>{if(e.target===backdrop)closeAccount()});
+function setAccountTab(tab){document.querySelectorAll("[data-account-tab]").forEach(b=>b.classList.toggle("active",b.dataset.accountTab===tab));document.getElementById("loginPanel").classList.toggle("hidden",tab!=="login");document.getElementById("registerForm").classList.toggle("hidden",tab!=="register");document.getElementById("logoutPanel").classList.toggle("hidden",tab!=="logout");document.getElementById("logoutMessage").textContent=loggedIn()?currentUser+"님으로 로그인되어 있습니다.":"현재 로그인 상태가 아닙니다."}
+document.querySelectorAll("[data-account-tab]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.accountTab==="logout"&&!loggedIn()){setAccountTab("login");showToast("먼저 로그인해 주세요.");return}setAccountTab(b.dataset.accountTab)}));
+document.getElementById("registerForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("regId").value.trim();const pw=document.getElementById("regPw").value;if(accounts[id]){showToast("이미 사용 중인 ID입니다.");return}if(id.length<4||pw.length<6){showToast("ID는 4자 이상, PW는 6자 이상 입력해 주세요.");return}
+ accounts[id]={pw,type:document.getElementById("regType").value,name:document.getElementById("regName").value.trim(),adminAccess:id.toLowerCase()==="jcm0011"||id.toLowerCase()==="ssjj",school:document.getElementById("regSchool").value.trim(),grade:document.getElementById("regGrade").value.trim(),phone:document.getElementById("regPhone").value.trim(),address:document.getElementById("regAddress").value.trim(),email:document.getElementById("regEmail").value.trim()};
+ if(!save("nstudy_accounts",accounts))return;e.target.reset();setAccountTab("login");document.getElementById("loginId").value=id;showToast("회원가입이 완료되었습니다.");});
+document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("loginId").value.trim();const pw=document.getElementById("loginPw").value;if(!accounts[id]||accounts[id].pw!==pw){showToast("ID 또는 PW를 확인해 주세요.");return}if(accounts[id].blocked===true){showToast("관리자에 의해 로그인이 제한된 회원입니다.");return}currentUser=id;sessionStorage.setItem("nstudy_current_user",id);closeAccount();updateAccountUI();showToast("로그인되었습니다. 모든 문제은행 게시글을 볼 수 있습니다.");});
+function logout(){currentUser="";sessionStorage.removeItem("nstudy_current_user");closeAccount();updateAccountUI();showToast("로그아웃되었습니다.")}
+document.getElementById("logoutButton").addEventListener("click",logout);
+document.getElementById("adminPageLink").addEventListener("click",openAdminPage);
+updateAccountUI();
+})();
+</script>
+</body>
+</html>
